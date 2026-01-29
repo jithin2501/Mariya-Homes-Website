@@ -1,0 +1,109 @@
+/* ===============================
+   CONTACT MESSAGES - ADMIN PANEL
+   =============================== */
+
+.admin-contact-title {
+  font-size: 26px;
+  font-weight: 700;
+  margin-bottom: 24px;
+  color: #0f172a;
+}
+
+/* Card */
+.admin-contact-card {
+  background: #ffffff;
+  padding: 24px;
+  border-radius: 14px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+}
+
+/* Table */
+.admin-contact-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 14px;
+}
+
+/* ===== TABLE HEADER ===== */
+.admin-contact-table thead th {
+  background: #f1f5f9;
+  color: #0f172a;
+  font-weight: 600;
+  padding: 14px 16px;
+  text-align: center; /* CENTER HEADING */
+  border-bottom: 1px solid #e5e7eb;
+}
+
+/* ===== ROWS ===== */
+.admin-contact-table tbody tr {
+  transition: background 0.2s ease;
+}
+
+.admin-contact-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+/* ===== CELLS ===== */
+.admin-contact-table td {
+  padding: 14px 16px;
+  color: #1e293b;
+  border-bottom: 1px solid #e5e7eb;
+  vertical-align: middle;
+  text-align: center; /* CENTER DATA */
+}
+
+/* Message column */
+.admin-contact-table td.message-cell {
+  max-width: 300px;
+  line-height: 1.6;
+  color: #334155;
+  word-break: break-word;
+  text-align: center;
+}
+
+/* Date column */
+.admin-contact-table td.date-cell {
+  white-space: nowrap;
+  font-size: 13px;
+  color: #475569;
+  text-align: center;
+}
+
+/* Action column */
+.admin-contact-table td.action-cell {
+  text-align: center;
+}
+
+/* ===== DELETE BUTTON ===== */
+.admin-contact-delete {
+  background: #ef4444;
+  color: #ffffff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+
+  /* PERFECT CENTERING */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-contact-delete:hover {
+  background: #dc2626;
+}
+
+/* ===== EMPTY STATE ===== */
+.admin-contact-empty {
+  margin-top: 24px;
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 28px;
+  text-align: center;
+  color: #64748b;
+  font-size: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}

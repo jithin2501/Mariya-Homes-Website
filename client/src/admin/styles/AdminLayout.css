@@ -1,0 +1,132 @@
+.admin-container {
+  display: flex;
+  min-height: 100vh;
+  background: #f8fafc;
+}
+
+.admin-sidebar {
+  width: 260px;
+  background: #0f172a;
+  color: white;
+  padding: 20px;
+}
+.admin-sidebar h2 {
+  margin-bottom: 32px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.admin-title {
+  font-size: 22px;
+  margin-bottom: 20px;
+}
+
+.admin-link {
+  display: block;
+  padding: 12px;
+  margin-bottom: 6px;
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+}
+
+.admin-link.active,
+.admin-link:hover {
+  background: #6366f1;
+}
+
+.admin-logout {
+  margin-top: 20px;
+  width: 100%;
+  padding: 10px;
+  background: #ef4444;
+  border: none;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.admin-content {
+  flex: 1;
+  padding: 40px;
+}
+
+.admin-page-title {
+  font-size: 28px;
+  margin-bottom: 20px;
+}
+
+.admin-table-wrapper {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.admin-table th,
+.admin-table td {
+  padding: 12px;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: left;
+}
+
+.empty-text {
+  text-align: center;
+  color: #64748b;
+}
+/* FIX TABLE TEXT VISIBILITY */
+.admin-content h1 {
+  color: #0f172a;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #ffffff;
+}
+
+.admin-table th {
+  color: #0f172a;
+  background: #f1f5f9;
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+}
+
+.admin-table td {
+  color: #1e293b;      /* DARK TEXT */
+  padding: 12px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.admin-table tr:hover {
+  background: #f8fafc;
+}
+.delete-btn {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.delete-btn:hover {
+  background: #dc2626;
+}
+.empty-card {
+  margin-top: 24px;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 24px;
+  text-align: center;
+  color: #64748b;
+  font-size: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  max-width: 100%;
+}
