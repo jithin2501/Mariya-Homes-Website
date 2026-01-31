@@ -553,30 +553,40 @@ html {
     line-height: 1.6;
 }
 
+/* PERMANENT CENTERED CARD STYLE */
 .services-grid {
     max-width: 1200px;
-    margin: 0 auto;
+    margin: 40px auto 0;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
     gap: 30px;
+    padding: 0 20px;
 }
 
 .service-card {
     background: #ffffff;
-    padding: 0;
-    border-radius: 12px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-    transition: transform 0.3s ease;
+    border-radius: 20px;
+    border: 1px solid rgba(15, 23, 42, 0.08);
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    border: 1px solid #e2e8f0;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); /* Permanent box look */
+    text-align: center; /* Center text */
+    height: 100%; /* Ensures all cards are equal height */
+}
+
+/* Remove hover effects */
+.service-card:hover {
+    transform: none; 
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    border-color: rgba(15, 23, 42, 0.08);
 }
 
 .service-image-box {
     width: 100%;
-    height: 220px;
+    height: 240px;
     overflow: hidden;
+    position: relative;
 }
 
 .service-image-box img {
@@ -586,43 +596,47 @@ html {
 }
 
 .service-content {
-    padding: 25px;
+    padding: 30px;
     display: flex;
     flex-direction: column;
-    flex-grow: 1;
+    align-items: center; 
+    flex-grow: 1; /* Makes this area fill the remaining space */
 }
 
 .service-card h3 {
-    font-size: 1.4rem;
-    font-weight: 700;
+    font-size: 1.5rem;
     color: #0f172a;
-    margin-bottom: 12px;
+    margin-bottom: 15px;
+    font-weight: 700;
 }
 
 .service-card p {
     font-size: 0.95rem;
     color: #64748b;
-    line-height: 1.6;
+    line-height: 1.7;
     margin-bottom: 25px;
-    flex-grow: 1;
 }
 
+/* ALIGNS ALL BUTTONS ON THE SAME LINE */
 .service-btn {
-    padding: 12px 20px;
+    margin-top: auto; /* Pushes the button to the very bottom of the card */
+    padding: 14px 24px;
     background-color: #f97316;
     color: white !important;
-    font-weight: 600;
-    border-radius: 8px;
-    transition: background 0.3s;
-    display: inline-block;
-    width: 100%;
-    text-decoration: none;
-    cursor: pointer;
+    font-weight: 700;
+    font-size: 0.9rem;
+    border-radius: 12px;
     border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 200px; /* Giving buttons a fixed width makes them look even */
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .service-btn:hover {
-    background-color: #ea580c;
+    background-color: #0f172a;
+    box-shadow: 0 8px 15px rgba(249, 115, 22, 0.3);
 }
 
 /* TESTIMONIALS */
@@ -663,7 +677,8 @@ html {
 
 @keyframes scroll-left {
     0% { transform: translateX(0); }
-    100% { transform: translateX(calc(-1230px)); }
+    /* Calculate based on one full set width (350px * 3 cards + 60px gap) */
+    100% { transform: translateX(calc(-1110px * 3)); }
 }
 
 .testimonials-container {
@@ -671,13 +686,26 @@ html {
     margin: 0 auto;
     padding: 0 20px;
     overflow: hidden;
+    position: relative;
+}
+
+.testimonial-carousel-wrapper {
+    overflow: hidden;
+    position: relative;
+    width: 100%;
 }
 
 .testimonial-carousel {
     display: flex;
     width: max-content;
     gap: 30px;
-    animation: scroll-left 25s linear infinite;
+    animation: scroll-left 50s linear infinite;
+    /* Pause on hover */
+    animation-play-state: running;
+}
+
+.testimonial-carousel:hover {
+    animation-play-state: paused;
 }
 
 .testimonial-grid {
@@ -751,6 +779,28 @@ html {
     color: rgba(255, 165, 0, 0.3);
     font-family: Arial, sans-serif;
     font-weight: 900;
+}
+
+/* Gradient overlays for smooth edges */
+.testimonial-carousel-wrapper::before,
+.testimonial-carousel-wrapper::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    width: 100px;
+    height: 100%;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.testimonial-carousel-wrapper::before {
+    left: 0;
+    background: linear-gradient(to right, #f0f2f5, transparent);
+}
+
+.testimonial-carousel-wrapper::after {
+    right: 0;
+    background: linear-gradient(to left, #f0f2f5, transparent);
 }
 
 /* HERO BANNER STYLES FOR PAGES */
@@ -1327,13 +1377,14 @@ html {
 }
 
 .process-heading {
-    font-size: clamp(1.8rem, 3vw, 2.2rem);
-    font-weight: 700;
-    color: #0f172a;
-    margin: 60px 0 20px;
-    text-align: center;
+    font-size: clamp(1.8rem, 3vw, 2.2rem) !important; /* Force the exact size */
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    margin: 60px 0 20px !important; /* Matches Construction spacing */
+    text-align: center !important;
+    display: block;
+    width: 100%;
 }
-
 .container {
     max-width: 1100px;
     margin: 0 auto;
@@ -1442,6 +1493,7 @@ html {
     margin: 0 auto 5rem;
     position: relative;
     z-index: 10;
+    padding: 80px 20px 10px;
 }
 
 .intro-text-section h2 {
@@ -1466,22 +1518,17 @@ html {
     z-index: 10;
 }
 
-.header h2 {
-    font-size: clamp(1.8rem, 3vw, 2.2rem);
-    font-weight: 700;
-    letter-spacing: -0.025em;
-    color: #0f172a;
-    text-transform: none;
-    line-height: 1.2;
-}
+
 
 .grid-container {
     position: relative;
     width: 100%;
     display: grid;
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
+    /* Change 1fr to the line below to get 3 in a row */
+    grid-template-columns: repeat(3, 1fr); 
+    gap: 2rem; /* Increased gap for better spacing between boxes */
     z-index: 10;
+    margin-top: 40px;
 }
 
 .step-card {
@@ -1493,6 +1540,9 @@ html {
     padding: 2.5rem 2rem;
     border-radius: 1.5rem;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    height: 100%; /* Makes all cards in a row the same height */
 }
 
 .step-card:hover {
@@ -2060,4 +2110,15 @@ html {
 .location-map {
     width: 100%;
     height: 100%;
+}
+@media (max-width: 992px) {
+    .grid-container {
+        grid-template-columns: repeat(2, 1fr); /* 2 in a row on tablets */
+    }
+}
+
+@media (max-width: 768px) {
+    .grid-container {
+        grid-template-columns: 1fr; /* 1 in a row on mobile */
+    }
 }

@@ -23,9 +23,7 @@ const Renovation = () => {
           <p>Whether it's a kitchen upgrade, a bathroom remodel, or a complete home makeover — Maria Homes delivers thoughtful, stylish, and functional renovations tailored to your lifestyle. With an experienced team and an eye for detail, we focus on making the old feel brand new — efficiently, affordably, and beautifully.</p>
         </section>
 
-        <header className="header">
-          <h2>Our Renovation Process</h2>
-        </header>
+        <h2 className="process-heading">Our Renovation Process</h2>
 
         <main className="grid-container">
           <div className="step-card">
