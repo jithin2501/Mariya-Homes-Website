@@ -15,6 +15,7 @@ app.use(express.json());
 // Routes (ONLY ONE)
 app.use('/api', require('./routes/contactRoutes'));
 app.use("/api", require("./routes/videoRoutes"));
+app.use("/api/admin", require("./routes/propertyRoutes"));
 
 // Start Server
 const PORT = process.env.PORT || 5000;

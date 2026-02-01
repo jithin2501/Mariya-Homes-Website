@@ -1,0 +1,274 @@
+/* Container Layout */
+.admin-props-container {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.admin-props-container h2 {
+    font-size: 1.5rem;
+    color: #111827;
+    margin-bottom: 2rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 2px solid #f3f4f6;
+    padding-bottom: 0.5rem;
+}
+
+/* Form Styling - Add Property Section */
+.admin-props-form {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    margin-bottom: 3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+
+.admin-props-form input, 
+.admin-props-form select {
+    padding: 0.8rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    outline: none;
+    transition: all 0.2s;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+.file-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1rem;
+    background: #f9fafb;
+    border: 2px dashed #e5e7eb;
+    border-radius: 8px;
+}
+
+/* Add Property Button & Spinner */
+.add-btn {
+    background-color: #000;
+    color: white;
+    padding: 1rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 50px;
+}
+
+.add-btn:disabled { background-color: #6b7280; cursor: not-allowed; }
+
+.spinner {
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Grid Layout - Exactly 3 per row */
+.props-list {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+/* Property Card - Fixed Length Box */
+.prop-card-admin {
+    display: flex;
+    flex-direction: column;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    height: 455px; /* Reduced height to remove excessive gap */
+    border: 1px solid #f0f0f0;
+}
+
+/* Fixed Image Section */
+.admin-image-wrapper {
+    width: 100%;
+    height: 220px; 
+    position: relative;
+    flex-shrink: 0;
+}
+
+.admin-prop-img-fixed {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.admin-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    padding: 5px 12px;
+    border-radius: 8px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: white;
+    background: #ffa500;
+    text-transform: uppercase;
+    z-index: 1;
+}
+
+/* Info Section - Tighter Layout */
+.prop-info-admin {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start; /* Elements stack naturally */
+    gap: 6px; /* Reduced gap between text elements */
+}
+
+.admin-location-text {
+    color: #ffa500;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+}
+
+.admin-prop-title {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #111;
+    min-height: 2.8rem; /* Keeps items aligned even if title is short */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.admin-feature-row {
+    display: flex;
+    gap: 12px;
+    margin: 4px 0;
+    font-size: 0.8rem;
+    color: #666;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #eee;
+}
+
+.admin-price-text {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #111;
+    margin: 4px 0 10px 0; /* Minimal bottom margin to tighten layout */
+}
+
+/* Admin Actions - Buttons at very bottom */
+.admin-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: auto; /* Pushes buttons to bottom without forcing gap above amount */
+    padding-top: 10px;
+}
+
+.edit-btn {
+    background: #f3f4f6;
+    color: #111;
+    border: 1px solid #d1d5db;
+    padding: 8px;
+    border-radius: 6px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.delete-btn {
+    background: #fee2e2;
+    color: #dc2626;
+    border: none;
+    padding: 8px;
+    border-radius: 6px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+/* Tablet & Mobile Breaks */
+@media (max-width: 1024px) {
+    .props-list { grid-template-columns: repeat(2, 1fr); }
+    .prop-card-admin { height: 460px; }
+}
+
+@media (max-width: 650px) {
+    .props-list { grid-template-columns: 1fr; }
+    .form-row { grid-template-columns: 1fr; }
+}
+.form-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.cancel-btn {
+    background-color: #e5e7eb;
+    color: #374151;
+    padding: 1rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    flex: 1;
+}
+/* Image Preview Styling */
+.image-preview-container {
+    margin-top: 15px;
+    padding: 10px;
+    background: #fff;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    text-align: center;
+}
+
+.image-preview-container p {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.upload-preview-img {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 8px;
+    display: block;
+    margin: 0 auto 10px;
+    border: 2px solid #6366f1;
+}
+
+.remove-preview {
+    background: #fee2e2;
+    color: #dc2626;
+    border: none;
+    padding: 5px 12px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.remove-preview:hover {
+    background: #dc2626;
+    color: white;
+}

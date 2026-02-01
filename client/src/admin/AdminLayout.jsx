@@ -26,6 +26,10 @@ const AdminLayout = () => {
           Upload Video
         </NavLink>
 
+        <NavLink to="/admin/properties" className="admin-link">
+         Manage Properties
+        </NavLink>
+
         {/* Updated Sign Out Button with onClick handler */}
         <button className="admin-logout" onClick={handleLogout}>
           Sign Out

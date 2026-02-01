@@ -4,21 +4,27 @@
   background: #f8fafc;
 }
 
+/* SIDEBAR: Locked in place */
 .admin-sidebar {
   width: 260px;
   background: #0f172a;
   color: white;
   padding: 20px;
+  
+  /* Fixed Positioning Logic */
+  position: fixed;     /* Keeps the sidebar from moving when you scroll */
+  top: 0;
+  left: 0;
+  bottom: 0;           /* Ensures it stays full height */
+  height: 100vh;       /* Forces it to cover the entire screen height */
+  z-index: 1000;       /* Keeps it on top of other elements */
+  overflow-y: auto;    /* Allows scrolling inside the sidebar if you add more links */
 }
+
 .admin-sidebar h2 {
   margin-bottom: 32px;
   padding-bottom: 12px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-}
-
-.admin-title {
-  font-size: 22px;
-  margin-bottom: 20px;
 }
 
 .admin-link {
@@ -46,10 +52,17 @@
   cursor: pointer;
 }
 
+/* MAIN CONTENT: Offset by sidebar width */
 .admin-content {
   flex: 1;
   padding: 40px;
+  
+  /* Margin Logic */
+  margin-left: 260px;  /* Must match the width of .admin-sidebar exactly */
+  min-height: 100vh;
 }
+
+/* --- Keep the rest of your table and card styles below --- */
 
 .admin-page-title {
   font-size: 28px;
@@ -60,27 +73,6 @@
   background: white;
   padding: 20px;
   border-radius: 10px;
-}
-
-.admin-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.admin-table th,
-.admin-table td {
-  padding: 12px;
-  border-bottom: 1px solid #e5e7eb;
-  text-align: left;
-}
-
-.empty-text {
-  text-align: center;
-  color: #64748b;
-}
-/* FIX TABLE TEXT VISIBILITY */
-.admin-content h1 {
-  color: #0f172a;
 }
 
 .admin-table {
@@ -98,14 +90,11 @@
 }
 
 .admin-table td {
-  color: #1e293b;      /* DARK TEXT */
+  color: #1e293b;
   padding: 12px;
   border-bottom: 1px solid #e5e7eb;
 }
 
-.admin-table tr:hover {
-  background: #f8fafc;
-}
 .delete-btn {
   background: #ef4444;
   color: white;
@@ -113,20 +102,4 @@
   padding: 6px 12px;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 13px;
-}
-
-.delete-btn:hover {
-  background: #dc2626;
-}
-.empty-card {
-  margin-top: 24px;
-  background: #ffffff;
-  border-radius: 12px;
-  padding: 24px;
-  text-align: center;
-  color: #64748b;
-  font-size: 16px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  max-width: 100%;
 }
