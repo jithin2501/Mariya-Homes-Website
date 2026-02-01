@@ -2,19 +2,34 @@ exports.uploadVideo = async (req, res) => {
   try {
     const Video = require("../models/Video");
 
-    await Video.deleteMany();
+    if (!req.file) {
+      return res.status(400).json({ message: "No video uploaded" });
+    }
 
-    const video = new Video({
-      videoUrl: req.file.path,
+    // 🔥 keep only latest video
+    await Video.deleteMany(); 
+    
+    // Create the new entry
+    const newVideo = await Video.create({
+      videoUrl: req.file.path, // This is the Cloudinary URL
     });
 
-    await video.save();
+    // CHANGE: Return the videoUrl in the response!
+    return res.status(200).json({
+      success: true,
+      message: "Video uploaded successfully",
+      videoUrl: newVideo.videoUrl // Add this line
+    });
 
-    res.json({ message: "Video uploaded successfully" });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+  } catch (err) {
+    console.error("UPLOAD ERROR:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Video upload failed",
+    });
   }
 };
+
 
 exports.getVideo = async (req, res) => {
   const Video = require("../models/Video");

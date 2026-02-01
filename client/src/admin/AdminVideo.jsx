@@ -39,31 +39,35 @@ const AdminVideo = () => {
     formData.append("video", videoFile);
 
     try {
-      setLoading(true);
+    setLoading(true);
+    const res = await fetch("http://localhost:5000/api/admin/video", {
+      method: "POST",
+      body: formData,
+    });
 
-      const res = await fetch("http://localhost:5000/api/admin/video", {
-        method: "POST",
-        body: formData,
-      });
+    const data = await res.json();
 
-      const data = await res.json();
-
-      // IMPORTANT: backend must return videoUrl
-      if (!data || !data.videoUrl) {
-        throw new Error("Upload failed");
-      }
-
-      setCurrentVideo(data.videoUrl);
-      setVideoFile(null);
-
-      alert("Video uploaded successfully");
-    } catch (err) {
-      console.error(err);
-      alert("Video upload failed. Please try again.");
-    } finally {
-      setLoading(false);
+    // Check res.ok first; this ensures status 200 codes pass
+    if (!res.ok) {
+      throw new Error("Upload failed");
     }
-  };
+
+    // Set the video if it exists, otherwise fetch it manually
+    if (data.videoUrl) {
+      setCurrentVideo(data.videoUrl);
+    } else {
+      await fetchVideo(); // Fallback to refresh data
+    }
+
+    setVideoFile(null);
+    alert("Video uploaded successfully");
+  } catch (err) {
+    console.error(err);
+    alert("Video upload failed. Please try again.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   // Delete video
   const handleDelete = async () => {

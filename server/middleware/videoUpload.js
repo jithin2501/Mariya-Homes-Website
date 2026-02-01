@@ -7,10 +7,14 @@ const storage = new CloudinaryStorage({
   params: {
     folder: "website-videos",
     resource_type: "video",
-    allowed_formats: ["mp4"],
   },
 });
 
-const upload = multer({ storage });
+const upload = multer({
+  storage,
+  limits: {
+    fileSize: 500 * 1024 * 1024, // 500 MB
+  },
+});
 
-module.exports = upload; // ✅ IMPORTANT
+module.exports = upload;
