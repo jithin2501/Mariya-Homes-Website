@@ -172,3 +172,25 @@ exports.getDetailsByPropertyId = async (req, res) => {
     res.status(500).json({ error: "Server error while fetching property details." });
   }
 };
+
+exports.deleteDetails = async (req, res) => {
+  try {
+    console.log("\n=== DELETING PROPERTY DETAILS ===");
+    console.log("Details ID:", req.params.id);
+    
+    const details = await PropertyDetails.findByIdAndDelete(req.params.id);
+    
+    if (!details) {
+      console.log("❌ No details found with this ID");
+      return res.status(404).json({ message: "Property details not found." });
+    }
+    
+    console.log("✓ Details deleted successfully");
+    console.log("================================\n");
+    
+    res.status(200).json({ message: "Property details deleted successfully." });
+  } catch (error) {
+    console.error("❌ Error deleting details:", error.message);
+    res.status(500).json({ error: "Server error while deleting property details." });
+  }
+};

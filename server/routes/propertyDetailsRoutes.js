@@ -1,7 +1,7 @@
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
-const { upsertDetails, getDetailsByPropertyId } = require('../controllers/propertyDetailsController');
+const { upsertDetails, getDetailsByPropertyId, deleteDetails } = require('../controllers/propertyDetailsController');
 
 const router = express.Router();
 
@@ -25,5 +25,8 @@ router.post('/property-details', upload.fields([
 
 // GET: Fetch Details for Frontend
 router.get('/property-details/:id', getDetailsByPropertyId);
+
+// DELETE: Delete Property Details
+router.delete('/property-details/:id', deleteDetails);
 
 module.exports = router;

@@ -7,6 +7,7 @@ const AdminPropertyDetails = () => {
   const [description, setDescription] = useState("");
   const [mapUrl, setMapUrl] = useState("");
   const [mainMedia, setMainMedia] = useState(null);
+  const [mainMediaPreview, setMainMediaPreview] = useState(null);
   const [gallery, setGallery] = useState([]);
   const [propertyImages, setPropertyImages] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
@@ -15,6 +16,10 @@ const AdminPropertyDetails = () => {
   // Amenities state
   const [amenities, setAmenities] = useState([]);
   const [newAmenity, setNewAmenity] = useState("");
+  
+  // Saved details state
+  const [savedDetails, setSavedDetails] = useState(null);
+  const [isEditMode, setIsEditMode] = useState(false);
 
   useEffect(() => {
     fetch("http://localhost:5000/api/admin/properties")
@@ -22,6 +27,102 @@ const AdminPropertyDetails = () => {
       .then(data => setProperties(data))
       .catch(err => console.error("Error fetching properties:", err));
   }, []);
+
+  // Fetch saved details when property is selected
+  useEffect(() => {
+    if (selectedPropertyId) {
+      fetchPropertyDetails(selectedPropertyId);
+    } else {
+      setSavedDetails(null);
+    }
+  }, [selectedPropertyId]);
+
+  const fetchPropertyDetails = async (propertyId) => {
+    try {
+      const res = await fetch(`http://localhost:5000/api/admin/property-details/${propertyId}`);
+      if (res.ok) {
+        const data = await res.json();
+        setSavedDetails(data);
+        console.log("Loaded saved details:", data);
+      } else {
+        setSavedDetails(null);
+      }
+    } catch (error) {
+      console.error("Error fetching property details:", error);
+      setSavedDetails(null);
+    }
+  };
+
+  const handleEdit = () => {
+    if (savedDetails) {
+      // Populate form with saved data
+      setDescription(savedDetails.description || "");
+      setMapUrl(savedDetails.mapUrl || "");
+      setAmenities(savedDetails.amenities || []);
+      
+      // Note: We can't pre-populate file inputs due to browser security
+      // User will need to re-upload files if they want to change them
+      
+      setIsEditMode(true);
+      
+      // Scroll to form
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!savedDetails) return;
+    
+    if (window.confirm("Are you sure you want to delete these property details? This action cannot be undone.")) {
+      try {
+        const res = await fetch(`http://localhost:5000/api/admin/property-details/${savedDetails._id}`, {
+          method: 'DELETE'
+        });
+        
+        if (res.ok) {
+          alert("Property details deleted successfully!");
+          setSavedDetails(null);
+          // Clear form
+          setDescription("");
+          setMapUrl("");
+          setMainMedia(null);
+          setMainMediaPreview(null);
+          setGallery([]);
+          setPropertyImages([]);
+          setAmenities([]);
+          setIsEditMode(false);
+        } else {
+          alert("Failed to delete property details");
+        }
+      } catch (error) {
+        console.error("Error deleting property details:", error);
+        alert("Error deleting property details");
+      }
+    }
+  };
+
+  const handleMainMediaChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setMainMedia(file);
+      
+      // Create preview URL
+      const previewUrl = URL.createObjectURL(file);
+      setMainMediaPreview({
+        url: previewUrl,
+        type: file.type.startsWith('video') ? 'video' : 'image',
+        name: file.name
+      });
+    }
+  };
+
+  const removeMainMedia = () => {
+    setMainMedia(null);
+    setMainMediaPreview(null);
+    // Reset the file input
+    const fileInput = document.getElementById('mainMediaInput');
+    if (fileInput) fileInput.value = '';
+  };
 
   const handleGalleryChange = (e) => {
     const files = Array.from(e.target.files);
@@ -69,24 +170,15 @@ const AdminPropertyDetails = () => {
       data.append("propertyId", selectedPropertyId);
       data.append("description", description);
       data.append("mapUrl", mapUrl);
-      data.append("amenities", JSON.stringify(amenities)); // Add amenities
+      data.append("amenities", JSON.stringify(amenities));
       if (mainMedia) data.append("mainMedia", mainMedia);
       gallery.forEach(file => data.append("gallery", file));
 
       // Append all property images at once
       propertyImages.forEach((image) => {
         data.append('constructionProgress', image);
-        data.append('constructionLabels', ''); // Empty label, will be auto-generated
+        data.append('constructionLabels', '');
       });
-
-      // DEBUGGING - Check what's being submitted
-      console.log("=== FORM SUBMISSION DEBUG ===");
-      console.log("Property ID:", selectedPropertyId);
-      console.log("Amenities state:", amenities);
-      console.log("Amenities count:", amenities.length);
-      console.log("Amenities JSON:", JSON.stringify(amenities));
-      console.log("FormData amenities:", data.get("amenities"));
-      console.log("============================");
 
       console.log("Submitting form data...");
       console.log("Property images count:", propertyImages.length);
@@ -98,23 +190,31 @@ const AdminPropertyDetails = () => {
       
       if (res.ok) {
         const result = await res.json();
-        console.log("=== SUCCESS RESPONSE ===");
-        console.log("Full response:", result);
-        console.log("Amenities in response:", result.amenities);
-        console.log("=======================");
-        alert("Details saved successfully!");
+        alert(isEditMode ? "Details updated successfully!" : "Details saved successfully!");
+        
+        // Refresh saved details
+        await fetchPropertyDetails(selectedPropertyId);
         
         // Reset form
         setDescription("");
         setMapUrl("");
         setMainMedia(null);
+        setMainMediaPreview(null);
         setGallery([]);
         setPropertyImages([]);
-        setSelectedPropertyId("");
-        setAmenities([]); // Reset amenities
+        setAmenities([]);
+        setIsEditMode(false);
         
         // Reset file inputs
         document.querySelectorAll('input[type="file"]').forEach(input => input.value = '');
+        
+        // Scroll to preview
+        setTimeout(() => {
+          const preview = document.getElementById('saved-preview');
+          if (preview) {
+            preview.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }, 100);
       } else {
         const errorData = await res.json();
         console.error("Error response:", errorData);
@@ -142,56 +242,86 @@ const AdminPropertyDetails = () => {
 
       {selectedPropertyId && (
         <form onSubmit={handleSubmit} className="admin-details-split">
-          <div className="left-side-upload">
-            <label>Big Box Media (Video or Image)</label>
-            <input 
-              type="file" 
-              accept="image/*,video/*"
-              onChange={e => setMainMedia(e.target.files[0])} 
-            />
-            {mainMedia && (
-              <p className="file-info">Selected: {mainMedia.name}</p>
-            )}
-          </div>
-
-          <div className="right-side-config">
-            <label>Property Description</label>
-            <textarea 
-              className="admin-textarea"
-              placeholder="Enter description..." 
-              value={description}
-              onChange={e => setDescription(e.target.value)} 
-              required
-            />
-
-            <label>Google Maps Iframe URL</label>
-            <input 
-              type="text" 
-              placeholder="Paste map src URL..." 
-              value={mapUrl}
-              onChange={e => setMapUrl(e.target.value)} 
-            />
-
-            <div className="gallery-upload-group">
-              <label>Gallery Images (Maximum 4 images)</label>
+          <div className="admin-details-split-top">
+            <div className="left-side-upload">
+              <label>Big Box Media (Video or Image)</label>
               <input 
+                id="mainMediaInput"
                 type="file" 
-                multiple 
-                accept="image/*"
-                onChange={handleGalleryChange}
-                max="4"
+                accept="image/*,video/*"
+                onChange={handleMainMediaChange}
               />
-              {errorMessage && (
-                <div className="error-message">{errorMessage}</div>
-              )}
-              {gallery.length > 0 && (
-                <p className="file-info">
-                  {gallery.length} image{gallery.length > 1 ? 's' : ''} selected 
-                  {gallery.length < 4 && ` (${4 - gallery.length} more allowed)`}
-                </p>
+              
+              {/* Preview Section */}
+              {mainMediaPreview && (
+                <div className="media-preview-container">
+                  <p className="preview-label">Preview: {mainMediaPreview.name}</p>
+                  {mainMediaPreview.type === 'video' ? (
+                    <video 
+                      src={mainMediaPreview.url} 
+                      className="media-preview"
+                      controls
+                    />
+                  ) : (
+                    <img 
+                      src={mainMediaPreview.url} 
+                      alt="Preview" 
+                      className="media-preview"
+                    />
+                  )}
+                  <button
+                    type="button"
+                    onClick={removeMainMedia}
+                    className="remove-media-btn"
+                  >
+                    Remove
+                  </button>
+                </div>
               )}
             </div>
 
+            <div className="right-side-config">
+              <label>Property Description</label>
+              <textarea 
+                className="admin-textarea"
+                placeholder="Enter description..." 
+                value={description}
+                onChange={e => setDescription(e.target.value)} 
+                required
+              />
+
+              <label>Google Maps Iframe URL</label>
+              <input 
+                type="text" 
+                placeholder="Paste map src URL..." 
+                value={mapUrl}
+                onChange={e => setMapUrl(e.target.value)} 
+              />
+
+              <div className="gallery-upload-group">
+                <label>Gallery Images (Maximum 4 images)</label>
+                <input 
+                  type="file" 
+                  multiple 
+                  accept="image/*"
+                  onChange={handleGalleryChange}
+                  max="4"
+                />
+                {errorMessage && (
+                  <div className="error-message">{errorMessage}</div>
+                )}
+                {gallery.length > 0 && (
+                  <p className="file-info">
+                    {gallery.length} image{gallery.length > 1 ? 's' : ''} selected 
+                    {gallery.length < 4 && ` (${4 - gallery.length} more allowed)`}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* PROPERTY IMAGES AND AMENITIES SIDE BY SIDE */}
+          <div className="bottom-split-section">
             {/* PROPERTY IMAGES SECTION - Multi Upload */}
             <div className="property-images-section">
               <label>Property Images (Carousel)</label>
@@ -298,12 +428,124 @@ const AdminPropertyDetails = () => {
                 </div>
               )}
             </div>
+          </div>
 
+          {/* SUBMIT BUTTON */}
+          <div className="submit-button-container">
             <button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Updating..." : "Update Details"}
+              {isSubmitting ? (isEditMode ? "Updating..." : "Saving...") : (isEditMode ? "Update Details" : "Save Details")}
             </button>
           </div>
         </form>
+      )}
+
+      {/* SAVED DETAILS PREVIEW */}
+      {savedDetails && !isEditMode && (
+        <div id="saved-preview" className="saved-details-preview">
+          <div className="preview-header">
+            <h3>Saved Property Details</h3>
+            <div className="preview-actions">
+              <button onClick={handleEdit} className="edit-btn">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                </svg>
+                Edit
+              </button>
+              <button onClick={handleDelete} className="delete-btn">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                </svg>
+                Delete
+              </button>
+            </div>
+          </div>
+
+          <div className="preview-content">
+            {/* Main Media Preview */}
+            {savedDetails.mainMedia && (
+              <div className="preview-section">
+                <h4>Main Media</h4>
+                <div className="preview-media-container">
+                  {savedDetails.mainMedia.includes('.mp4') || savedDetails.mainMedia.includes('.webm') ? (
+                    <video src={savedDetails.mainMedia} controls className="preview-media" />
+                  ) : (
+                    <img src={savedDetails.mainMedia} alt="Main media" className="preview-media" />
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Description */}
+            {savedDetails.description && (
+              <div className="preview-section">
+                <h4>Description</h4>
+                <p className="preview-text">{savedDetails.description}</p>
+              </div>
+            )}
+
+            {/* Gallery */}
+            {savedDetails.gallery && savedDetails.gallery.length > 0 && (
+              <div className="preview-section">
+                <h4>Gallery ({savedDetails.gallery.length} images)</h4>
+                <div className="preview-gallery-grid">
+                  {savedDetails.gallery.map((img, index) => (
+                    <img key={index} src={img} alt={`Gallery ${index + 1}`} className="preview-gallery-img" />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Property Images (Carousel) */}
+            {savedDetails.constructionProgress && savedDetails.constructionProgress.length > 0 && (
+              <div className="preview-section">
+                <h4>Property Images ({savedDetails.constructionProgress.length} images)</h4>
+                <div className="preview-gallery-grid">
+                  {savedDetails.constructionProgress.map((item, index) => (
+                    <div key={index} className="preview-property-image">
+                      <img src={item.image} alt={item.label} className="preview-gallery-img" />
+                      <span className="preview-image-label">{item.label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Amenities */}
+            {savedDetails.amenities && savedDetails.amenities.length > 0 && (
+              <div className="preview-section">
+                <h4>Amenities ({savedDetails.amenities.length})</h4>
+                <div className="preview-amenities-grid">
+                  {savedDetails.amenities.map((amenity, index) => (
+                    <div key={index} className="preview-amenity-item">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                      </svg>
+                      {amenity}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Map URL */}
+            {savedDetails.mapUrl && (
+              <div className="preview-section">
+                <h4>Map Location</h4>
+                <div className="preview-map">
+                  <iframe
+                    src={savedDetails.mapUrl}
+                    width="100%"
+                    height="400"
+                    style={{ border: 0 }}
+                    allowFullScreen=""
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                  ></iframe>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       )}
     </div>
   );
