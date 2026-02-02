@@ -10,6 +10,7 @@ const PropertyDetails = () => {
   const [details, setDetails] = useState(null);
   const [mainMedia, setMainMedia] = useState("");
   const [loading, setLoading] = useState(true);
+  const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -50,6 +51,34 @@ const PropertyDetails = () => {
     } else if (videoElement.msRequestFullscreen) {
       videoElement.msRequestFullscreen();
     }
+  };
+
+  const nextSlide = () => {
+    if (details?.constructionProgress?.length > 0) {
+      setCurrentSlide((prev) => 
+        prev === details.constructionProgress.length - 1 ? 0 : prev + 1
+      );
+    }
+  };
+
+  const prevSlide = () => {
+    if (details?.constructionProgress?.length > 0) {
+      setCurrentSlide((prev) => 
+        prev === 0 ? details.constructionProgress.length - 1 : prev - 1
+      );
+    }
+  };
+
+  const getSlidePosition = (index) => {
+    const total = details?.constructionProgress?.length || 0;
+    if (total === 0) return '';
+    
+    const diff = index - currentSlide;
+    
+    if (diff === 0) return 'center';
+    if (diff === 1 || diff === -(total - 1)) return 'right';
+    if (diff === -1 || diff === total - 1) return 'left';
+    return 'hidden';
   };
 
   if (loading) return <div className="loader">Loading Property...</div>;
@@ -150,6 +179,59 @@ const PropertyDetails = () => {
           </div>
         </div>
       </div>
+
+      {/* 3D Property Images Carousel */}
+      {details?.constructionProgress && details.constructionProgress.length > 0 && (
+        <div className="construction-progress-section">
+          <h2>Property Images</h2>
+          <div className="carousel-3d-wrapper">
+            <button className="carousel-btn-3d prev-btn" onClick={prevSlide}>
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="white">
+                <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+              </svg>
+            </button>
+
+            <div className="carousel-3d-container">
+              {details.constructionProgress.map((item, index) => (
+                <div
+                  key={index}
+                  className={`carousel-3d-slide ${getSlidePosition(index)}`}
+                  onClick={() => {
+                    if (getSlidePosition(index) === 'left') prevSlide();
+                    if (getSlidePosition(index) === 'right') nextSlide();
+                  }}
+                >
+                  <img 
+                    src={item.image} 
+                    alt={`Property view ${index + 1}`} 
+                    className="carousel-3d-image" 
+                  />
+                  {item.label && getSlidePosition(index) === 'center' && (
+                    <div className="carousel-3d-label">{item.label}</div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <button className="carousel-btn-3d next-btn" onClick={nextSlide}>
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="white">
+                <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
+              </svg>
+            </button>
+          </div>
+
+          {/* Carousel Indicators */}
+          <div className="carousel-indicators">
+            {details.constructionProgress.map((_, index) => (
+              <button
+                key={index}
+                className={`indicator ${currentSlide === index ? 'active' : ''}`}
+                onClick={() => setCurrentSlide(index)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

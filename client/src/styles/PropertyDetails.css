@@ -42,7 +42,7 @@
     position: absolute;
     bottom: 20px;
     right: 20px;
-    background: rgba(15, 23, 42, 0.7); /* Slate dark background */
+    background: rgba(15, 23, 42, 0.7);
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 8px;
     padding: 10px;
@@ -55,7 +55,7 @@
 }
 
 .fullscreen-btn:hover {
-    background: #f97316; /* Brand orange from your theme */
+    background: #f97316;
     transform: scale(1.05);
 }
 
@@ -64,7 +64,6 @@
 }
 
 /* CRITICAL: HIDE NATIVE VIDEO CONTROLS */
-/* This ensures that even in fullscreen, the pause/play/volume bars stay hidden */
 #property-video::-webkit-media-controls {
     display: none !important;
 }
@@ -175,6 +174,169 @@
     border: none;
 }
 
+/* ========================================
+   3D PROPERTY IMAGES CAROUSEL
+   ======================================== */
+
+.construction-progress-section {
+    margin-top: 60px;
+    padding: 40px 0;
+    border-top: 2px solid #e2e8f0;
+}
+
+.construction-progress-section h2 {
+    font-size: 2rem;
+    color: #0f172a;
+    font-weight: 700;
+    margin-bottom: 50px;
+    text-align: center;
+}
+
+/* 3D Carousel Wrapper */
+.carousel-3d-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 60px 0;
+}
+
+/* 3D Carousel Container */
+.carousel-3d-container {
+    position: relative;
+    width: 100%;
+    max-width: 700px;
+    height: 500px;
+    perspective: 1200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Individual 3D Slide */
+.carousel-3d-slide {
+    position: absolute;
+    width: 600px;
+    height: 450px;
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.carousel-3d-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Center Position - Main Focus */
+.carousel-3d-slide.center {
+    transform: translateX(0) scale(1) rotateY(0deg);
+    z-index: 3;
+    opacity: 1;
+    filter: brightness(1);
+}
+
+/* Left Position - Partially Visible & Faded */
+.carousel-3d-slide.left {
+    transform: translateX(-320px) scale(0.75) rotateY(20deg);
+    z-index: 1;
+    opacity: 0.5;
+    filter: brightness(0.6);
+    cursor: pointer;
+}
+
+/* Right Position - Partially Visible & Faded */
+.carousel-3d-slide.right {
+    transform: translateX(320px) scale(0.75) rotateY(-20deg);
+    z-index: 1;
+    opacity: 0.5;
+    filter: brightness(0.6);
+    cursor: pointer;
+}
+
+/* Hidden Position */
+.carousel-3d-slide.hidden {
+    transform: translateX(0) scale(0.5);
+    opacity: 0;
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* Hover Effects on Side Images */
+.carousel-3d-slide.left:hover,
+.carousel-3d-slide.right:hover {
+    opacity: 0.7;
+    filter: brightness(0.75);
+}
+
+/* Label on Center Image - HIDDEN */
+.carousel-3d-label {
+    display: none !important;
+}
+
+/* Navigation Buttons */
+.carousel-btn-3d {
+    background: rgba(15, 23, 42, 0.85);
+    border: none;
+    border-radius: 50%;
+    width: 55px;
+    height: 55px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+    z-index: 10;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.carousel-btn-3d:hover {
+    background: #f97316;
+    transform: scale(1.15);
+    box-shadow: 0 6px 20px rgba(249, 115, 22, 0.4);
+}
+
+.carousel-btn-3d:active {
+    transform: scale(0.95);
+}
+
+/* Carousel Indicators */
+.carousel-indicators {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 40px;
+}
+
+.indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #cbd5e1;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 0;
+}
+
+.indicator.active {
+    background: #f97316;
+    width: 35px;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(249, 115, 22, 0.4);
+}
+
+.indicator:hover {
+    background: #94a3b8;
+}
+
 /* RESPONSIVENESS */
 @media (max-width: 992px) {
     .details-gallery, .details-info-grid {
@@ -192,5 +354,63 @@
     
     .side-img-wrapper {
         height: 100px;
+    }
+
+    .carousel-3d-container {
+        height: 400px;
+        max-width: 500px;
+    }
+
+    .carousel-3d-slide {
+        width: 450px;
+        height: 350px;
+    }
+
+    .carousel-3d-slide.left {
+        transform: translateX(-200px) scale(0.7) rotateY(15deg);
+    }
+
+    .carousel-3d-slide.right {
+        transform: translateX(200px) scale(0.7) rotateY(-15deg);
+    }
+
+    .carousel-btn-3d {
+        width: 45px;
+        height: 45px;
+    }
+}
+
+@media (max-width: 600px) {
+    .carousel-3d-wrapper {
+        padding: 40px 0;
+    }
+
+    .carousel-3d-container {
+        height: 300px;
+        max-width: 350px;
+    }
+
+    .carousel-3d-slide {
+        width: 320px;
+        height: 250px;
+    }
+
+    .carousel-3d-slide.left {
+        transform: translateX(-140px) scale(0.6) rotateY(10deg);
+    }
+
+    .carousel-3d-slide.right {
+        transform: translateX(140px) scale(0.6) rotateY(-10deg);
+    }
+
+    .construction-progress-section h2 {
+        font-size: 1.5rem;
+    }
+
+    .carousel-3d-label {
+        top: 15px;
+        right: 15px;
+        font-size: 0.85rem;
+        padding: 8px 16px;
     }
 }

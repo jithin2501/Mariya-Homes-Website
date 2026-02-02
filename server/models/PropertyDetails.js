@@ -6,7 +6,11 @@ const propertyDetailsSchema = new mongoose.Schema({
   additionalDetails: { type: String }, 
   mainMedia: { type: String }, 
   gallery: [{ type: String }], 
-  mapUrl: { type: String },    
+  mapUrl: { type: String },
+  constructionProgress: [{
+    image: { type: String, required: true },
+    label: { type: String, required: true }
+  }]
 });
 
 module.exports = mongoose.model('PropertyDetails', propertyDetailsSchema);

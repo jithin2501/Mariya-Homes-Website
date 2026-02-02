@@ -19,7 +19,8 @@ const upload = multer({ storage });
 // POST: Create or Update Property Details
 router.post('/property-details', upload.fields([
   { name: 'mainMedia', maxCount: 1 },
-  { name: 'gallery', maxCount: 10 }
+  { name: 'gallery', maxCount: 10 },
+  { name: 'constructionProgress', maxCount: 20 } // Added support for construction progress images
 ]), upsertDetails);
 
 // GET: Fetch Details for Frontend
