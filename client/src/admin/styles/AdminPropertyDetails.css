@@ -315,6 +315,142 @@
   transform: scale(1.1);
 }
 
+/* ========================================
+   AMENITIES SECTION
+   ======================================== */
+
+.amenities-section {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  padding: 25px;
+  border-radius: 12px;
+  color: white;
+  margin-top: 10px;
+}
+
+.amenities-section label {
+  color: white;
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.amenity-input-group {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.amenity-input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  font-size: 15px;
+  background: rgba(255, 255, 255, 0.95);
+  color: #000;
+  font-weight: 500;
+}
+
+.amenity-input:focus {
+  outline: none;
+  border-color: white;
+  background: white;
+}
+
+.amenity-input::placeholder {
+  color: #6b7280;
+}
+
+.add-amenity-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.95);
+  color: #059669;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.add-amenity-btn:hover {
+  background: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.add-amenity-btn svg {
+  fill: #059669;
+}
+
+.amenities-list {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 20px;
+  border-radius: 10px;
+  backdrop-filter: blur(10px);
+}
+
+.amenities-count {
+  color: white;
+  font-weight: 700;
+  font-size: 15px;
+  margin-bottom: 15px;
+}
+
+.amenities-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.amenity-tag {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  transition: all 0.3s ease;
+}
+
+.amenity-tag:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: white;
+}
+
+.amenity-tag span {
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  flex: 1;
+}
+
+.remove-amenity-btn {
+  background: rgba(239, 68, 68, 0.8);
+  color: white;
+  border: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  margin-left: 10px;
+}
+
+.remove-amenity-btn:hover {
+  background: #dc2626;
+  transform: scale(1.1);
+}
+
 /* Update Details Button */
 .right-side-config button[type="submit"] {
   background-color: #4e73df;

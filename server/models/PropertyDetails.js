@@ -10,7 +10,13 @@ const propertyDetailsSchema = new mongoose.Schema({
   constructionProgress: [{
     image: { type: String, required: true },
     label: { type: String, required: true }
-  }]
+  }],
+  amenities: { 
+    type: [String], 
+    default: [] 
+  } // Changed to explicitly set type and default
+}, {
+  timestamps: true // Optional: adds createdAt and updatedAt
 });
 
 module.exports = mongoose.model('PropertyDetails', propertyDetailsSchema);

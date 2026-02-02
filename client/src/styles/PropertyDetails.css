@@ -138,25 +138,34 @@
     gap: 50px;
 }
 
-.property-details-grid {
+/* PROPERTY FEATURES SECTION - WHITE BACKGROUND WITH 3 COLUMNS, PLAIN TEXT */
+.property-features-section {
+    margin-top: 40px;
+}
+
+.property-features-section h2 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 25px;
+}
+
+.property-features-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-    padding: 20px 0;
+    gap: 15px 30px;
 }
 
-.detail-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-weight: 600;
+.property-feature-item {
+    font-size: 1.05rem;
+    font-weight: 500;
     color: #475569;
+    padding: 0;
+    background: none;
+    border: none;
 }
 
-.amenity-icon {
-    width: 24px;
-    height: 24px;
-}
+
 
 /* MAP & INQUIRY */
 .location-card {
@@ -356,6 +365,18 @@
         height: 100px;
     }
 
+    .property-features-section h2 {
+        font-size: 1.6rem;
+    }
+
+    .property-features-grid {
+        gap: 12px 20px;
+    }
+
+    .property-feature-item {
+        font-size: 1rem;
+    }
+
     .carousel-3d-container {
         height: 400px;
         max-width: 500px;
@@ -381,6 +402,19 @@
 }
 
 @media (max-width: 600px) {
+    .property-features-section h2 {
+        font-size: 1.5rem;
+    }
+
+    .property-features-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .property-feature-item {
+        font-size: 0.95rem;
+    }
+
     .carousel-3d-wrapper {
         padding: 40px 0;
     }
@@ -405,12 +439,5 @@
 
     .construction-progress-section h2 {
         font-size: 1.5rem;
-    }
-
-    .carousel-3d-label {
-        top: 15px;
-        right: 15px;
-        font-size: 0.85rem;
-        padding: 8px 16px;
     }
 }

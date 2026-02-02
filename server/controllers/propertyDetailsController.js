@@ -6,12 +6,14 @@ exports.upsertDetails = async (req, res) => {
     console.log("PROPERTY DETAILS UPDATE REQUEST RECEIVED");
     console.log("==========================================");
     
-    const { propertyId, description, additionalDetails, mapUrl } = req.body;
+    const { propertyId, description, additionalDetails, mapUrl, amenities } = req.body;
     
     console.log("1. Request Body:");
     console.log("   - PropertyId:", propertyId);
     console.log("   - Description:", description ? "Provided" : "Missing");
     console.log("   - MapUrl:", mapUrl ? "Provided" : "Missing");
+    console.log("   - Raw amenities from body:", amenities);
+    console.log("   - Amenities type:", typeof amenities);
     
     console.log("\n2. Files Received:");
     if (req.files) {
@@ -33,8 +35,42 @@ exports.upsertDetails = async (req, res) => {
       description, 
       additionalDetails, 
       mapUrl,
-      propertyId 
+      propertyId
     };
+
+    // Parse and add amenities if provided - FIXED VERSION
+    if (amenities) {
+      try {
+        let parsedAmenities;
+        
+        // Check if amenities is already an array or a string
+        if (typeof amenities === 'string') {
+          parsedAmenities = JSON.parse(amenities);
+          console.log("   ✓ Parsed amenities from string:", parsedAmenities);
+        } else if (Array.isArray(amenities)) {
+          parsedAmenities = amenities;
+          console.log("   ✓ Amenities already an array:", parsedAmenities);
+        } else {
+          console.log("   ⚠ Unexpected amenities format:", typeof amenities);
+          parsedAmenities = [];
+        }
+        
+        // Ensure it's an array of strings and filter out empty values
+        updateData.amenities = parsedAmenities
+          .filter(item => item && typeof item === 'string' && item.trim() !== '')
+          .map(item => item.trim());
+          
+        console.log("   ✓ Final amenities array:", updateData.amenities);
+        console.log("   ✓ Amenities count:", updateData.amenities.length);
+        
+      } catch (err) {
+        console.log("   ⚠ Amenities parse error:", err.message);
+        updateData.amenities = [];
+      }
+    } else {
+      console.log("   ℹ No amenities provided - using empty array");
+      updateData.amenities = [];
+    }
 
     // Process main media
     if (req.files && req.files['mainMedia']) {
@@ -77,15 +113,20 @@ exports.upsertDetails = async (req, res) => {
 
     console.log("\n5. Attempting Database Update...");
     console.log("   Query: { propertyId:", propertyId, "}");
+    console.log("   Update Data:", JSON.stringify(updateData, null, 2));
     
+    // IMPORTANT: Use $set explicitly to ensure amenities field is updated
     const details = await PropertyDetails.findOneAndUpdate(
       { propertyId: propertyId },
-      updateData,
+      { $set: updateData },
       { upsert: true, new: true, runValidators: true }
     );
 
     console.log("\n✅ SUCCESS! Property details saved");
     console.log("   Document ID:", details._id);
+    console.log("   Saved amenities:", details.amenities);
+    console.log("   Amenities count:", details.amenities?.length || 0);
+    console.log("   Full document amenities:", JSON.stringify(details.amenities));
     console.log("==========================================\n");
     
     res.status(200).json(details);
@@ -107,20 +148,27 @@ exports.upsertDetails = async (req, res) => {
 
 exports.getDetailsByPropertyId = async (req, res) => {
   try {
-    console.log("\nFetching property details for ID:", req.params.id);
+    console.log("\n=== FETCHING PROPERTY DETAILS ===");
+    console.log("Property ID:", req.params.id);
     
     const details = await PropertyDetails.findOne({ propertyId: req.params.id })
-      .populate('propertyId');
+      .populate('propertyId')
+      .lean(); // Use lean() for better performance and plain JS object
     
     if (!details) {
-      console.log("No details found for this property");
+      console.log("❌ No details found for this property");
       return res.status(404).json({ message: "No specific details found for this property." });
     }
     
-    console.log("✓ Details found successfully");
+    console.log("✓ Details found");
+    console.log("✓ Amenities in DB:", details.amenities);
+    console.log("✓ Amenities count:", details.amenities?.length || 0);
+    console.log("✓ Amenities type:", Array.isArray(details.amenities) ? 'array' : typeof details.amenities);
+    console.log("================================\n");
+    
     res.status(200).json(details);
   } catch (error) {
-    console.error("Error fetching details:", error.message);
+    console.error("❌ Error fetching details:", error.message);
     res.status(500).json({ error: "Server error while fetching property details." });
   }
 };

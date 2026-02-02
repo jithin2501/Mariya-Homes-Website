@@ -11,6 +11,10 @@ const AdminPropertyDetails = () => {
   const [propertyImages, setPropertyImages] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Amenities state
+  const [amenities, setAmenities] = useState([]);
+  const [newAmenity, setNewAmenity] = useState("");
 
   useEffect(() => {
     fetch("http://localhost:5000/api/admin/properties")
@@ -38,6 +42,18 @@ const AdminPropertyDetails = () => {
     setPropertyImages(files);
   };
 
+  // Amenities handlers
+  const addAmenity = () => {
+    if (newAmenity.trim()) {
+      setAmenities([...amenities, newAmenity.trim()]);
+      setNewAmenity("");
+    }
+  };
+
+  const removeAmenity = (index) => {
+    setAmenities(amenities.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -53,6 +69,7 @@ const AdminPropertyDetails = () => {
       data.append("propertyId", selectedPropertyId);
       data.append("description", description);
       data.append("mapUrl", mapUrl);
+      data.append("amenities", JSON.stringify(amenities)); // Add amenities
       if (mainMedia) data.append("mainMedia", mainMedia);
       gallery.forEach(file => data.append("gallery", file));
 
@@ -61,6 +78,15 @@ const AdminPropertyDetails = () => {
         data.append('constructionProgress', image);
         data.append('constructionLabels', ''); // Empty label, will be auto-generated
       });
+
+      // DEBUGGING - Check what's being submitted
+      console.log("=== FORM SUBMISSION DEBUG ===");
+      console.log("Property ID:", selectedPropertyId);
+      console.log("Amenities state:", amenities);
+      console.log("Amenities count:", amenities.length);
+      console.log("Amenities JSON:", JSON.stringify(amenities));
+      console.log("FormData amenities:", data.get("amenities"));
+      console.log("============================");
 
       console.log("Submitting form data...");
       console.log("Property images count:", propertyImages.length);
@@ -72,7 +98,10 @@ const AdminPropertyDetails = () => {
       
       if (res.ok) {
         const result = await res.json();
-        console.log("Success response:", result);
+        console.log("=== SUCCESS RESPONSE ===");
+        console.log("Full response:", result);
+        console.log("Amenities in response:", result.amenities);
+        console.log("=======================");
         alert("Details saved successfully!");
         
         // Reset form
@@ -82,6 +111,7 @@ const AdminPropertyDetails = () => {
         setGallery([]);
         setPropertyImages([]);
         setSelectedPropertyId("");
+        setAmenities([]); // Reset amenities
         
         // Reset file inputs
         document.querySelectorAll('input[type="file"]').forEach(input => input.value = '');
@@ -204,6 +234,61 @@ const AdminPropertyDetails = () => {
                           onClick={() => {
                             setPropertyImages(propertyImages.filter((_, i) => i !== index));
                           }}
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* AMENITIES SECTION */}
+            <div className="amenities-section">
+              <label>Property Amenities</label>
+              <p className="section-description">
+                Add custom amenities that will display in a grid (e.g., visiting room, dining area, hall, kitchen).
+              </p>
+              
+              <div className="amenity-input-group">
+                <input
+                  type="text"
+                  value={newAmenity}
+                  onChange={(e) => setNewAmenity(e.target.value)}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      addAmenity();
+                    }
+                  }}
+                  placeholder="Enter amenity name (e.g., visiting room)"
+                  className="amenity-input"
+                />
+                <button
+                  type="button"
+                  onClick={addAmenity}
+                  className="add-amenity-btn"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                  </svg>
+                  Add
+                </button>
+              </div>
+
+              {amenities.length > 0 && (
+                <div className="amenities-list">
+                  <p className="amenities-count">{amenities.length} amenities added:</p>
+                  <div className="amenities-grid">
+                    {amenities.map((amenity, index) => (
+                      <div key={index} className="amenity-tag">
+                        <span>{amenity}</span>
+                        <button
+                          type="button"
+                          onClick={() => removeAmenity(index)}
+                          className="remove-amenity-btn"
+                          title="Remove"
                         >
                           ✕
                         </button>

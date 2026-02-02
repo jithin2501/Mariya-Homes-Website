@@ -28,6 +28,7 @@ const PropertyDetails = () => {
           setDetails(detailData);
           setMainMedia(detailData.mainMedia || propData.image);
         } else {
+          console.log("No property details found for this property");
           setMainMedia(propData.image);
         }
       } catch (err) {
@@ -145,21 +146,19 @@ const PropertyDetails = () => {
           <h2>Property Description</h2>
           <p>{details?.description || "No description available."}</p>
           
-          <h2>Property Details</h2>
-          <div className="property-details-grid">
-            <div className="detail-item">
-              <img src="https://cdn-icons-png.flaticon.com/512/3030/3030336.png" className="amenity-icon" alt="Bed" />
-              <span className="detail-text">{propertyData.features?.bed} Beds</span>
+          {/* Property Features Section - White background with 3-column grid */}
+          {details?.amenities && Array.isArray(details.amenities) && details.amenities.length > 0 && (
+            <div className="property-features-section">
+              <h2>Property Features</h2>
+              <div className="property-features-grid">
+                {details.amenities.map((amenity, index) => (
+                  <div key={index} className="property-feature-item">
+                    {amenity}
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className="detail-item">
-              <img src="https://cdn-icons-png.flaticon.com/512/2950/2950901.png" className="amenity-icon" alt="Bath" />
-              <span className="detail-text">{propertyData.features?.bath} Bath</span>
-            </div>
-            <div className="detail-item">
-              <img src="https://cdn-icons-png.flaticon.com/512/10573/10573516.png" className="amenity-icon" alt="Area" />
-              <span className="detail-text">{propertyData.features?.sqft} sqft</span>
-            </div>
-          </div>
+          )}
         </div>
 
         <div className="inquiry-side">
@@ -206,9 +205,6 @@ const PropertyDetails = () => {
                     alt={`Property view ${index + 1}`} 
                     className="carousel-3d-image" 
                   />
-                  {item.label && getSlidePosition(index) === 'center' && (
-                    <div className="carousel-3d-label">{item.label}</div>
-                  )}
                 </div>
               ))}
             </div>
