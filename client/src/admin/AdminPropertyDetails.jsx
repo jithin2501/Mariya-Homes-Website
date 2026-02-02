@@ -20,6 +20,10 @@ const AdminPropertyDetails = () => {
   // Saved details state
   const [savedDetails, setSavedDetails] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
+  
+  // Search/filter state
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   useEffect(() => {
     fetch("http://localhost:5000/api/admin/properties")
@@ -36,6 +40,21 @@ const AdminPropertyDetails = () => {
       setSavedDetails(null);
     }
   }, [selectedPropertyId]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      const container = document.querySelector('.searchable-select-container');
+      if (container && !container.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const fetchPropertyDetails = async (propertyId) => {
     try {
@@ -155,6 +174,25 @@ const AdminPropertyDetails = () => {
     setAmenities(amenities.filter((_, i) => i !== index));
   };
 
+  // Filter properties based on search term
+  const filteredProperties = properties.filter(property =>
+    property.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Handle property selection
+  const handlePropertySelect = (propertyId, propertyTitle) => {
+    setSelectedPropertyId(propertyId);
+    setSearchTerm(propertyTitle);
+    setIsDropdownOpen(false);
+  };
+
+  // Clear selection
+  const clearSelection = () => {
+    setSelectedPropertyId("");
+    setSearchTerm("");
+    setSavedDetails(null);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -231,14 +269,61 @@ const AdminPropertyDetails = () => {
   return (
     <div className="admin-props-container">
       <h2>Configure Property Details</h2>
-      <select 
-        onChange={(e) => setSelectedPropertyId(e.target.value)} 
-        className="admin-select"
-        value={selectedPropertyId}
-      >
-        <option value="">-- Choose a Property --</option>
-        {properties.map(p => <option key={p._id} value={p._id}>{p.title}</option>)}
-      </select>
+      
+      {/* Searchable Property Selector */}
+      <div className="searchable-select-container">
+        <div className="search-input-wrapper">
+          <input
+            type="text"
+            className="admin-search-input"
+            placeholder="Search and select a property..."
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setIsDropdownOpen(true);
+            }}
+            onFocus={() => setIsDropdownOpen(true)}
+          />
+          {selectedPropertyId && (
+            <button
+              className="clear-selection-btn"
+              onClick={clearSelection}
+              title="Clear selection"
+            >
+              ✕
+            </button>
+          )}
+          <svg className="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+          </svg>
+        </div>
+
+        {/* Dropdown List */}
+        {isDropdownOpen && (
+          <div className="dropdown-list">
+            {filteredProperties.length > 0 ? (
+              filteredProperties.map(property => (
+                <div
+                  key={property._id}
+                  className={`dropdown-item ${selectedPropertyId === property._id ? 'selected' : ''}`}
+                  onClick={() => handlePropertySelect(property._id, property.title)}
+                >
+                  <span className="property-title">{property.title}</span>
+                  {selectedPropertyId === property._id && (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                  )}
+                </div>
+              ))
+            ) : (
+              <div className="dropdown-item no-results">
+                No properties found
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       {selectedPropertyId && (
         <form onSubmit={handleSubmit} className="admin-details-split">

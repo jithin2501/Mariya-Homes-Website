@@ -20,7 +20,7 @@ const AdminLayout = () => {
         
         {/* New Section Linked correctly */}
         <NavLink to="/admin/property-details" className="admin-link">
-          Property Details Settings
+          Property Details 
         </NavLink>
 
         <button className="admin-logout" onClick={handleLogout} style={{marginTop: 'auto'}}>
