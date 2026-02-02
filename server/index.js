@@ -1,7 +1,11 @@
 const express = require('express');
 const cors = require('cors');
-const connectDB = require('./config/db');
-require('dotenv').config();
+const dotenv = require('dotenv');
+const path = require('path');
+const connectDB = require('./config/db'); // Remove .js extension for CommonJS
+
+// Load environment variables
+dotenv.config();
 
 const app = express();
 
@@ -11,11 +15,19 @@ connectDB();
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Routes (ONLY ONE)
-app.use('/api', require('./routes/contactRoutes'));
-app.use("/api", require("./routes/videoRoutes"));
-app.use("/api/admin", require("./routes/propertyRoutes"));
+// Import Routes using CommonJS
+const contactRoutes = require('./routes/contactRoutes');
+const videoRoutes = require('./routes/videoRoutes');
+const propertyRoutes = require('./routes/propertyRoutes');
+const propertyDetailsRoutes = require('./routes/propertyDetailsRoutes');
+
+// Route Middlewares
+app.use('/api', contactRoutes);
+app.use("/api", videoRoutes);
+app.use("/api/admin", propertyRoutes);
+app.use("/api/admin", propertyDetailsRoutes);
 
 // Start Server
 const PORT = process.env.PORT || 5000;

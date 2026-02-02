@@ -4,17 +4,17 @@ const {
   addProperty, 
   getAllProperties, 
   deleteProperty,
-  updateProperty // 1. Make sure this is imported
+  updateProperty,
+  getPropertyById // NEW: Import the new function
 } = require('../controllers/propertyController');
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
 router.get('/properties', getAllProperties);
+router.get('/properties/:id', getPropertyById); // NEW: Add this route
 router.post('/properties', upload.single('image'), addProperty);
 router.delete('/properties/:id', deleteProperty);
-
-// 2. Add this specific line to handle the PUT request
 router.put('/properties/:id', upload.single('image'), updateProperty);
 
 module.exports = router;

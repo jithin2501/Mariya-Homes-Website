@@ -1,0 +1,196 @@
+/* PROPERTY DETAILS PAGE CONTAINER */
+.property-details-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 140px 20px 80px;
+    color: #333;
+}
+
+/* GALLERY LAYOUT */
+.details-gallery {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 15px;
+    margin-bottom: 40px;
+}
+
+/* VIDEO WRAPPER & MEDIA */
+.main-gallery-box {
+    position: relative;
+    width: 100%;
+    height: 500px;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #000;
+}
+
+.video-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.main-gallery-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* CUSTOM FULLSCREEN BUTTON */
+.fullscreen-btn {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(15, 23, 42, 0.7); /* Slate dark background */
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    padding: 10px;
+    cursor: pointer;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.fullscreen-btn:hover {
+    background: #f97316; /* Brand orange from your theme */
+    transform: scale(1.05);
+}
+
+.fullscreen-btn svg {
+    transition: transform 0.2s ease;
+}
+
+/* CRITICAL: HIDE NATIVE VIDEO CONTROLS */
+/* This ensures that even in fullscreen, the pause/play/volume bars stay hidden */
+#property-video::-webkit-media-controls {
+    display: none !important;
+}
+
+#property-video::-webkit-media-controls-enclosure {
+    display: none !important;
+}
+
+#property-video::-webkit-media-controls-panel {
+    display: none !important;
+}
+
+/* SIDE GALLERY GRID */
+.side-gallery-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 10px;
+}
+
+.side-img-wrapper {
+    cursor: pointer;
+    overflow: hidden;
+    border-radius: 8px;
+    height: 245px;
+}
+
+.side-gallery-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.side-img-wrapper:hover .side-gallery-img {
+    transform: scale(1.05);
+}
+
+/* HEADER & INFO */
+.property-details-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 30px;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 30px;
+}
+
+.details-title-box h1 {
+    font-size: 2.5rem;
+    color: #0f172a;
+    font-weight: 800;
+}
+
+.details-location {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #64748b;
+    margin-top: 10px;
+}
+
+.details-price {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #f97316;
+}
+
+.details-info-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 50px;
+}
+
+.property-details-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    padding: 20px 0;
+}
+
+.detail-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    color: #475569;
+}
+
+.amenity-icon {
+    width: 24px;
+    height: 24px;
+}
+
+/* MAP & INQUIRY */
+.location-card {
+    width: 100%;
+    height: 250px;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-top: 20px;
+    border: 1px solid #e2e8f0;
+}
+
+.location-map iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+/* RESPONSIVENESS */
+@media (max-width: 992px) {
+    .details-gallery, .details-info-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .main-gallery-box {
+        height: 350px;
+    }
+    
+    .side-gallery-grid {
+        grid-template-columns: repeat(4, 1fr);
+        height: 100px;
+    }
+    
+    .side-img-wrapper {
+        height: 100px;
+    }
+}

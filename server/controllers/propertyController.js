@@ -49,6 +49,19 @@ exports.getAllProperties = async (req, res) => {
   }
 };
 
+// NEW: Get single property by ID
+exports.getPropertyById = async (req, res) => {
+  try {
+    const property = await Property.findById(req.params.id);
+    if (!property) {
+      return res.status(404).json({ message: "Property not found" });
+    }
+    res.status(200).json(property);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching property", error: error.message });
+  }
+};
+
 exports.deleteProperty = async (req, res) => {
   try {
     await Property.findByIdAndDelete(req.params.id);
@@ -57,6 +70,7 @@ exports.deleteProperty = async (req, res) => {
     res.status(500).json({ message: "Error deleting property", error: error.message });
   }
 };
+
 exports.updateProperty = async (req, res) => {
   try {
     const { id } = req.params;

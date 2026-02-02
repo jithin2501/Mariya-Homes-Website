@@ -1,115 +1,151 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import "../styles/PropertyDetails.css";
 
 const PropertyDetails = () => {
+  const { id } = useParams();
   const navigate = useNavigate();
-  const [mainImage, setMainImage] = useState("https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=800");
+  
+  const [propertyData, setPropertyData] = useState(null);
+  const [details, setDetails] = useState(null);
+  const [mainMedia, setMainMedia] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  const sideImages = [
-    "https://images.unsplash.com/photo-1600573472591-ee6b68d14c68?auto=format&fit=crop&q=80&w=400",
-    "https:////images.unsplash.com/photo-1600573472591-ee6b68d14c68?auto=format&fit=crop&q=80&w=400",
-    "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=800",
-    "https://images.unsplash.com/photo-1600573472591-ee6b68d14c68?auto=format&fit=crop&q=80&w=400"
-  ];
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const propRes = await fetch(`http://localhost:5000/api/admin/properties/${id}`);
+        if (!propRes.ok) throw new Error("Property not found");
+        const propData = await propRes.json();
+        setPropertyData(propData);
 
-  const handleImageClick = (imageSrc) => {
-    setMainImage(imageSrc);
+        const detailRes = await fetch(`http://localhost:5000/api/admin/property-details/${id}`);
+        
+        if (detailRes.ok) {
+          const detailData = await detailRes.json();
+          setDetails(detailData);
+          setMainMedia(detailData.mainMedia || propData.image);
+        } else {
+          setMainMedia(propData.image);
+        }
+      } catch (err) {
+        console.error("Error fetching property details:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [id]);
+
+  const isVideo = (url) => {
+    return url && url.match(/\.(mp4|webm|ogg)$/i);
   };
+
+  const toggleFullscreen = (videoElement) => {
+    if (videoElement.requestFullscreen) {
+      videoElement.requestFullscreen();
+    } else if (videoElement.webkitRequestFullscreen) {
+      videoElement.webkitRequestFullscreen();
+    } else if (videoElement.msRequestFullscreen) {
+      videoElement.msRequestFullscreen();
+    }
+  };
+
+  if (loading) return <div className="loader">Loading Property...</div>;
+  if (!propertyData) return <div className="error">Property not found.</div>;
 
   return (
     <div className="property-details-container">
       <div className="details-gallery">
         <div className="main-gallery-box">
-          <img 
-            src={mainImage} 
-            className="main-gallery-img" 
-            id="details-main-img" 
-            alt="Property Main" 
-          />
+          {isVideo(mainMedia) ? (
+            <div className="video-wrapper">
+              <video 
+                id="property-video"
+                src={mainMedia} 
+                autoPlay 
+                loop
+                muted
+                playsInline
+                className="main-gallery-img"
+              />
+              <button 
+                className="fullscreen-btn"
+                onClick={() => {
+                  const video = document.getElementById('property-video');
+                  toggleFullscreen(video);
+                }}
+                title="Fullscreen"
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                  <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+                </svg>
+              </button>
+            </div>
+          ) : (
+            <img src={mainMedia} className="main-gallery-img" alt="Selected View" />
+          )}
         </div>
+
         <div className="side-gallery-grid">
-          {sideImages.map((image, index) => (
-            <img 
-              key={index}
-              src={image} 
-              className="side-gallery-img" 
-              alt={`Side View ${index + 1}`}
-              onClick={() => handleImageClick(image)}
-              style={{ cursor: 'pointer' }}
-            />
+          {details?.gallery?.slice(0, 4).map((img, index) => (
+            <div key={index} className="side-img-wrapper" onClick={() => setMainMedia(img)}>
+              <img src={img} className="side-gallery-img" alt={`View ${index + 1}`} />
+            </div>
           ))}
         </div>
       </div>
 
-      {/* Rest of your PropertyDetails component remains the same */}
       <div className="property-details-header">
         <div className="details-title-box">
-          <h1 id="details-title">Villa Sundara</h1>
+          <h1>{propertyData.title}</h1>
           <div className="details-location">
-            <img src="https://cdn-icons-png.flaticon.com/512/684/684908.png" className="location-icon" alt="Location Icon" /> 
-            <span id="details-loc">Suburban Area, Los Angeles</span>
+            <img src="https://cdn-icons-png.flaticon.com/512/684/684908.png" className="location-icon" alt="Location" /> 
+            <span>{propertyData.locationText}</span>
           </div>
         </div>
         <div className="details-price-box">
           <span className="price-label">Price</span>
-          <span className="details-price" id="details-price">$250,000</span>
+          <span className="details-price">{propertyData.price}</span>
         </div>
       </div>
 
       <div className="details-info-grid">
         <div className="details-description">
           <h2>Property Description</h2>
-          <p>
-            Crafted to inspire, the Seacliff Horizon Villa blends modern curves, warm lighting, and natural textures to create a living experience like no other. Every detail from the flowing architecture to the curated materials has been designed to elevate comfort, beauty, and functionality.
-          </p>
+          <p>{details?.description || "No description available."}</p>
+          
           <h2>Property Details</h2>
           <div className="property-details-grid">
             <div className="detail-item">
-              <img src="https://cdn-icons-png.flaticon.com/512/3030/3030336.png" className="amenity-icon" alt="Bed Icon" />
-              <span className="detail-text">4 Beds</span>
+              <img src="https://cdn-icons-png.flaticon.com/512/3030/3030336.png" className="amenity-icon" alt="Bed" />
+              <span className="detail-text">{propertyData.features?.bed} Beds</span>
             </div>
             <div className="detail-item">
-              <img src="https://cdn-icons-png.flaticon.com/512/2950/2950901.png" className="amenity-icon" alt="Bath Icon" />
-              <span className="detail-text">3 Bath</span>
+              <img src="https://cdn-icons-png.flaticon.com/512/2950/2950901.png" className="amenity-icon" alt="Bath" />
+              <span className="detail-text">{propertyData.features?.bath} Bath</span>
             </div>
             <div className="detail-item">
-              <img src="/images/setsquare.png" className="amenity-icon" alt="Area Icon" onError={(e) => {
-                e.target.src = "https://cdn-icons-png.flaticon.com/512/10573/10573516.png";
-              }} />
-              <span className="detail-text">500 sq.m</span>
-            </div>
-
-            <div className="detail-item">
-              <img src="https://cdn-icons-png.flaticon.com/512/2324/2324151.png" className="amenity-icon" alt="Floor Icon" />
-              <span className="detail-text">2 Floors</span>
-            </div>
-            <div className="detail-item">
-              <img src="https://cdn-icons-png.flaticon.com/512/3408/3408545.png" className="amenity-icon" alt="Parking Icon" />
-              <span className="detail-text">2 Parking</span>
-            </div>
-            <div className="detail-item">
-              <img src="https://cdn-icons-png.flaticon.com/512/3703/3703259.png" className="amenity-icon" alt="Year Icon" />
-              <span className="detail-text">Built 2023</span>
+              <img src="https://cdn-icons-png.flaticon.com/512/10573/10573516.png" className="amenity-icon" alt="Area" />
+              <span className="detail-text">{propertyData.features?.sqft} sqft</span>
             </div>
           </div>
         </div>
 
         <div className="inquiry-side">
           <div className="inquiry-card">
-            <h3>Interested in this property?</h3>
-            <button className="inquiry-btn" onClick={() => { navigate('/contact'); window.scrollTo(0, 0); }}>Request More Info</button>
-            <button className="filter-reset-btn" onClick={() => { navigate('/properties'); window.scrollTo(0, 0); }}>Back to Listings</button>
+            <h3>Interested?</h3>
+            <button className="inquiry-btn" onClick={() => navigate('/contact')}>Request More Info</button>
+            <button className="filter-reset-btn" onClick={() => navigate('/properties')}>Back to Listings</button>
           </div>
-
           <div className="location-card">
             <div className="location-map">
-              <iframe 
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d106316.31508210459!2d-118.3411033!3d34.020479!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x80c2c75ddc27da13%3A0xe22fdf6f254608f4!2sLos%20Angeles%2C%20CA!5e0!3m2!1sen!2sus!4v1700000000000" 
-                allowFullScreen="" 
-                loading="lazy"
-                title="Property Location"
-                style={{ width: '100%', height: '100%', border: 'none' }}
-              />
+              {details?.mapUrl ? (
+                <iframe src={details.mapUrl} allowFullScreen="" loading="lazy" title="Map" />
+              ) : (
+                <div className="no-map">Map not available</div>
+              )}
             </div>
           </div>
         </div>

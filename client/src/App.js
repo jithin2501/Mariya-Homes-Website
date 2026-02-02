@@ -16,6 +16,7 @@ import AdminContact from "./admin/AdminContact";
 import AdminVideo from "./admin/AdminVideo";
 import Login from "./admin/auth/Login"; 
 import AdminProperties from "./admin/AdminProperties";
+import AdminPropertyDetails from "./admin/AdminPropertyDetails";
 // Global Styles
 import "./styles/App.css";
 
@@ -63,6 +64,7 @@ function App() {
           <Route path="contact" element={<AdminContact />} />
           <Route path="video" element={<AdminVideo />} />
           <Route path="properties" element={<AdminProperties />} />
+          <Route path="property-details" element={<AdminPropertyDetails />} />
         </Route>
 
         {/* --- CATCH-ALL REDIRECTS --- */}
