@@ -233,7 +233,7 @@ const AdminGallery = () => {
     <div className="admin-gallery-container">
       <div className="admin-gallery-header">
         <h1>Gallery Management</h1>
-        <p className="header-subtitle">Upload and manage images for Construction and Renovation galleries</p>
+
       </div>
 
       <div className="gallery-sections">
@@ -241,7 +241,7 @@ const AdminGallery = () => {
         <div className="gallery-upload-section construction-section">
           <div className="section-header">
             <h2>Construction Gallery</h2>
-            <p>Upload multiple images at once. They will appear in the carousel on the construction page.</p>
+
           </div>
 
           <div className="upload-area">
@@ -254,11 +254,6 @@ const AdminGallery = () => {
               style={{ display: 'none' }}
             />
             <label htmlFor="construction-upload" className="upload-button">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="17 8 12 3 7 8"/>
-                <line x1="12" y1="3" x2="12" y2="15"/>
-              </svg>
               Choose Images
             </label>
           </div>
@@ -305,17 +300,18 @@ const AdminGallery = () => {
               <div className="existing-images-grid">
                 {constructionImages.map((item) => (
                   <div key={item._id} className="existing-image-card">
+                    <button 
+                      className="delete-cross-btn"
+                      onClick={() => handleDelete(item._id, 'construction')}
+                      title="Delete image"
+                    >
+                      ×
+                    </button>
                     <img src={item.image} alt={item.title} />
                     <div className="existing-image-info">
                       <h4>{item.title}</h4>
                       <span className="image-order">Order: {item.order}</span>
                     </div>
-                    <button 
-                      className="delete-existing-btn"
-                      onClick={() => handleDelete(item._id, 'construction')}
-                    >
-                      Delete
-                    </button>
                   </div>
                 ))}
               </div>
@@ -327,7 +323,7 @@ const AdminGallery = () => {
         <div className="gallery-upload-section renovation-section">
           <div className="section-header">
             <h2>Renovation Gallery</h2>
-            <p>Upload multiple images at once. They will appear in the carousel on the renovation page.</p>
+
           </div>
 
           <div className="upload-area">
@@ -340,11 +336,6 @@ const AdminGallery = () => {
               style={{ display: 'none' }}
             />
             <label htmlFor="renovation-upload" className="upload-button">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="17 8 12 3 7 8"/>
-                <line x1="12" y1="3" x2="12" y2="15"/>
-              </svg>
               Choose Images
             </label>
           </div>
@@ -391,17 +382,18 @@ const AdminGallery = () => {
               <div className="existing-images-grid">
                 {renovationImages.map((item) => (
                   <div key={item._id} className="existing-image-card">
+                    <button 
+                      className="delete-cross-btn"
+                      onClick={() => handleDelete(item._id, 'renovation')}
+                      title="Delete image"
+                    >
+                      ×
+                    </button>
                     <img src={item.image} alt={item.title} />
                     <div className="existing-image-info">
                       <h4>{item.title}</h4>
                       <span className="image-order">Order: {item.order}</span>
                     </div>
-                    <button 
-                      className="delete-existing-btn"
-                      onClick={() => handleDelete(item._id, 'renovation')}
-                    >
-                      Delete
-                    </button>
                   </div>
                 ))}
               </div>

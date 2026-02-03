@@ -1,8 +1,14 @@
 import React, { useEffect, useState } from 'react';
+import '../styles/Construction.css';
 
 const Construction = () => {
   const [galleries, setGalleries] = useState([]);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [journeySlides, setJourneySlides] = useState([]);
+  const [journeyCurrentSlide, setJourneyCurrentSlide] = useState(0);
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [filteredGalleries, setFilteredGalleries] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const nodes = document.querySelectorAll('.node');
@@ -16,27 +22,124 @@ const Construction = () => {
     fetchGalleries();
   }, []);
 
+  useEffect(() => {
+    if (selectedCategory === 'all') {
+      setFilteredGalleries(galleries);
+    } else {
+      setFilteredGalleries(galleries.filter(gallery => 
+        gallery.category && gallery.category.toLowerCase() === selectedCategory
+      ));
+    }
+  }, [galleries, selectedCategory]);
+
   const fetchGalleries = async () => {
     try {
+      setLoading(true);
       const response = await fetch('http://localhost:5000/api/gallery/type/construction');
       const data = await response.json();
       setGalleries(data);
+      setFilteredGalleries(data);
+      
+      // Convert fetched gallery data to journey slides format
+      if (data && data.length > 0) {
+        const convertedSlides = data.map((item, index) => ({
+          id: index + 1,
+          title: item.title || `Step ${index + 1}`,
+          image: item.image,
+          description: item.description || ''
+        }));
+        setJourneySlides(convertedSlides);
+      } else {
+        // Fallback to default slides if no images uploaded yet
+        initializeDefaultJourneySlides();
+      }
+      
+      setLoading(false);
     } catch (error) {
       console.error('Error fetching galleries:', error);
+      // Fallback to default slides on error
+      initializeDefaultJourneySlides();
+      setLoading(false);
     }
   };
 
+  const initializeDefaultJourneySlides = () => {
+    const journeyData = [
+      {
+        id: 1,
+        title: "Ground Breaking",
+        image: "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?auto=format&fit=crop&w=800",
+        description: "Initial site preparation and foundation work begins with precise measurements and soil testing."
+      },
+      {
+        id: 2,
+        title: "Foundation Work",
+        image: "https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=800",
+        description: "Pouring concrete and establishing a strong structural base for durability."
+      },
+      {
+        id: 3,
+        title: "Framing Stage",
+        image: "https://images.unsplash.com/photo-1513584684374-8bab748fbf90?auto=format&fit=crop&w=800",
+        description: "Erecting the wooden framework that defines the structure's shape and strength."
+      },
+      {
+        id: 4,
+        title: "Roof Installation",
+        image: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=800",
+        description: "Installing roofing materials and waterproofing to protect from elements."
+      },
+      {
+        id: 5,
+        title: "Interior Work",
+        image: "https://images.unsplash.com/photo-1518780664697-55e3ad937233?auto=format&fit=crop&w=800",
+        description: "Electrical, plumbing, insulation, and interior finishing touches."
+      },
+      {
+        id: 6,
+        title: "Final Touches",
+        image: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=800",
+        description: "Landscaping, final inspections, and preparing for handover."
+      }
+    ];
+    setJourneySlides(journeyData);
+  };
+
+  // 3D Carousel Functions
+  const nextJourneySlide = () => {
+    setJourneyCurrentSlide((prev) => (prev + 1) % journeySlides.length);
+  };
+
+  const prevJourneySlide = () => {
+    setJourneyCurrentSlide((prev) => (prev - 1 + journeySlides.length) % journeySlides.length);
+  };
+
+  const getSlidePosition = (index) => {
+    const totalSlides = journeySlides.length;
+    if (totalSlides === 0) return 'hidden';
+    
+    const diff = (index - journeyCurrentSlide + totalSlides) % totalSlides;
+    
+    if (diff === 0) return 'center';
+    if (diff === 1 || (diff === 1 - totalSlides && totalSlides > 2)) return 'right';
+    if (diff === totalSlides - 1 || (diff === -1 && totalSlides > 2)) return 'left';
+    return 'hidden';
+  };
+
+  // Gallery functions
   const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % galleries.length);
+    setCurrentSlide((prev) => (prev + 1) % filteredGalleries.length);
   };
 
   const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + galleries.length) % galleries.length);
+    setCurrentSlide((prev) => (prev - 1 + filteredGalleries.length) % filteredGalleries.length);
   };
 
   const goToSlide = (index) => {
     setCurrentSlide(index);
   };
+
+  const categories = ['all', 'exterior', 'interior', 'foundation', 'roofing', 'finishing'];
 
   return (
     <>
@@ -119,79 +222,61 @@ const Construction = () => {
         </main>
       </div>
 
-      {/* Gallery Carousel Section */}
-      {galleries.length > 0 && (
-        <section className="gallery-carousel-section">
-          <div className="carousel-container">
-            <h2 className="gallery-section-title">Our Construction Journey</h2>
-            
-            <div className="carousel-wrapper">
-              {/* Navigation Arrows */}
-              <button className="carousel-nav carousel-nav-left" onClick={prevSlide}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M15 18l-6-6 6-6"/>
-                </svg>
-              </button>
+      {/* 3D Construction Journey Carousel */}
+      {journeySlides.length > 0 && (
+        <div className="construction-journey-section">
+          <h2>Our Construction Journey</h2>
+          <p className="journey-subtitle">Witness the transformation from empty land to dream home</p>
+          
+          <div className="carousel-3d-wrapper">
+            <button className="carousel-btn-3d prev-btn" onClick={prevJourneySlide}>
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="white">
+                <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+              </svg>
+            </button>
 
-              {/* Main Carousel */}
-              <div className="carousel-track">
-                {/* Thumbnail Previews */}
-                <div className="carousel-thumbnails">
-                  {galleries.map((item, index) => (
-                    <div
-                      key={item._id}
-                      className={`thumbnail-item ${index === currentSlide ? 'active' : ''} ${
-                        index < currentSlide ? 'passed' : ''
-                      }`}
-                      onClick={() => goToSlide(index)}
-                    >
-                      <div className="thumbnail-image">
-                        <img src={item.image} alt={item.title} />
-                      </div>
-                      <div className="thumbnail-label">
-                        <span>{item.title}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Main Image Display */}
-                <div className="carousel-main-display">
-                  <div className="main-image-wrapper">
-                    <img 
-                      src={galleries[currentSlide]?.image} 
-                      alt={galleries[currentSlide]?.title}
-                      className="main-image"
-                    />
-                  </div>
-                  <div className="main-image-info">
-                    <h3>{galleries[currentSlide]?.title}</h3>
-                    {galleries[currentSlide]?.description && (
-                      <p>{galleries[currentSlide]?.description}</p>
-                    )}
+            <div className="carousel-3d-container">
+              {journeySlides.map((item, index) => (
+                <div
+                  key={item.id}
+                  className={`carousel-3d-slide ${getSlidePosition(index)}`}
+                  onClick={() => {
+                    if (getSlidePosition(index) === 'left') prevJourneySlide();
+                    if (getSlidePosition(index) === 'right') nextJourneySlide();
+                  }}
+                >
+                  <img 
+                    src={item.image} 
+                    alt={item.title} 
+                    className="carousel-3d-image" 
+                  />
+                  <div className="slide-content-overlay">
+                    <h3 className="slide-title">{item.title}</h3>
+                    <p className="slide-description">{item.description}</p>
+                    <span className="slide-number">Step {item.id}</span>
                   </div>
                 </div>
-              </div>
-
-              <button className="carousel-nav carousel-nav-right" onClick={nextSlide}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M9 18l6-6-6-6"/>
-                </svg>
-              </button>
-            </div>
-
-            {/* Progress Dots */}
-            <div className="carousel-dots">
-              {galleries.map((_, index) => (
-                <button
-                  key={index}
-                  className={`dot ${index === currentSlide ? 'active' : ''}`}
-                  onClick={() => goToSlide(index)}
-                />
               ))}
             </div>
+
+            <button className="carousel-btn-3d next-btn" onClick={nextJourneySlide}>
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="white">
+                <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
+              </svg>
+            </button>
           </div>
-        </section>
+
+          <div className="carousel-indicators">
+            {journeySlides.map((item, index) => (
+              <button
+                key={item.id}
+                className={`indicator ${journeyCurrentSlide === index ? 'active' : ''}`}
+                onClick={() => setJourneyCurrentSlide(index)}
+                aria-label={`Go to step ${item.id}`}
+              />
+            ))}
+          </div>
+        </div>
       )}
     </>
   );
