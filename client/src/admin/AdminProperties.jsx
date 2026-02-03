@@ -109,9 +109,20 @@ const AdminProperties = () => {
       <h2>{isEditing ? "Edit Property" : "Manage Properties"}</h2>
       
       <form className="admin-props-form" onSubmit={handleSubmit}>
-        <input type="text" placeholder="Title" value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} required />
-        <input type="text" placeholder="Location" value={formData.locationText} onChange={(e) => setFormData({...formData, locationText: e.target.value})} required />
-        <input type="text" placeholder="Price" value={formData.price} onChange={(e) => setFormData({...formData, price: e.target.value})} required />
+        <div className="form-row-2">
+          <input type="text" placeholder="Title" value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} required />
+          <input type="text" placeholder="Location" value={formData.locationText} onChange={(e) => setFormData({...formData, locationText: e.target.value})} required />
+        </div>
+        
+        <div className="form-row-2">
+          <input type="text" placeholder="Price" value={formData.price} onChange={(e) => setFormData({...formData, price: e.target.value})} required />
+          <select value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})}>
+            <option value="For Sale">For Sale</option>
+            <option value="Featured">Featured</option>
+            <option value="New">New</option>
+            <option value="Sold">Sold</option>
+          </select>
+        </div>
         
         <div className="form-row">
           <input type="number" placeholder="Beds" value={formData.bed} onChange={(e) => setFormData({...formData, bed: e.target.value})} required />
@@ -139,13 +150,6 @@ const AdminProperties = () => {
             </div>
           )}
         </div>
-
-        <select value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})}>
-          <option value="For Sale">For Sale</option>
-          <option value="Featured">Featured</option>
-          <option value="New">New</option>
-          <option value="Sold">Sold</option>
-        </select>
 
         <div className="form-actions">
           <button type="submit" className="add-btn" disabled={loading}>
