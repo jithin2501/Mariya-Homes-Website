@@ -1,4 +1,4 @@
-import { NavLink, Outlet, useNavigate, Link } from "react-router-dom"; // Added Link
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import "./styles/AdminLayout.css";
 
 const AdminLayout = () => {
@@ -14,13 +14,24 @@ const AdminLayout = () => {
       <aside className="admin-sidebar">
         <h2>Mariya Homes</h2>
 
-        <NavLink to="/admin/contact" className="admin-link">Contact Messages</NavLink>
-        <NavLink to="/admin/video" className="admin-link">Upload Video</NavLink>
-        <NavLink to="/admin/properties" className="admin-link">Manage Properties</NavLink>
+        <NavLink to="/admin/contact" className="admin-link">
+          Contact Messages
+        </NavLink>
         
-        {/* New Section Linked correctly */}
+        <NavLink to="/admin/video" className="admin-link">
+          Upload Video
+        </NavLink>
+        
+        <NavLink to="/admin/properties" className="admin-link">
+          Manage Properties
+        </NavLink>
+        
         <NavLink to="/admin/property-details" className="admin-link">
           Property Details 
+        </NavLink>
+
+        <NavLink to="/admin/gallery" className="admin-link">
+          Gallery Management
         </NavLink>
 
         <button className="admin-logout" onClick={handleLogout} style={{marginTop: 'auto'}}>

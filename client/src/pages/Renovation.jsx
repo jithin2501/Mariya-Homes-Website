@@ -1,6 +1,36 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 const Renovation = () => {
+  const [galleries, setGalleries] = useState([]);
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  useEffect(() => {
+    // Fetch gallery images
+    fetchGalleries();
+  }, []);
+
+  const fetchGalleries = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/gallery/type/renovation');
+      const data = await response.json();
+      setGalleries(data);
+    } catch (error) {
+      console.error('Error fetching galleries:', error);
+    }
+  };
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % galleries.length);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + galleries.length) % galleries.length);
+  };
+
+  const goToSlide = (index) => {
+    setCurrentSlide(index);
+  };
+
   return (
     <>
       <div className="bg-decoration"></div>
@@ -99,6 +129,81 @@ const Renovation = () => {
           </div>
         </main>
       </div>
+
+      {/* Gallery Carousel Section */}
+      {galleries.length > 0 && (
+        <section className="gallery-carousel-section">
+          <div className="carousel-container">
+            <h2 className="gallery-section-title">Our Renovation Journey</h2>
+            
+            <div className="carousel-wrapper">
+              {/* Navigation Arrows */}
+              <button className="carousel-nav carousel-nav-left" onClick={prevSlide}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M15 18l-6-6 6-6"/>
+                </svg>
+              </button>
+
+              {/* Main Carousel */}
+              <div className="carousel-track">
+                {/* Thumbnail Previews */}
+                <div className="carousel-thumbnails">
+                  {galleries.map((item, index) => (
+                    <div
+                      key={item._id}
+                      className={`thumbnail-item ${index === currentSlide ? 'active' : ''} ${
+                        index < currentSlide ? 'passed' : ''
+                      }`}
+                      onClick={() => goToSlide(index)}
+                    >
+                      <div className="thumbnail-image">
+                        <img src={item.image} alt={item.title} />
+                      </div>
+                      <div className="thumbnail-label">
+                        <span>{item.title}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Main Image Display */}
+                <div className="carousel-main-display">
+                  <div className="main-image-wrapper">
+                    <img 
+                      src={galleries[currentSlide]?.image} 
+                      alt={galleries[currentSlide]?.title}
+                      className="main-image"
+                    />
+                  </div>
+                  <div className="main-image-info">
+                    <h3>{galleries[currentSlide]?.title}</h3>
+                    {galleries[currentSlide]?.description && (
+                      <p>{galleries[currentSlide]?.description}</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <button className="carousel-nav carousel-nav-right" onClick={nextSlide}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M9 18l6-6-6-6"/>
+                </svg>
+              </button>
+            </div>
+
+            {/* Progress Dots */}
+            <div className="carousel-dots">
+              {galleries.map((_, index) => (
+                <button
+                  key={index}
+                  className={`dot ${index === currentSlide ? 'active' : ''}`}
+                  onClick={() => goToSlide(index)}
+                />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
     </>
   );
 };

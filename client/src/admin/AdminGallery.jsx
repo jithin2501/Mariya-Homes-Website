@@ -1,0 +1,416 @@
+import React, { useState, useEffect } from 'react';
+import './styles/AdminGallery.css';
+
+const AdminGallery = () => {
+  const [constructionImages, setConstructionImages] = useState([]);
+  const [renovationImages, setRenovationImages] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Construction form state
+  const [constructionFiles, setConstructionFiles] = useState([]);
+  const [constructionPreviews, setConstructionPreviews] = useState([]);
+  const [constructionTexts, setConstructionTexts] = useState([]);
+
+  // Renovation form state
+  const [renovationFiles, setRenovationFiles] = useState([]);
+  const [renovationPreviews, setRenovationPreviews] = useState([]);
+  const [renovationTexts, setRenovationTexts] = useState([]);
+
+  useEffect(() => {
+    fetchGalleries();
+  }, []);
+
+  const fetchGalleries = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/gallery');
+      const data = await response.json();
+      
+      setConstructionImages(data.filter(item => item.type === 'construction'));
+      setRenovationImages(data.filter(item => item.type === 'renovation'));
+    } catch (error) {
+      console.error('Error fetching galleries:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle multiple image selection for Construction
+  const handleConstructionImageChange = (e) => {
+    const files = Array.from(e.target.files);
+    setConstructionFiles(files);
+
+    // Create previews
+    const previews = files.map(file => URL.createObjectURL(file));
+    setConstructionPreviews(previews);
+
+    // Initialize text fields for each image
+    setConstructionTexts(files.map(() => ''));
+  };
+
+  // Handle multiple image selection for Renovation
+  const handleRenovationImageChange = (e) => {
+    const files = Array.from(e.target.files);
+    setRenovationFiles(files);
+
+    // Create previews
+    const previews = files.map(file => URL.createObjectURL(file));
+    setRenovationPreviews(previews);
+
+    // Initialize text fields for each image
+    setRenovationTexts(files.map(() => ''));
+  };
+
+  // Update text for a specific image
+  const updateConstructionText = (index, value) => {
+    const newTexts = [...constructionTexts];
+    newTexts[index] = value;
+    setConstructionTexts(newTexts);
+  };
+
+  const updateRenovationText = (index, value) => {
+    const newTexts = [...renovationTexts];
+    newTexts[index] = value;
+    setRenovationTexts(newTexts);
+  };
+
+  // Remove a selected image
+  const removeConstructionImage = (index) => {
+    const newFiles = constructionFiles.filter((_, i) => i !== index);
+    const newPreviews = constructionPreviews.filter((_, i) => i !== index);
+    const newTexts = constructionTexts.filter((_, i) => i !== index);
+    
+    setConstructionFiles(newFiles);
+    setConstructionPreviews(newPreviews);
+    setConstructionTexts(newTexts);
+  };
+
+  const removeRenovationImage = (index) => {
+    const newFiles = renovationFiles.filter((_, i) => i !== index);
+    const newPreviews = renovationPreviews.filter((_, i) => i !== index);
+    const newTexts = renovationTexts.filter((_, i) => i !== index);
+    
+    setRenovationFiles(newFiles);
+    setRenovationPreviews(newPreviews);
+    setRenovationTexts(newTexts);
+  };
+
+  // Upload Construction Images
+  const handleConstructionUpload = async () => {
+    if (constructionFiles.length === 0) {
+      alert('Please select at least one image');
+      return;
+    }
+
+    try {
+      // Get the current max order
+      const maxOrder = constructionImages.length > 0 
+        ? Math.max(...constructionImages.map(img => img.order)) 
+        : -1;
+
+      for (let i = 0; i < constructionFiles.length; i++) {
+        const file = constructionFiles[i];
+        const title = constructionTexts[i] || `Construction Image ${i + 1}`;
+
+        // Upload image
+        const formData = new FormData();
+        formData.append('image', file);
+
+        const uploadResponse = await fetch('http://localhost:5000/api/upload', {
+          method: 'POST',
+          body: formData
+        });
+
+        const uploadData = await uploadResponse.json();
+
+        // Create gallery item
+        await fetch('http://localhost:5000/api/gallery', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'construction',
+            title: title,
+            description: '',
+            image: uploadData.imageUrl,
+            order: maxOrder + i + 1
+          })
+        });
+      }
+
+      alert('Construction images uploaded successfully!');
+      
+      // Reset form
+      setConstructionFiles([]);
+      setConstructionPreviews([]);
+      setConstructionTexts([]);
+      
+      // Refresh gallery
+      fetchGalleries();
+    } catch (error) {
+      console.error('Error uploading construction images:', error);
+      alert('Failed to upload images');
+    }
+  };
+
+  // Upload Renovation Images
+  const handleRenovationUpload = async () => {
+    if (renovationFiles.length === 0) {
+      alert('Please select at least one image');
+      return;
+    }
+
+    try {
+      // Get the current max order
+      const maxOrder = renovationImages.length > 0 
+        ? Math.max(...renovationImages.map(img => img.order)) 
+        : -1;
+
+      for (let i = 0; i < renovationFiles.length; i++) {
+        const file = renovationFiles[i];
+        const title = renovationTexts[i] || `Renovation Image ${i + 1}`;
+
+        // Upload image
+        const formData = new FormData();
+        formData.append('image', file);
+
+        const uploadResponse = await fetch('http://localhost:5000/api/upload', {
+          method: 'POST',
+          body: formData
+        });
+
+        const uploadData = await uploadResponse.json();
+
+        // Create gallery item
+        await fetch('http://localhost:5000/api/gallery', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'renovation',
+            title: title,
+            description: '',
+            image: uploadData.imageUrl,
+            order: maxOrder + i + 1
+          })
+        });
+      }
+
+      alert('Renovation images uploaded successfully!');
+      
+      // Reset form
+      setRenovationFiles([]);
+      setRenovationPreviews([]);
+      setRenovationTexts([]);
+      
+      // Refresh gallery
+      fetchGalleries();
+    } catch (error) {
+      console.error('Error uploading renovation images:', error);
+      alert('Failed to upload images');
+    }
+  };
+
+  // Delete existing gallery item
+  const handleDelete = async (id, type) => {
+    if (!window.confirm('Are you sure you want to delete this item?')) return;
+
+    try {
+      const response = await fetch(`http://localhost:5000/api/gallery/${id}`, {
+        method: 'DELETE'
+      });
+
+      if (response.ok) {
+        alert('Gallery item deleted!');
+        fetchGalleries();
+      }
+    } catch (error) {
+      console.error('Error deleting gallery item:', error);
+      alert('Failed to delete gallery item');
+    }
+  };
+
+  if (loading) return <div className="admin-loading">Loading...</div>;
+
+  return (
+    <div className="admin-gallery-container">
+      <div className="admin-gallery-header">
+        <h1>Gallery Management</h1>
+        <p className="header-subtitle">Upload and manage images for Construction and Renovation galleries</p>
+      </div>
+
+      <div className="gallery-sections">
+        {/* CONSTRUCTION SECTION */}
+        <div className="gallery-upload-section construction-section">
+          <div className="section-header">
+            <h2>Construction Gallery</h2>
+            <p>Upload multiple images at once. They will appear in the carousel on the construction page.</p>
+          </div>
+
+          <div className="upload-area">
+            <input
+              type="file"
+              id="construction-upload"
+              multiple
+              accept="image/*"
+              onChange={handleConstructionImageChange}
+              style={{ display: 'none' }}
+            />
+            <label htmlFor="construction-upload" className="upload-button">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+              Choose Images
+            </label>
+          </div>
+
+          {constructionPreviews.length > 0 && (
+            <div className="selected-images-container">
+              <h3 className="selected-images-title">Selected Images ({constructionPreviews.length}):</h3>
+              <div className="image-preview-grid">
+                {constructionPreviews.map((preview, index) => (
+                  <div key={index} className="preview-card">
+                    <button 
+                      className="remove-image-btn"
+                      onClick={() => removeConstructionImage(index)}
+                      title="Remove image"
+                    >
+                      ×
+                    </button>
+                    <div className="preview-image-wrapper">
+                      <img src={preview} alt={`Preview ${index + 1}`} />
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Enter image title/description"
+                      value={constructionTexts[index]}
+                      onChange={(e) => updateConstructionText(index, e.target.value)}
+                      className="preview-text-input"
+                    />
+                  </div>
+                ))}
+              </div>
+              <button 
+                className="upload-all-btn construction-btn"
+                onClick={handleConstructionUpload}
+              >
+                Upload All Construction Images
+              </button>
+            </div>
+          )}
+
+          {/* Existing Construction Images */}
+          {constructionImages.length > 0 && (
+            <div className="existing-images-section">
+              <h3>Current Construction Images ({constructionImages.length})</h3>
+              <div className="existing-images-grid">
+                {constructionImages.map((item) => (
+                  <div key={item._id} className="existing-image-card">
+                    <img src={item.image} alt={item.title} />
+                    <div className="existing-image-info">
+                      <h4>{item.title}</h4>
+                      <span className="image-order">Order: {item.order}</span>
+                    </div>
+                    <button 
+                      className="delete-existing-btn"
+                      onClick={() => handleDelete(item._id, 'construction')}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* RENOVATION SECTION */}
+        <div className="gallery-upload-section renovation-section">
+          <div className="section-header">
+            <h2>Renovation Gallery</h2>
+            <p>Upload multiple images at once. They will appear in the carousel on the renovation page.</p>
+          </div>
+
+          <div className="upload-area">
+            <input
+              type="file"
+              id="renovation-upload"
+              multiple
+              accept="image/*"
+              onChange={handleRenovationImageChange}
+              style={{ display: 'none' }}
+            />
+            <label htmlFor="renovation-upload" className="upload-button">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+              Choose Images
+            </label>
+          </div>
+
+          {renovationPreviews.length > 0 && (
+            <div className="selected-images-container">
+              <h3 className="selected-images-title">Selected Images ({renovationPreviews.length}):</h3>
+              <div className="image-preview-grid">
+                {renovationPreviews.map((preview, index) => (
+                  <div key={index} className="preview-card">
+                    <button 
+                      className="remove-image-btn"
+                      onClick={() => removeRenovationImage(index)}
+                      title="Remove image"
+                    >
+                      ×
+                    </button>
+                    <div className="preview-image-wrapper">
+                      <img src={preview} alt={`Preview ${index + 1}`} />
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Enter image title/description"
+                      value={renovationTexts[index]}
+                      onChange={(e) => updateRenovationText(index, e.target.value)}
+                      className="preview-text-input"
+                    />
+                  </div>
+                ))}
+              </div>
+              <button 
+                className="upload-all-btn renovation-btn"
+                onClick={handleRenovationUpload}
+              >
+                Upload All Renovation Images
+              </button>
+            </div>
+          )}
+
+          {/* Existing Renovation Images */}
+          {renovationImages.length > 0 && (
+            <div className="existing-images-section">
+              <h3>Current Renovation Images ({renovationImages.length})</h3>
+              <div className="existing-images-grid">
+                {renovationImages.map((item) => (
+                  <div key={item._id} className="existing-image-card">
+                    <img src={item.image} alt={item.title} />
+                    <div className="existing-image-info">
+                      <h4>{item.title}</h4>
+                      <span className="image-order">Order: {item.order}</span>
+                    </div>
+                    <button 
+                      className="delete-existing-btn"
+                      onClick={() => handleDelete(item._id, 'renovation')}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default AdminGallery;
