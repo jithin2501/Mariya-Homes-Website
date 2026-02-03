@@ -4,7 +4,6 @@ const PropertyFilter = ({ filters, onFilterChange, onResetFilters }) => {
   const locations = ['All', 'Kothamangalam', 'Muvattupuzha', 'Perumbavoor', 'Kolenchery'];
   const bedrooms = ['Any', '1', '2', '3', '4', '5+'];
   const bathrooms = ['Any', '1', '2', '3+'];
-  const floors = ['Any', '1', '2', '3+'];
   const parking = ['Any', '1', '2', '3+'];
 
   const handleSelection = (type, value) => {
@@ -48,7 +47,7 @@ const PropertyFilter = ({ filters, onFilterChange, onResetFilters }) => {
             className="price-field" 
             placeholder="Min" 
             id="price-min"
-            value={filters.priceMin}
+            value={filters.priceMin || ''}
             onChange={(e) => handlePriceChange('priceMin', e.target.value)}
           />
           <input 
@@ -56,7 +55,7 @@ const PropertyFilter = ({ filters, onFilterChange, onResetFilters }) => {
             className="price-field" 
             placeholder="Max" 
             id="price-max"
-            value={filters.priceMax}
+            value={filters.priceMax || ''}
             onChange={(e) => handlePriceChange('priceMax', e.target.value)}
           />
         </div>
@@ -93,24 +92,6 @@ const PropertyFilter = ({ filters, onFilterChange, onResetFilters }) => {
               onClick={() => handleSelection('bathrooms', bath)}
             >
               {bath}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="filter-group">
-        <div className="filter-label-wrapper">
-          <img src="https://cdn-icons-png.flaticon.com/512/2324/2324151.png" className="filter-label-icon" alt="Floor Icon" />
-          <label>Floors</label>
-        </div>
-        <div className="selection-grid">
-          {floors.map(floor => (
-            <div 
-              key={floor}
-              className={`selection-box ${filters.floors === floor ? 'active' : ''}`}
-              onClick={() => handleSelection('floors', floor)}
-            >
-              {floor}
             </div>
           ))}
         </div>

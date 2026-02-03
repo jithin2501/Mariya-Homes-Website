@@ -9,7 +9,6 @@ const Properties = () => {
     priceMax: '',
     bedrooms: 'Any',
     bathrooms: 'Any',
-    floors: 'Any',
     parking: 'Any'
   });
 
@@ -24,7 +23,6 @@ const Properties = () => {
       priceMax: '',
       bedrooms: 'Any',
       bathrooms: 'Any',
-      floors: 'Any',
       parking: 'Any'
     });
   };
@@ -49,11 +47,13 @@ const Properties = () => {
           <h2>Find Your Next Destination</h2>
           
           <div className="properties-layout">
-            <PropertyFilter 
-              filters={filters}
-              onFilterChange={handleFilterChange}
-              onResetFilters={handleResetFilters}
-            />
+            <div className="filter-wrapper">
+              <PropertyFilter 
+                filters={filters}
+                onFilterChange={handleFilterChange}
+                onResetFilters={handleResetFilters}
+              />
+            </div>
             <main className="properties-main">
               <PropertiesGrid filters={filters} />
             </main>
