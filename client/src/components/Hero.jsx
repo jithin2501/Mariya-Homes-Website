@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import '../styles/hero.css';
 
 const Hero = () => {
   const [activeTextIndex, setActiveTextIndex] = useState(0);
@@ -7,6 +8,13 @@ const Hero = () => {
     "Find Homes Designed for Living.",
     "Experience Comfort, Style & Quality."
   ];
+
+
+  const [statImages] = useState({
+    years: "/images/Hero-images/years.jpg", 
+    projects: "/images/Hero-images/projects.png", 
+    families: "/images/Hero-images/Happy Family.jpg", 
+  });
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -30,30 +38,48 @@ const Hero = () => {
         </div>
 
         <h1>Find Your Perfect<br />Home with us.</h1>
-        <p>Discover modern properties, premium designs, and the lifestyle you deserve all in one place. Whether buying, selling, or renting, Maria Homes brings every home closer to you.</p>
+        <p>Discover expert construction, smart renovations, and trusted real estate solutions all in one place. Whether you're building, upgrading, buying, or selling, Mariya Homes turns your vision into reality.</p>
 
         <div className="stats-container">
           <div className="stat-item">
-            <div className="stat-icon">🏢</div>
+            <div className="stat-icon">
+              <img 
+                src={statImages.years} 
+                alt="Years Experience" 
+                className="stat-icon-image"
+              />
+            </div>
             <div className="stat-content">
-              <h3>500+</h3>
-              <p><b>Verified Listings</b></p>
+              <h3>10+</h3>
+              <p><b>Years</b></p>
             </div>
           </div>
 
           <div className="stat-item">
-            <div className="stat-icon">⭐</div>
+            <div className="stat-icon">
+              <img 
+                src={statImages.projects} 
+                alt="Projects Completed" 
+                className="stat-icon-image"
+              />
+            </div>
             <div className="stat-content">
               <h3>200+</h3>
-              <p><b>Trusted Realtors</b></p>
+              <p><b>Projects</b></p>
             </div>
           </div>
 
           <div className="stat-item">
-            <div className="stat-icon">📍</div>
+            <div className="stat-icon">
+              <img 
+                src={statImages.families} 
+                alt="Happy Families" 
+                className="stat-icon-image"
+              />
+            </div>
             <div className="stat-content">
-              <h3>300+</h3>
-              <p><b>Across Prime Locations</b></p>
+              <h3>500+</h3>
+              <p><b>Happy Families</b></p>
             </div>
           </div>
         </div>
