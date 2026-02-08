@@ -1,23 +1,38 @@
 import React from 'react';
+import '../styles/Testimonials.css';
 
 const Testimonials = () => {
   const testimonials = [
     { 
-      name: "Anthony W.", 
-      location: "Los Angeles", 
-      text: "Homzon made my first home purchase seamless. Their team guided me at every step and made the process stress-free. Lorem ipsum dolor sit amet, conse ctetur adipiscing elit, sed do eiusmod." 
+      name: "Fafe", 
+      location: "Renovation", 
+      text: "Maria Homes brought our vision to life with true professionalism and care. The quality and communication were excellent, and we're thrilled with the outcome. Highly recommend their team.",
+      image: "/images/Reviews/person1.jpeg" 
     },
     { 
-      name: "David K.", 
-      location: "New York City", 
-      text: "Homzon made my first home purchase seamless. Their team guided me at every step and made the process stress-free. Lorem ipsum dolor sit amet, conse ctetur adipiscing elit, sed do eiusmod." 
+      name: "Selvi Antony", 
+      location: "Renovation", 
+      text: "Exceptional renovation work from start to finish. The team was professional, detail-focused, and delivered on schedule. We're very happy with the results and strongly recommend them.",
+      image: "/images/Reviews/person2.jpeg" 
     },
     { 
-      name: "Christopher M.", 
-      location: "Chicago", 
-      text: "Homzon made my first home purchase seamless. Their team guided me at every step and made the process stress-free. Lorem ipsum dolor sit amet, conse ctetur adipiscing elit, sed do eiusmod." 
+      name: "Sabu", 
+      location: "Construction", 
+      text: "Very responsive and attentive to detail throughout the project. The entire process felt smooth and well-managed, and we absolutely love our new villa.",
+      image: "/images/Reviews/person3.jpeg" 
+    },
+    { 
+      name: "Binil", 
+      location: "Construction", 
+      text: "An outstanding experience with Maria Homes. Their professionalism made everything stress-free, and the final result exceeded expectations. We'd gladly recommend them.",
+      image: "/images/Reviews/person4.jpeg"
     }
   ];
+
+  const handleImageError = (e, fallbackColor, initial) => {
+    e.target.onerror = null;
+    e.target.src = `https://placehold.co/60x60/${fallbackColor}/ffffff?text=${initial}`;
+  };
 
   return (
     <section className="testimonials-section" id="reviews">
@@ -30,26 +45,32 @@ const Testimonials = () => {
 
         <div className="testimonial-carousel-wrapper">
           <div className="testimonial-carousel">
-            {/* Render 6 sets instead of 4 for better overlap */}
             {[...Array(6)].map((_, setIndex) => (
               <div key={setIndex} className="testimonial-grid">
-                {testimonials.map((testimonial, index) => (
-                  <div key={`${setIndex}-${index}`} className="testimonial-card">
-                    <span className="quote-icon">"</span>
-                    <div className="client-info">
-                      <img 
-                        src={`https://placehold.co/60x60/${index === 0 ? '0f172a' : index === 1 ? 'FFA500' : 'f97316'}/ffffff?text=${testimonial.name.charAt(0)}`} 
-                        alt={testimonial.name} 
-                        className="client-image" 
-                      />
-                      <div className="client-details">
-                        <strong>— {testimonial.name}</strong>
-                        <span>{testimonial.location}</span>
+                {testimonials.map((testimonial, index) => {
+                  const fallbackColors = ['0f172a', 'FFA500', 'f97316', '10b981'];
+                  const fallbackColor = fallbackColors[index % fallbackColors.length];
+                  const initial = testimonial.name.charAt(0);
+                  
+                  return (
+                    <div key={`${setIndex}-${index}`} className="testimonial-card">
+                      <span className="quote-icon">"</span>
+                      <div className="client-info">
+                        <img 
+                          src={testimonial.image} 
+                          alt={testimonial.name} 
+                          className="client-image"
+                          onError={(e) => handleImageError(e, fallbackColor, initial)}
+                        />
+                        <div className="client-details">
+                          <strong>— {testimonial.name}</strong>
+                          <span>{testimonial.location}</span>
+                        </div>
                       </div>
+                      <p className="quote-text">{testimonial.text}</p>
                     </div>
-                    <p className="quote-text">{testimonial.text}</p>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ))}
           </div>
