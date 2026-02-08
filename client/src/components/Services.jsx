@@ -29,7 +29,7 @@ const Services = () => {
       <div className="services-grid">
         <div className="service-card">
           <div className="service-image-box">
-            <img src="/images/photo.jpg" alt="Construction" />
+            <img src="/images/services/construction.jpg" alt="Construction" />
           </div>
           <div className="service-content">
             <h3>Construction</h3>
@@ -40,7 +40,7 @@ const Services = () => {
 
         <div className="service-card">
           <div className="service-image-box">
-            <img src="https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&q=80&w=600" alt="Renovation" />
+            <img src="/images/services/renovation.webp" alt="Renovation" />
           </div>
           <div className="service-content">
             <h3>Renovation</h3>
@@ -51,7 +51,7 @@ const Services = () => {
 
         <div className="service-card">
           <div className="service-image-box">
-            <img src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&q=80&w=600" alt="Real Estate" />
+            <img src="/images/services/realestate.jpg" alt="Real Estate" />
           </div>
           <div className="service-content">
             <h3>Real Estate</h3>

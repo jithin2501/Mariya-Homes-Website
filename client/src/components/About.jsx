@@ -19,15 +19,15 @@ const About = () => {
       <div className="about-container">
         <div className="about-left">
           <div className="about-tagline">About Maria Homes</div>
-          <h2>3950+ Families<br />Trust us.</h2>
+          <h2>500+ Families<br />Trust us.</h2>
 
           <div className="stat-box">
             <div className="stat-header-row">
-              <div className="stat-main-number">65K</div>
+              <div className="stat-main-number">5K</div>
               <div className="avatars-row">
-                <img src="https://placehold.co/45x45/FFA500/ffffff?text=A" alt="Family A" className="avatar" />
-                <img src="https://placehold.co/45x45/0f172a/ffffff?text=B" alt="Family B" className="avatar" />
-                <img src="https://placehold.co/45x45/f97316/ffffff?text=C" alt="Family C" className="avatar" />
+                <img src="/images/AboutUs-Avathar/person1.jpeg" alt="Family A" className="avatar" />
+                <img src="/images/AboutUs-Avathar/person2.jpeg" alt="Family B" className="avatar" />
+                <img src="/images/AboutUs-Avathar/person4.jpeg" alt="Family C" className="avatar" />
                 <div className="avatar-plus">+</div>
               </div>
             </div>
@@ -47,7 +47,7 @@ const About = () => {
           </ul>
 
           <div className="btn-group">
-            <button className="action-btn btn-primary" onClick={handleExplorePrograms}>Explore Programs</button>
+            <button className="action-btn btn-primary" onClick={handleExplorePrograms}>Explore Properties</button>
             <button className="action-btn btn-secondary" onClick={handleContact}>Request A Callback ?</button>
           </div>
         </div>
