@@ -112,7 +112,7 @@ const Renovation = () => {
       <section
   className="hero-banner-section construction-bg"
   style={{
-    backgroundImage: "url('/images/Banner-Images/renovation.avif')", 
+    backgroundImage: "url('/images/Banner-Images/renovation.jpg')", 
     backgroundSize: "cover",
     backgroundPosition: "center"
   }}

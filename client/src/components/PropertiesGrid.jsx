@@ -165,21 +165,21 @@ const PropertiesGrid = ({ filters }) => {
               </div>
               <div className="property-info">
                 <div className="property-location">
-                  <img src="https://cdn-icons-png.flaticon.com/512/684/684908.png" className="location-icon" alt="Location" /> 
+                  <img src="/images/propertie-logos/propertie-location.png" className="location-icon" alt="Location" /> 
                   {property.locationText}
                 </div>
                 <div className="property-title">{property.title}</div>
                 <div className="property-features">
                   <div className="feature-item">
-                    <img src="https://cdn-icons-png.flaticon.com/512/3030/3030336.png" className="feature-icon" alt="Bed" /> 
+                    <img src="/images/propertie-logos/propertie-bed.png" className="feature-icon" alt="Bed" /> 
                     {property.features?.bed} Bed
                   </div>
                   <div className="feature-item">
-                    <img src="https://cdn-icons-png.flaticon.com/512/2950/2950901.png" className="feature-icon" alt="Bath" /> 
+                    <img src="/images/propertie-logos/propertie-bath.jpg" className="feature-icon" alt="Bath" /> 
                     {property.features?.bath} Bath
                   </div>
                   <div className="feature-item">
-                    <img src="https://cdn-icons-png.flaticon.com/512/10573/10573516.png" className="feature-icon" alt="Area" /> 
+                    <img src="/images/propertie-logos/propertie-Sqft.jpg" className="feature-icon" alt="Area" /> 
                     {property.features?.sqft} Sqft
                   </div>
                 </div>
