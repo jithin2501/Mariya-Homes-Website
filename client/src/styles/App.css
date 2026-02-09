@@ -1,3 +1,4 @@
+/* GLOBAL STYLES */
 * {
     margin: 0;
     padding: 0;
@@ -22,6 +23,15 @@ ul {
 
 img {
     display: block;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+/* Add scroll margin for sections */
+#about, #services, #reviews {
+    scroll-margin-top: 95px;
 }
 
 /* NAVIGATION */
@@ -118,14 +128,6 @@ img {
     border-color: rgba(255, 255, 255, 0.6);
 }
 
-html {
-    scroll-behavior: smooth;
-}
-
-/* Add scroll margin for sections */
-#about, #services, #reviews {
-    scroll-margin-top: 95px;
-}
 /* HERO BANNER STYLES FOR PAGES */
 .hero-banner-section {
     width: 100%;
@@ -189,172 +191,6 @@ html {
     max-width: 600px;
 }
 
-/* PROPERTY DETAILS PAGE */
-.property-details-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 140px 20px 80px;
-    color: #333;
-}
-
-.details-gallery {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 15px;
-    margin-bottom: 40px;
-}
-
-.main-gallery-img {
-    width: 100%;
-    height: 500px;
-    object-fit: cover;
-    border-radius: 12px;
-}
-
-.side-gallery-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
-    gap: 10px;
-}
-
-.side-gallery-img {
-    width: 100%;
-    height: 245px;
-    object-fit: cover;
-    border-radius: 8px;
-}
-
-.property-details-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 30px;
-    border-bottom: 1px solid #e2e8f0;
-    padding-bottom: 30px;
-}
-
-.details-title-box h1 {
-    font-size: 2.5rem;
-    color: #0f172a;
-    font-weight: 800;
-    margin-bottom: 10px;
-}
-
-.details-location {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: #64748b;
-    font-size: 1.1rem;
-}
-
-.details-price-box {
-    text-align: right;
-}
-
-.details-price {
-    font-size: 2.2rem;
-    font-weight: 800;
-    color: #f97316;
-    display: block;
-}
-
-.price-label {
-    font-size: 0.9rem;
-    color: #64748b;
-    font-weight: 600;
-    text-transform: uppercase;
-}
-
-.details-info-grid {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 50px;
-}
-
-.details-description h2 {
-    font-size: 1.6rem;
-    color: #0f172a;
-    margin-bottom: 20px;
-    padding-bottom: 10px;
-    border-bottom: 2px solid #f97316;
-    display: inline-block;
-}
-
-.details-description p {
-    font-size: 1.05rem;
-    line-height: 1.8;
-    color: #475569;
-    margin-bottom: 30px;
-}
-
-.property-details-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px; /* Let the gap handle spacing */
-    width: 100%;
-    align-items: center;
-    background: transparent;
-    padding: 20px 0;
-    /* Remove the fixed height: 150px; and grid-template-rows: 1fr 1fr; */
-}
-
-.detail-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.detail-text {
-    font-weight: 600;
-    color: #475569;
-}
-
-.inquiry-side {
-    display: flex;
-    flex-direction: column;
-    gap: 25px;
-}
-
-.inquiry-card {
-    background: white;
-    padding: 30px;
-    border-radius: 16px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-    height: fit-content;
-    border: 1px solid #edf2f7;
-}
-
-.inquiry-card h3 {
-    font-size: 1.3rem;
-    color: #0f172a;
-    margin-bottom: 20px;
-    text-align: center;
-}
-
-.inquiry-btn, .filter-reset-btn {
-    width: 100%;
-    padding: 15px;
-    border: none;
-    border-radius: 10px;
-    font-weight: 700;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.inquiry-btn {
-    background-color: #f97316;
-    color: white;
-    margin-bottom: 10px;
-}
-
-.inquiry-btn:hover {
-    background-color: #ea580c;
-}
-
-
 /* MEDIA QUERIES */
 @media (max-width: 992px) {
     .navbar {
@@ -365,11 +201,6 @@ html {
         display: none;
     }
 
-    .services-grid {
-        grid-template-columns: 1fr;
-        gap: 20px;
-    }
-
     .hero-banner-section {
         padding: 40px 0;
         min-height: 250px;
@@ -378,23 +209,6 @@ html {
     .hero-banner-content h1 {
         font-size: 2rem;
     }
-
-    .details-gallery {
-        grid-template-columns: 1fr;
-    }
-
-    .details-info-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .details-price-box {
-        text-align: left;
-        margin-top: 15px;
-    }
-
-    .property-details-header {
-        flex-direction: column;
-    }
 }
 
 @media (max-width: 768px) {
@@ -402,12 +216,8 @@ html {
         display: none;
     }
 
-    .main-gallery-img {
-        height: 300px;
-    }
-
-    .side-gallery-img {
-        height: 150px;
+    .hero-banner-section {
+        min-height: 200px;
     }
 }
 
@@ -425,12 +235,7 @@ html {
         font-size: 1.2rem;
     }
 
-    .video-overlay-text {
-        width: 70%;
-        padding: 20px;
-    }
-
-    .video-overlay-text h2 {
-        font-size: 1.8rem;
+    .intro-section {
+        padding: 60px 15px 30px;
     }
 }

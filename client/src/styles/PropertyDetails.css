@@ -116,6 +116,7 @@
     font-size: 2.5rem;
     color: #0f172a;
     font-weight: 800;
+    margin-bottom: 10px;
 }
 
 .details-location {
@@ -123,19 +124,48 @@
     align-items: center;
     gap: 8px;
     color: #64748b;
+    font-size: 1.1rem;
     margin-top: 10px;
+}
+
+.details-price-box {
+    text-align: right;
 }
 
 .details-price {
     font-size: 2.2rem;
     font-weight: 800;
     color: #f97316;
+    display: block;
+}
+
+.price-label {
+    font-size: 0.9rem;
+    color: #64748b;
+    font-weight: 600;
+    text-transform: uppercase;
 }
 
 .details-info-grid {
     display: grid;
     grid-template-columns: 2fr 1fr;
     gap: 50px;
+}
+
+.details-description h2 {
+    font-size: 1.6rem;
+    color: #0f172a;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #f97316;
+    display: inline-block;
+}
+
+.details-description p {
+    font-size: 1.05rem;
+    line-height: 1.8;
+    color: #475569;
+    margin-bottom: 30px;
 }
 
 /* PROPERTY FEATURES SECTION - WHITE BACKGROUND WITH 3 COLUMNS, PLAIN TEXT */
@@ -165,7 +195,71 @@
     border: none;
 }
 
+/* PROPERTY DETAILS GRID (ICON + TEXT) */
+.property-details-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    width: 100%;
+    align-items: center;
+    background: transparent;
+    padding: 20px 0;
+}
 
+.detail-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.detail-text {
+    font-weight: 600;
+    color: #475569;
+}
+
+/* INQUIRY SECTION */
+.inquiry-side {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.inquiry-card {
+    background: white;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    height: fit-content;
+    border: 1px solid #edf2f7;
+}
+
+.inquiry-card h3 {
+    font-size: 1.3rem;
+    color: #0f172a;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.inquiry-btn, .filter-reset-btn {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.inquiry-btn {
+    background-color: #f97316;
+    color: white;
+    margin-bottom: 10px;
+}
+
+.inquiry-btn:hover {
+    background-color: #ea580c;
+}
 
 /* MAP & INQUIRY */
 .location-card {
@@ -365,6 +459,15 @@
         height: 100px;
     }
 
+    .property-details-header {
+        flex-direction: column;
+    }
+
+    .details-price-box {
+        text-align: left;
+        margin-top: 15px;
+    }
+
     .property-features-section h2 {
         font-size: 1.6rem;
     }
@@ -401,18 +504,13 @@
     }
 }
 
-@media (max-width: 600px) {
-    .property-features-section h2 {
-        font-size: 1.5rem;
+@media (max-width: 768px) {
+    .main-gallery-box {
+        height: 300px;
     }
 
-    .property-features-grid {
-        grid-template-columns: 1fr;
-        gap: 10px;
-    }
-
-    .property-feature-item {
-        font-size: 0.95rem;
+    .side-img-wrapper {
+        height: 80px;
     }
 
     .carousel-3d-wrapper {
@@ -436,8 +534,54 @@
     .carousel-3d-slide.right {
         transform: translateX(140px) scale(0.6) rotateY(-10deg);
     }
+}
+
+@media (max-width: 600px) {
+    .details-title-box h1 {
+        font-size: 2rem;
+    }
+
+    .details-price {
+        font-size: 1.8rem;
+    }
+
+    .property-features-section h2 {
+        font-size: 1.5rem;
+    }
+
+    .property-features-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .property-feature-item {
+        font-size: 0.95rem;
+    }
 
     .construction-progress-section h2 {
         font-size: 1.5rem;
+    }
+
+    .carousel-btn-3d {
+        width: 40px;
+        height: 40px;
+    }
+}
+
+@media (max-width: 480px) {
+    .property-details-container {
+        padding: 120px 15px 60px;
+    }
+
+    .details-title-box h1 {
+        font-size: 1.8rem;
+    }
+
+    .details-price {
+        font-size: 1.6rem;
+    }
+
+    .details-location {
+        font-size: 1rem;
     }
 }
