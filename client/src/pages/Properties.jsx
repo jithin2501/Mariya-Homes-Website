@@ -29,7 +29,15 @@ const Properties = () => {
 
   return (
     <>
-      <section className="hero-banner-section properties-bg">
+      <section
+  className="hero-banner-section construction-bg"
+  style={{
+    backgroundImage: "url('/images/Banner-Images/properties.jpg')",
+    backgroundSize: "cover",
+    backgroundPosition: "center"
+  }}
+>
+
         <div className="hero-banner-container">
           <div className="hero-banner-content">
             <div className="hero-banner-tagline">Our Exclusive Listings</div>

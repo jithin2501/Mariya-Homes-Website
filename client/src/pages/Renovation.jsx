@@ -109,7 +109,15 @@ const Renovation = () => {
     <>
       <div className="bg-decoration"></div>
 
-      <section className="hero-banner-section renovation-bg">
+      <section
+  className="hero-banner-section construction-bg"
+  style={{
+    backgroundImage: "url('/images/Banner-Images/renovation.avif')", 
+    backgroundSize: "cover",
+    backgroundPosition: "center"
+  }}
+>
+
         <div className="hero-banner-container">
           <div className="hero-banner-content">
             <div className="hero-banner-tagline">Excellence in Transformation</div>

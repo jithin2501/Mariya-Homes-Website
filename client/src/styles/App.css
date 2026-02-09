@@ -1067,23 +1067,6 @@ html {
     display: block;
 }
 
-/* Background Images for Pages */
-.construction-bg {
-    background-image: url('https://images.unsplash.com/photo-1541888946425-d81bb19240f5?auto=format&fit=crop&q=80&w=1600');
-}
-
-.renovation-bg {
-    background-image: url('https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&q=80&w=1600');
-}
-
-.properties-bg {
-    background-image: url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=1600');
-}
-
-.contact-bg {
-    background-image: url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=1600');
-}
-
 .amenity-icon {
     width: 24px;   /* Set a fixed small size */
     height: 24px;
