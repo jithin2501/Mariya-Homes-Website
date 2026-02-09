@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import '../styles/VideoSection.css';
 
 const VideoSection = () => {
   const [videoUrl, setVideoUrl] = useState("");

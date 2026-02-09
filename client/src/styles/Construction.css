@@ -389,6 +389,60 @@
     transform: translateY(-2px);
 }
 
+/* CONSTRUCTION & RENOVATION SHARED */
+.intro-section {
+    padding: 80px 20px 40px;
+    text-align: center;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.intro-section h2 {
+    font-size: clamp(2.2rem, 4vw, 3.2rem);
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 25px;
+    line-height: 1.1;
+}
+
+.intro-section p {
+    font-size: 1.1rem;
+    color: #444;
+    line-height: 1.8;
+    max-width: 850px;
+    margin: 0 auto;
+}
+
+.process-heading {
+    font-size: clamp(1.8rem, 3vw, 2.2rem) !important; /* Force the exact size */
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    margin: 60px 0 20px !important; /* Matches Construction spacing */
+    text-align: center !important;
+    display: block;
+    width: 100%;
+}
+
+.amenity-icon {
+    width: 24px;   /* Set a fixed small size */
+    height: 24px;
+    object-fit: contain;
+    margin-right: 8px;
+}
+.location-card {
+    width: 100%;
+    height: 200px; /* Give the map a container height */
+    border-radius: 12px;
+    overflow: hidden;
+    margin-top: 20px;
+    border: 1px solid #e2e8f0;
+}
+
+.location-map {
+    width: 100%;
+    height: 100%;
+}
+
 /* RESPONSIVENESS */
 @media (max-width: 992px) {
     .construction-journey-section h2 {
