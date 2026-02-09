@@ -24,7 +24,14 @@ const Hero = () => {
   }, [texts.length]);
 
   return (
-    <div className="top-banner-bg">
+    <div
+  className="top-banner-bg"
+  style={{
+    backgroundImage: "url('/images/Hero-Banner/Banner.png')",
+    backgroundSize: "cover",
+    backgroundPosition: "center"
+  }}
+>
       <div className="hero-content">
         <div className="hero-tagline rotating-text">
           {texts.map((text, index) => (
