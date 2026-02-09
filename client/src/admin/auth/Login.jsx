@@ -11,13 +11,10 @@ const Login = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // 1. Set transform origin for all characters to the bottom
     gsap.set('.character', { transformOrigin: "50% 100%" });
-
-    // 2. Constant Idle Breathing (Scaling instead of moving)
     gsap.to('.character', {
-      scaleY: 1.05, // Subtle stretch upwards
-      scaleX: 0.98, // Subtle squash for organic feel
+      scaleY: 1.05,
+      scaleX: 0.98,
       duration: 2,
       repeat: -1,
       yoyo: true,
@@ -25,10 +22,8 @@ const Login = () => {
       stagger: 0.2
     });
 
-    // 3. Ambient Mouse Tracking
     const handleMouseMove = (e) => {
       if (isFocusedOnPassword || isPasswordVisible) return;
-
       const { clientX, clientY } = e;
       const x = (clientX - window.innerWidth / 2) / 30;
       const y = (clientY - window.innerHeight / 2) / 30;
@@ -54,16 +49,30 @@ const Login = () => {
     }
   };
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    const adminUser = process.env.REACT_APP_ADMIN_USERNAME;
-    const adminPass = process.env.REACT_APP_ADMIN_PASSWORD;
+    try {
+      const response = await fetch("http://localhost:5000/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(credentials),
+      });
 
-    if (credentials.username === adminUser && credentials.password === adminPass) {
-      localStorage.setItem("isAdminAuthenticated", "true");
-      navigate("/admin/contact");
-    } else {
-      alert("Invalid Credentials");
+      const data = await response.json();
+
+      if (response.ok) {
+        // Store JWT and metadata
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("isAdminAuthenticated", "true");
+        localStorage.setItem("adminUsername", data.user.username);
+        localStorage.setItem("adminRole", data.user.role);
+        
+        navigate("/admin/contact");
+      } else {
+        alert(data.message || "Invalid Credentials");
+      }
+    } catch (err) {
+      alert("Server is not responding. Please check your backend connection.");
     }
   };
 
@@ -72,7 +81,6 @@ const Login = () => {
       <div className="login-card">
         <div className="illustration-side">
           <svg id="blob-scene" viewBox="0 0 400 400">
-            {/* Purple Character */}
             <g id="purple-group" className="character">
               <rect x="130" y="80" width="105" height="280" fill="#6B38FB" />
               <g className="eye-group" id="purple-eyes">
@@ -81,8 +89,6 @@ const Login = () => {
                 <rect x="175" y="130" width="15" height="2.5" rx="1.25" fill="white" />
               </g>
             </g>
-
-            {/* Black Character */}
             <g id="black-group" className="character">
               <rect x="210" y="150" width="65" height="210" fill="#1C1C1E" />
               <g className="eye-group" id="black-eyes">
@@ -90,8 +96,6 @@ const Login = () => {
                 <circle cx="245" cy="180" r="4.5" fill="white" />
               </g>
             </g>
-
-            {/* Orange Character */}
             <g id="orange-group" className="character">
               <path d="M60 360 A 80 80 0 0 1 240 360 Z" fill="#FF7426" />
               <g className="eye-group" id="orange-eyes">
@@ -100,8 +104,6 @@ const Login = () => {
                 <path d="M125 325 Q 135 335 145 325" stroke="#222" strokeWidth="3" fill="none" strokeLinecap="round" />
               </g>
             </g>
-
-            {/* Yellow Character */}
             <g id="yellow-group" className="character">
               <path d="M260 360 L 260 270 A 40 40 0 0 1 340 270 L 340 360 Z" fill="#FFD200" />
               <g className="eye-group" id="yellow-eyes">

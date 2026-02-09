@@ -65,6 +65,7 @@ const videoRoutes = require('./routes/videoRoutes');
 const propertyRoutes = require('./routes/propertyRoutes');
 const propertyDetailsRoutes = require('./routes/propertyDetailsRoutes');
 const galleryRoutes = require('./routes/galleryRoutes');
+const userRoutes = require('./routes/userRoutes');
 
 // Route Middlewares
 app.use('/api', contactRoutes);
@@ -72,7 +73,7 @@ app.use('/api', videoRoutes);
 app.use('/api/admin', propertyRoutes);
 app.use('/api/admin', propertyDetailsRoutes);
 app.use('/api/gallery', galleryRoutes);
-
+app.use('/api/admin', userRoutes);
 // Start Server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

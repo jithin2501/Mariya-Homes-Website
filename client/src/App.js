@@ -18,6 +18,7 @@ import AdminGallery from "./admin/AdminGallery";
 import Login from "./admin/auth/Login"; 
 import AdminProperties from "./admin/AdminProperties";
 import AdminPropertyDetails from "./admin/AdminPropertyDetails";
+import UserManagement from "./admin/UserManagement";
 
 // Global Styles
 import "./styles/App.css";
@@ -68,6 +69,7 @@ function App() {
           <Route path="properties" element={<AdminProperties />} />
           <Route path="property-details" element={<AdminPropertyDetails />} />
           <Route path="gallery" element={<AdminGallery />} />
+          <Route path="users" element={<UserManagement />} />
         </Route>
 
         {/* --- CATCH-ALL REDIRECTS --- */}

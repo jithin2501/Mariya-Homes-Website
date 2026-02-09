@@ -9,6 +9,10 @@ const AdminLayout = () => {
     navigate("/admin/login", { replace: true });
   };
 
+  // Check if current user is superadmin
+  const currentUsername = localStorage.getItem("adminUsername") || process.env.REACT_APP_ADMIN_USERNAME;
+  const isSuperAdmin = currentUsername === process.env.REACT_APP_ADMIN_USERNAME;
+
   return (
     <div className="admin-container">
       <aside className="admin-sidebar">
@@ -33,6 +37,13 @@ const AdminLayout = () => {
         <NavLink to="/admin/gallery" className="admin-link">
           Gallery Management
         </NavLink>
+
+        {/* Only show User Management to superadmin */}
+        {isSuperAdmin && (
+          <NavLink to="/admin/users" className="admin-link">
+            User Management
+          </NavLink>
+        )}
 
         <button className="admin-logout" onClick={handleLogout} style={{marginTop: 'auto'}}>
           Sign Out
