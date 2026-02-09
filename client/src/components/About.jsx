@@ -24,7 +24,7 @@ const About = () => {
 
           <div className="stat-box">
             <div className="stat-header-row">
-              <div className="stat-main-number">5K</div>
+              <div className="stat-main-number">15K</div>
               <div className="avatars-row">
                 <img src="/images/AboutUs-Avathar/person1.jpeg" alt="Family A" className="avatar" />
                 <img src="/images/AboutUs-Avathar/person2.jpeg" alt="Family B" className="avatar" />

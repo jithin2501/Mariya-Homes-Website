@@ -116,10 +116,10 @@ const Footer = () => {
             </div>
             <div className="contact-text-item">
               <p className="contact-text-line1">
-                Varakkad, Kottamala P.O., Vellarikundu-671314
+                Maria homes, Kothamangalam
               </p>
               <p className="contact-text-line2">
-                Kasaragod District, Kerala
+                Kerala 686691
               </p>
             </div>
           </div>
@@ -149,7 +149,7 @@ const Footer = () => {
             </div>
             <div className="contact-text-item">
               <a href="tel:+919544394939" className="contact-link">
-                +91 9544394939
+                +91 7012791781
               </a>
             </div>
           </div>

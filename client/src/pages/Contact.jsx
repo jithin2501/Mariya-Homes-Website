@@ -85,7 +85,7 @@ const handleSubmit = async (e) => {
                 <img src="/images/contact-logo/phone-icon.png" alt="Phone Icon" />
               </div>
               <div className="info-details">
-                <span>+91 70127 91781</span>
+                <span>+91 7012791781</span>
               </div>
             </div>
 
