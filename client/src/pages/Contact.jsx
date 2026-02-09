@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import '../styles/Contact.css';
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -67,39 +68,39 @@ const handleSubmit = async (e) => {
           <div className="contact-card contact-info-card">
             <h2>General Inquiries:</h2>
             <p>
-              We're here to help you find your perfect home, investment, or dream property. Reach out to our team and experience the Homzon difference: personalized, transparent, and professional service every step of the way.
+             From construction and renovation to real estate services, we’re here to bring your plans to life. Contact Mariya Homes for personalized care, honest advice, and a smooth experience every step of the way.
             </p>
 
             <div className="info-item">
               <div className="info-icon-wrapper">
-                <img src="https://placehold.co/40x40/FFA500/ffffff?text=📍" alt="Location Icon" />
+                <img src="/images/contact-logo/location-icon.png" alt="Location Icon" />
               </div>
               <div className="info-details">
-                <span>Homzon Real Estate, Manhattan, New York, USA</span>
+                <span>Maria homes, Kothamangalam, Kerala 686691</span>
               </div>
             </div>
 
             <div className="info-item">
               <div className="info-icon-wrapper">
-                <img src="https://placehold.co/40x40/0f172a/ffffff?text=📞" alt="Phone Icon" />
+                <img src="/images/contact-logo/phone-icon.png" alt="Phone Icon" />
               </div>
               <div className="info-details">
-                <span>(566) 456-7890</span>
+                <span>+91 70127 91781</span>
               </div>
             </div>
 
             <div className="info-item">
               <div className="info-icon-wrapper">
-                <img src="https://placehold.co/40x40/f97316/ffffff?text=✉️" alt="Email Icon" />
+                <img src="/images/contact-logo/email-icon.png" alt="Email Icon" />
               </div>
               <div className="info-details">
-                <span>info@homzon.com</span>
+                <span>info@mariyahomes.com</span>
               </div>
             </div>
 
             <div className="map-wrapper">
               <iframe 
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2483.4754593839174!2d-0.12028608422770265!3d51.5033245796347!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x487604b900d26989%3A0x232431aa52b75a1d!2sLondon%20Eye!5e0!3m2!1sen!2sin!4v1678822000000!5m2!1sen!2sin" 
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3928.4492737746928!2d76.62711127599039!3d10.062224590046416!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3b07e79e12537ab7%3A0xccbc8b5d4c9fb10e!2sMaria%20homes!5e0!3m2!1sen!2sin!4v1752908504232!5m2!1sen!2sin" 
                 width="100%" 
                 height="100%" 
                 style={{border: 0}} 
