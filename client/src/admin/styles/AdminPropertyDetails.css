@@ -388,7 +388,6 @@
   flex: 1;
   min-width: 0; /* Allows flex items to shrink below content size */
 }
-
 /* ========================================
    PROPERTY IMAGES MULTI-UPLOAD SECTION
    ======================================== */
@@ -400,16 +399,20 @@
   color: white;
 }
 
+/* CHANGE LABEL TEXT TO BLACK */
 .property-images-section label {
-  color: white;
+  color: #000000 !important; /* Black text */
   font-size: 18px;
   margin-bottom: 10px;
+  font-weight: 700;
 }
 
-.section-description {
-  color: rgba(255, 255, 255, 0.9);
+/* DESCRIPTION TEXT TO BLACK */
+.property-images-section .section-description {
+  color: #000000 !important; /* Black text */
   font-size: 13px;
   margin-bottom: 20px;
+   margin-top: 8px; 
   font-weight: 400;
 }
 
@@ -550,10 +553,21 @@
   color: white;
 }
 
+/* CHANGE LABEL TEXT TO BLACK */
 .amenities-section label {
-  color: white;
+  color: #000000 !important; /* Black text */
   font-size: 18px;
   margin-bottom: 10px;
+  font-weight: 700;
+}
+
+/* DESCRIPTION TEXT TO BLACK */
+.amenities-section .section-description {
+  color: #000000 !important; /* Black text */
+  font-size: 13px;
+  margin-top: 8px;
+  margin-bottom: 20px;
+  font-weight: 400;
 }
 
 .amenity-input-group {
@@ -702,7 +716,6 @@
   background-color: #9ca3af;
   cursor: not-allowed;
 }
-
 /* ========================================
    SAVED DETAILS PREVIEW SECTION
    ======================================== */

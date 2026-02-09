@@ -9,12 +9,21 @@ const Hero = () => {
     "Experience Comfort, Style & Quality."
   ];
 
-
   const [statImages] = useState({
-    years: "/images/Hero-images/years.png", 
-    projects: "/images/Hero-images/projects.png", 
-    families: "/images/Hero-images/Happy Family.png", 
+    years: "/images/Hero-images/years.avif", 
+    projects: "/images/Hero-images/project.jpg", 
+    families: "/images/Hero-images/Happy Families.webp", 
   });
+
+  const [imageErrors, setImageErrors] = useState({
+    years: false,
+    projects: false,
+    families: false
+  });
+
+  const handleImageError = (imageName) => {
+    setImageErrors(prev => ({ ...prev, [imageName]: true }));
+  };
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -23,15 +32,22 @@ const Hero = () => {
     return () => clearInterval(interval);
   }, [texts.length]);
 
+  // Fallback icons in case images don't load
+  const fallbackIcons = {
+    years: "📅",
+    projects: "🏗️",
+    families: "👨‍👩‍👧‍👦"
+  };
+
   return (
     <div
-  className="top-banner-bg"
-  style={{
-    backgroundImage: "url('/images/Hero-Banner/Banner.png')",
-    backgroundSize: "cover",
-    backgroundPosition: "center"
-  }}
->
+      className="top-banner-bg"
+      style={{
+        backgroundImage: "url('/images/Hero-Banner/Banner.png')",
+        backgroundSize: "cover",
+        backgroundPosition: "center"
+      }}
+    >
       <div className="hero-content">
         <div className="hero-tagline rotating-text">
           {texts.map((text, index) => (
@@ -50,11 +66,17 @@ const Hero = () => {
         <div className="stats-container">
           <div className="stat-item">
             <div className="stat-icon">
-              <img 
-                src={statImages.years} 
-                alt="Years Experience" 
-                className="stat-icon-image"
-              />
+              {imageErrors.years ? (
+                <span className="fallback-icon">{fallbackIcons.years}</span>
+              ) : (
+                <img 
+                  src={statImages.years} 
+                  alt="Years Experience" 
+                  className="stat-icon-image"
+                  onError={() => handleImageError('years')}
+                  loading="lazy"
+                />
+              )}
             </div>
             <div className="stat-content">
               <h3>10+</h3>
@@ -64,11 +86,17 @@ const Hero = () => {
 
           <div className="stat-item">
             <div className="stat-icon">
-              <img 
-                src={statImages.projects} 
-                alt="Projects Completed" 
-                className="stat-icon-image"
-              />
+              {imageErrors.projects ? (
+                <span className="fallback-icon">{fallbackIcons.projects}</span>
+              ) : (
+                <img 
+                  src={statImages.projects} 
+                  alt="Projects Completed" 
+                  className="stat-icon-image"
+                  onError={() => handleImageError('projects')}
+                  loading="lazy"
+                />
+              )}
             </div>
             <div className="stat-content">
               <h3>200+</h3>
@@ -78,11 +106,17 @@ const Hero = () => {
 
           <div className="stat-item">
             <div className="stat-icon">
-              <img 
-                src={statImages.families} 
-                alt="Happy Families" 
-                className="stat-icon-image"
-              />
+              {imageErrors.families ? (
+                <span className="fallback-icon">{fallbackIcons.families}</span>
+              ) : (
+                <img 
+                  src={statImages.families} 
+                  alt="Happy Families" 
+                  className="stat-icon-image"
+                  onError={() => handleImageError('families')}
+                  loading="lazy"
+                />
+              )}
             </div>
             <div className="stat-content">
               <h3>500+</h3>
