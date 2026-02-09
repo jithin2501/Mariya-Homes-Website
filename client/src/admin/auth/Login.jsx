@@ -49,7 +49,7 @@ const Login = () => {
     }
   };
 
-  const handleLogin = async (e) => {
+const handleLogin = async (e) => {
     e.preventDefault();
     try {
       const response = await fetch("http://localhost:5000/api/admin/login", {
@@ -61,7 +61,12 @@ const Login = () => {
       const data = await response.json();
 
       if (response.ok) {
-        // Store JWT and metadata
+        // Record the login event in the database
+        await fetch(`http://localhost:5000/api/admin/users/${data.user.username}/last-login`, {
+          method: "PATCH",
+          headers: { "Authorization": `Bearer ${data.token}` }
+        });
+
         localStorage.setItem("token", data.token);
         localStorage.setItem("isAdminAuthenticated", "true");
         localStorage.setItem("adminUsername", data.user.username);
@@ -72,7 +77,7 @@ const Login = () => {
         alert(data.message || "Invalid Credentials");
       }
     } catch (err) {
-      alert("Server is not responding. Please check your backend connection.");
+      alert("Backend server connection error.");
     }
   };
 

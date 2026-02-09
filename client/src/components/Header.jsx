@@ -43,7 +43,7 @@ const Header = () => {
       <header className="navbar">
         <div className="logo" onClick={handleLogoClick} style={{ cursor: 'pointer' }}>
           <img 
-            src="/images/download.webp" 
+            src="/images/MariyaHomes-logo/download.webp" 
             alt="Maria Homes Logo" 
             className="logo-img" 
             onError={(e) => {

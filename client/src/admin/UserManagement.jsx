@@ -7,30 +7,53 @@ const UserManagement = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // Centralized Backend URL pointing to your Express server
   const API_BASE_URL = "http://localhost:5000/api/admin";
 
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        const response = await fetch(`${API_BASE_URL}/users`, {
-          headers: {
-            'Authorization': `Bearer ${token}` 
-          }
-        });
+  // Icon image URLs - replace with your own image paths
+  const ICONS = {
+    activate: "/images/usermanagement logo/Active.png", // Active icon
+    deactivate: "/images/usermanagement logo/Inactive.png", // Inactive icon
+    delete: "/images/usermanagement logo/Delete.png" // Delete icon
+  };
 
-        if (!response.ok) {
-          if (response.status === 401) throw new Error("Unauthorized - Please Login Again");
-          throw new Error("Failed to fetch users");
+  // Fallback icons in case image URLs fail
+  const FALLBACK_ICONS = {
+    activate: "🔑",
+    deactivate: "🔒",
+    delete: "🗑️"
+  };
+
+  const [iconError, setIconError] = useState({});
+
+  const handleIconError = (iconName) => {
+    setIconError(prev => ({ ...prev, [iconName]: true }));
+  };
+
+  // Fetch existing users on component mount
+  const fetchUsers = async () => {
+    try {
+      const token = localStorage.getItem("token"); // Consistent with authMiddleware
+      const response = await fetch(`${API_BASE_URL}/users`, {
+        headers: {
+          'Authorization': `Bearer ${token}` 
         }
+      });
 
-        const data = await response.json();
-        setUsers(Array.isArray(data) ? data : []);
-      } catch (error) {
-        console.error("Failed to fetch users:", error);
-        setError(error.message);
+      if (!response.ok) {
+        if (response.status === 401) throw new Error("Unauthorized - Please Login Again");
+        throw new Error("Failed to fetch users");
       }
-    };
+
+      const data = await response.json();
+      setUsers(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error("Failed to fetch users:", error);
+      setError(error.message);
+    }
+  };
+
+  useEffect(() => {
     fetchUsers();
   }, []);
 
@@ -66,6 +89,30 @@ const UserManagement = () => {
     }
   };
 
+  // Logic to toggle user activation status
+  const toggleUserStatus = async (username) => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`${API_BASE_URL}/users/${username}/toggle-status`, {
+        method: "PATCH",
+        headers: {
+          "Authorization": `Bearer ${token}`
+        },
+      });
+
+      if (response.ok) {
+        // Refresh the list to show updated status and last login
+        fetchUsers();
+      } else {
+        const data = await response.json();
+        alert(data.message || "Failed to update status.");
+      }
+    } catch (err) {
+      console.error("Failed to toggle status:", err);
+      alert("Network error. Please try again.");
+    }
+  };
+
   const handleDeleteUser = async (username) => {
     if (!window.confirm(`Are you sure you want to delete user "${username}"?`)) {
       return;
@@ -93,6 +140,7 @@ const UserManagement = () => {
     }
   };
 
+  // Check if current user is superadmin
   const isSuperAdmin = localStorage.getItem("adminRole") === "superadmin";
 
   if (!isSuperAdmin) {
@@ -172,6 +220,7 @@ const UserManagement = () => {
                 <tr>
                   <th>USERNAME</th>
                   <th>ROLE</th>
+                  <th>STATUS</th>
                   <th>LAST LOGIN</th>
                   <th>ACTION</th>
                 </tr>
@@ -186,18 +235,55 @@ const UserManagement = () => {
                       </span>
                     </td>
                     <td>
+                      <span className={user.isActive ? "status-active" : "status-inactive"}>
+                        {user.isActive ? "Active" : "Deactivated"}
+                      </span>
+                    </td>
+                    <td>
                       {user.lastLogin 
                         ? new Date(user.lastLogin).toLocaleString('en-GB')
                         : 'Never logged in'}
                     </td>
                     <td>
                       {user.role !== 'superadmin' && (
-                        <button
-                          onClick={() => handleDeleteUser(user.username)}
-                          className="delete-btn"
-                        >
-                          Delete
-                        </button>
+                        <div className="action-buttons">
+                          <button 
+                            onClick={() => toggleUserStatus(user.username)}
+                            className="icon-btn"
+                            title={user.isActive ? "Deactivate User" : "Activate User"}
+                          >
+                            {iconError[user.isActive ? 'deactivate' : 'activate'] ? (
+                              <span className="fallback-icon">
+                                {user.isActive ? FALLBACK_ICONS.deactivate : FALLBACK_ICONS.activate}
+                              </span>
+                            ) : (
+                              <img 
+                                src={user.isActive ? ICONS.deactivate : ICONS.activate}
+                                alt={user.isActive ? "Deactivate" : "Activate"}
+                                className="action-icon"
+                                onError={() => handleIconError(user.isActive ? 'deactivate' : 'activate')}
+                              />
+                            )}
+                          </button>
+                          <button 
+                            onClick={() => handleDeleteUser(user.username)} 
+                            className="icon-btn"
+                            title="Delete User"
+                          >
+                            {iconError.delete ? (
+                              <span className="fallback-icon">
+                                {FALLBACK_ICONS.delete}
+                              </span>
+                            ) : (
+                              <img 
+                                src={ICONS.delete}
+                                alt="Delete"
+                                className="action-icon"
+                                onError={() => handleIconError('delete')}
+                              />
+                            )}
+                          </button>
+                        </div>
                       )}
                     </td>
                   </tr>

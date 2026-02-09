@@ -21,6 +21,10 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: null
   },
+  isActive: { // New field for deactivation
+    type: Boolean,
+    default: true
+  },
   createdBy: {
     type: String,
     default: 'system'
