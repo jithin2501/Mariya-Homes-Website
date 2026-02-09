@@ -11,9 +11,9 @@ const Hero = () => {
 
 
   const [statImages] = useState({
-    years: "/images/Hero-images/years.jpg", 
+    years: "/images/Hero-images/years.png", 
     projects: "/images/Hero-images/projects.png", 
-    families: "/images/Hero-images/Happy Family.jpg", 
+    families: "/images/Hero-images/Happy Family.png", 
   });
 
   useEffect(() => {

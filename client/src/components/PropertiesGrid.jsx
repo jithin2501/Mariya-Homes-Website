@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import '../styles/PropertiesGrid.css';
 
 const PropertiesGrid = ({ filters }) => {
   const navigate = useNavigate();
@@ -175,11 +176,11 @@ const PropertiesGrid = ({ filters }) => {
                     {property.features?.bed} Bed
                   </div>
                   <div className="feature-item">
-                    <img src="/images/propertie-logos/propertie-bath.jpg" className="feature-icon" alt="Bath" /> 
+                    <img src="/images/propertie-logos/propertie-bath.png" className="feature-icon" alt="Bath" /> 
                     {property.features?.bath} Bath
                   </div>
                   <div className="feature-item">
-                    <img src="/images/propertie-logos/propertie-Sqft.jpg" className="feature-icon" alt="Area" /> 
+                    <img src="/images/propertie-logos/propertie-Sqft.png" className="feature-icon" alt="Area" /> 
                     {property.features?.sqft} Sqft
                   </div>
                 </div>
