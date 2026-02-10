@@ -12,46 +12,60 @@ const Contact = () => {
 
   const handleChange = (e) => {
     const { id, value } = e.target;
-    setFormData(prev => ({ ...prev, [id]: value }));
+    
+    // Validate input based on field type
+    if (id === 'name') {
+      // Allow only alphabets and spaces
+      const lettersOnly = value.replace(/[^a-zA-Z\s]/g, '');
+      setFormData(prev => ({ ...prev, [id]: lettersOnly }));
+    } 
+    else if (id === 'phone') {
+      // Allow only numbers, plus sign, parentheses, and hyphens
+      const numbersOnly = value.replace(/[^\d\+\-\(\)\s]/g, '');
+      setFormData(prev => ({ ...prev, [id]: numbersOnly }));
+    }
+    else {
+      // For other fields (email, message), allow any input
+      setFormData(prev => ({ ...prev, [id]: value }));
+    }
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  try {
-    const response = await fetch("http://localhost:5000/api/contact", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(formData),
-    });
+    try {
+      const response = await fetch("http://localhost:5000/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
 
-    if (response.ok) {
-      setShowStatus(true);
-      setFormData({ name: "", email: "", phone: "", message: "" });
+      if (response.ok) {
+        setShowStatus(true);
+        setFormData({ name: "", email: "", phone: "", message: "" });
 
-      setTimeout(() => setShowStatus(false), 4000);
-    } else {
-      alert("Failed to send message");
+        setTimeout(() => setShowStatus(false), 4000);
+      } else {
+        alert("Failed to send message");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Server error");
     }
-  } catch (error) {
-    console.error(error);
-    alert("Server error");
-  }
-};
-
+  };
 
   return (
     <>
       <section
-  className="hero-banner-section construction-bg"
-  style={{
-    backgroundImage: "url('/images/Banner-Images/contact.jpg')", 
-    backgroundSize: "cover",
-    backgroundPosition: "center"
-  }}
->
+        className="hero-banner-section construction-bg"
+        style={{
+          backgroundImage: "url('/images/Banner-Images/contact.jpg')", 
+          backgroundSize: "cover",
+          backgroundPosition: "center"
+        }}
+      >
         <div className="hero-banner-container">
           <div className="hero-banner-content">
             <div className="hero-banner-tagline">Contact Us</div>
@@ -68,7 +82,7 @@ const handleSubmit = async (e) => {
           <div className="contact-card contact-info-card">
             <h2>General Inquiries:</h2>
             <p>
-             From construction and renovation to real estate services, we’re here to bring your plans to life. Contact Mariya Homes for personalized care, honest advice, and a smooth experience every step of the way.
+              From construction and renovation to real estate services, we're here to bring your plans to life. Contact Mariya Homes for personalized care, honest advice, and a smooth experience every step of the way.
             </p>
 
             <div className="info-item">
@@ -124,6 +138,8 @@ const handleSubmit = async (e) => {
                   required 
                   value={formData.name}
                   onChange={handleChange}
+                  pattern="[A-Za-z\s]+"
+                  title="Please enter only alphabetic characters"
                 />
               </div>
 
@@ -147,6 +163,8 @@ const handleSubmit = async (e) => {
                   placeholder="Phone Number"
                   value={formData.phone}
                   onChange={handleChange}
+                  pattern="[\d\+\-\(\)\s]+"
+                  title="Please enter only numbers"
                 />
               </div>
 
