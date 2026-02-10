@@ -10,11 +10,13 @@ const AdminGallery = () => {
   const [constructionFiles, setConstructionFiles] = useState([]);
   const [constructionPreviews, setConstructionPreviews] = useState([]);
   const [constructionTexts, setConstructionTexts] = useState([]);
+  const [constructionUploading, setConstructionUploading] = useState(false);
 
   // Renovation form state
   const [renovationFiles, setRenovationFiles] = useState([]);
   const [renovationPreviews, setRenovationPreviews] = useState([]);
   const [renovationTexts, setRenovationTexts] = useState([]);
+  const [renovationUploading, setRenovationUploading] = useState(false);
 
   useEffect(() => {
     fetchGalleries();
@@ -29,6 +31,7 @@ const AdminGallery = () => {
       setRenovationImages(data.filter(item => item.type === 'renovation'));
     } catch (error) {
       console.error('Error fetching galleries:', error);
+      alert('Error loading gallery images');
     } finally {
       setLoading(false);
     }
@@ -94,12 +97,14 @@ const AdminGallery = () => {
     setRenovationTexts(newTexts);
   };
 
-  // Upload Construction Images
+  // Upload Construction Images to Cloudinary
   const handleConstructionUpload = async () => {
     if (constructionFiles.length === 0) {
       alert('Please select at least one image');
       return;
     }
+
+    setConstructionUploading(true);
 
     try {
       // Get the current max order
@@ -107,56 +112,82 @@ const AdminGallery = () => {
         ? Math.max(...constructionImages.map(img => img.order)) 
         : -1;
 
+      let successCount = 0;
+      let errorCount = 0;
+
       for (let i = 0; i < constructionFiles.length; i++) {
         const file = constructionFiles[i];
         const title = constructionTexts[i] || `Construction Image ${i + 1}`;
 
-        // Upload image
-        const formData = new FormData();
-        formData.append('image', file);
+        try {
+          // Upload image to Cloudinary
+          const formData = new FormData();
+          formData.append('image', file);
 
-        const uploadResponse = await fetch('http://localhost:5000/api/upload', {
-          method: 'POST',
-          body: formData
-        });
+          const uploadResponse = await fetch('http://localhost:5000/api/upload', {
+            method: 'POST',
+            body: formData
+          });
 
-        const uploadData = await uploadResponse.json();
+          if (!uploadResponse.ok) {
+            throw new Error('Upload failed');
+          }
 
-        // Create gallery item
-        await fetch('http://localhost:5000/api/gallery', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            type: 'construction',
-            title: title,
-            description: '',
-            image: uploadData.imageUrl,
-            order: maxOrder + i + 1
-          })
-        });
+          const uploadData = await uploadResponse.json();
+
+          // Create gallery item in database
+          const galleryResponse = await fetch('http://localhost:5000/api/gallery', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              type: 'construction',
+              title: title,
+              description: '',
+              image: uploadData.imageUrl,
+              order: maxOrder + i + 1
+            })
+          });
+
+          if (!galleryResponse.ok) {
+            throw new Error('Failed to save gallery item');
+          }
+
+          successCount++;
+        } catch (error) {
+          console.error(`Error uploading image ${i + 1}:`, error);
+          errorCount++;
+        }
       }
 
-      alert('Construction images uploaded successfully!');
-      
-      // Reset form
-      setConstructionFiles([]);
-      setConstructionPreviews([]);
-      setConstructionTexts([]);
-      
-      // Refresh gallery
-      fetchGalleries();
+      if (successCount > 0) {
+        alert(`Successfully uploaded ${successCount} construction image(s)${errorCount > 0 ? `. ${errorCount} failed.` : '!'}`);
+        
+        // Reset form
+        setConstructionFiles([]);
+        setConstructionPreviews([]);
+        setConstructionTexts([]);
+        
+        // Refresh gallery
+        fetchGalleries();
+      } else {
+        alert('Failed to upload images. Please try again.');
+      }
     } catch (error) {
       console.error('Error uploading construction images:', error);
-      alert('Failed to upload images');
+      alert('Failed to upload images. Please check your connection and try again.');
+    } finally {
+      setConstructionUploading(false);
     }
   };
 
-  // Upload Renovation Images
+  // Upload Renovation Images to Cloudinary
   const handleRenovationUpload = async () => {
     if (renovationFiles.length === 0) {
       alert('Please select at least one image');
       return;
     }
+
+    setRenovationUploading(true);
 
     try {
       // Get the current max order
@@ -164,53 +195,77 @@ const AdminGallery = () => {
         ? Math.max(...renovationImages.map(img => img.order)) 
         : -1;
 
+      let successCount = 0;
+      let errorCount = 0;
+
       for (let i = 0; i < renovationFiles.length; i++) {
         const file = renovationFiles[i];
         const title = renovationTexts[i] || `Renovation Image ${i + 1}`;
 
-        // Upload image
-        const formData = new FormData();
-        formData.append('image', file);
+        try {
+          // Upload image to Cloudinary
+          const formData = new FormData();
+          formData.append('image', file);
 
-        const uploadResponse = await fetch('http://localhost:5000/api/upload', {
-          method: 'POST',
-          body: formData
-        });
+          const uploadResponse = await fetch('http://localhost:5000/api/upload', {
+            method: 'POST',
+            body: formData
+          });
 
-        const uploadData = await uploadResponse.json();
+          if (!uploadResponse.ok) {
+            throw new Error('Upload failed');
+          }
 
-        // Create gallery item
-        await fetch('http://localhost:5000/api/gallery', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            type: 'renovation',
-            title: title,
-            description: '',
-            image: uploadData.imageUrl,
-            order: maxOrder + i + 1
-          })
-        });
+          const uploadData = await uploadResponse.json();
+
+          // Create gallery item in database
+          const galleryResponse = await fetch('http://localhost:5000/api/gallery', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              type: 'renovation',
+              title: title,
+              description: '',
+              image: uploadData.imageUrl,
+              order: maxOrder + i + 1
+            })
+          });
+
+          if (!galleryResponse.ok) {
+            throw new Error('Failed to save gallery item');
+          }
+
+          successCount++;
+        } catch (error) {
+          console.error(`Error uploading image ${i + 1}:`, error);
+          errorCount++;
+        }
       }
 
-      alert('Renovation images uploaded successfully!');
-      
-      // Reset form
-      setRenovationFiles([]);
-      setRenovationPreviews([]);
-      setRenovationTexts([]);
-      
-      // Refresh gallery
-      fetchGalleries();
+      if (successCount > 0) {
+        alert(`Successfully uploaded ${successCount} renovation image(s)${errorCount > 0 ? `. ${errorCount} failed.` : '!'}`);
+        
+        // Reset form
+        setRenovationFiles([]);
+        setRenovationPreviews([]);
+        setRenovationTexts([]);
+        
+        // Refresh gallery
+        fetchGalleries();
+      } else {
+        alert('Failed to upload images. Please try again.');
+      }
     } catch (error) {
       console.error('Error uploading renovation images:', error);
-      alert('Failed to upload images');
+      alert('Failed to upload images. Please check your connection and try again.');
+    } finally {
+      setRenovationUploading(false);
     }
   };
 
   // Delete existing gallery item
   const handleDelete = async (id, type) => {
-    if (!window.confirm('Are you sure you want to delete this item?')) return;
+    if (!window.confirm('Are you sure you want to delete this item? This will also delete the image from Cloudinary.')) return;
 
     try {
       const response = await fetch(`http://localhost:5000/api/gallery/${id}`, {
@@ -218,12 +273,14 @@ const AdminGallery = () => {
       });
 
       if (response.ok) {
-        alert('Gallery item deleted!');
+        alert('Gallery item deleted successfully!');
         fetchGalleries();
+      } else {
+        throw new Error('Failed to delete');
       }
     } catch (error) {
       console.error('Error deleting gallery item:', error);
-      alert('Failed to delete gallery item');
+      alert('Failed to delete gallery item. Please try again.');
     }
   };
 
@@ -233,7 +290,7 @@ const AdminGallery = () => {
     <div className="admin-gallery-container">
       <div className="admin-gallery-header">
         <h1>Gallery Management</h1>
-
+        <p className="gallery-subtitle">Upload and manage construction and renovation journey images</p>
       </div>
 
       <div className="gallery-sections">
@@ -241,7 +298,7 @@ const AdminGallery = () => {
         <div className="gallery-upload-section construction-section">
           <div className="section-header">
             <h2>Construction Gallery</h2>
-
+            <span className="image-count">{constructionImages.length} images</span>
           </div>
 
           <div className="upload-area">
@@ -252,9 +309,13 @@ const AdminGallery = () => {
               accept="image/*"
               onChange={handleConstructionImageChange}
               style={{ display: 'none' }}
+              disabled={constructionUploading}
             />
-            <label htmlFor="construction-upload" className="upload-button">
-              Choose Images
+            <label 
+              htmlFor="construction-upload" 
+              className={`upload-button ${constructionUploading ? 'disabled' : ''}`}
+            >
+              {constructionUploading ? 'Uploading...' : 'Choose Images'}
             </label>
           </div>
 
@@ -268,6 +329,7 @@ const AdminGallery = () => {
                       className="remove-image-btn"
                       onClick={() => removeConstructionImage(index)}
                       title="Remove image"
+                      disabled={constructionUploading}
                     >
                       ×
                     </button>
@@ -280,6 +342,7 @@ const AdminGallery = () => {
                       value={constructionTexts[index]}
                       onChange={(e) => updateConstructionText(index, e.target.value)}
                       className="preview-text-input"
+                      disabled={constructionUploading}
                     />
                   </div>
                 ))}
@@ -287,8 +350,9 @@ const AdminGallery = () => {
               <button 
                 className="upload-all-btn construction-btn"
                 onClick={handleConstructionUpload}
+                disabled={constructionUploading}
               >
-                Upload All Construction Images
+                {constructionUploading ? 'Uploading to Cloudinary...' : 'Upload All Construction Images'}
               </button>
             </div>
           )}
@@ -323,7 +387,7 @@ const AdminGallery = () => {
         <div className="gallery-upload-section renovation-section">
           <div className="section-header">
             <h2>Renovation Gallery</h2>
-
+            <span className="image-count">{renovationImages.length} images</span>
           </div>
 
           <div className="upload-area">
@@ -334,9 +398,13 @@ const AdminGallery = () => {
               accept="image/*"
               onChange={handleRenovationImageChange}
               style={{ display: 'none' }}
+              disabled={renovationUploading}
             />
-            <label htmlFor="renovation-upload" className="upload-button">
-              Choose Images
+            <label 
+              htmlFor="renovation-upload" 
+              className={`upload-button ${renovationUploading ? 'disabled' : ''}`}
+            >
+              {renovationUploading ? 'Uploading...' : 'Choose Images'}
             </label>
           </div>
 
@@ -350,6 +418,7 @@ const AdminGallery = () => {
                       className="remove-image-btn"
                       onClick={() => removeRenovationImage(index)}
                       title="Remove image"
+                      disabled={renovationUploading}
                     >
                       ×
                     </button>
@@ -362,6 +431,7 @@ const AdminGallery = () => {
                       value={renovationTexts[index]}
                       onChange={(e) => updateRenovationText(index, e.target.value)}
                       className="preview-text-input"
+                      disabled={renovationUploading}
                     />
                   </div>
                 ))}
@@ -369,8 +439,9 @@ const AdminGallery = () => {
               <button 
                 className="upload-all-btn renovation-btn"
                 onClick={handleRenovationUpload}
+                disabled={renovationUploading}
               >
-                Upload All Renovation Images
+                {renovationUploading ? 'Uploading to Cloudinary...' : 'Upload All Renovation Images'}
               </button>
             </div>
           )}

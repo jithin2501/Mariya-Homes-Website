@@ -29,59 +29,22 @@ const Renovation = () => {
         }));
         setJourneySlides(convertedSlides);
       } else {
-        // Fallback to default slides if no images uploaded yet
+        // Show empty state instead of fallback images
         initializeDefaultJourneySlides();
       }
       
       setLoading(false);
     } catch (error) {
       console.error('Error fetching galleries:', error);
-      // Fallback to default slides on error
+      // Show empty state on error
       initializeDefaultJourneySlides();
       setLoading(false);
     }
   };
 
   const initializeDefaultJourneySlides = () => {
-    const journeyData = [
-      {
-        id: 1,
-        title: "Consultation & Evaluation",
-        image: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=800",
-        description: "In-depth space analysis and structural feasibility study to understand your vision."
-      },
-      {
-        id: 2,
-        title: "Design & Selection",
-        image: "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=800",
-        description: "Detailed layouts and premium fixture curation aligned with your aesthetic goals."
-      },
-      {
-        id: 3,
-        title: "Quote & Timeline",
-        image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=800",
-        description: "Scope finalization and project roadmap delivery for a transparent investment."
-      },
-      {
-        id: 4,
-        title: "Demolition & Prep",
-        image: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=800",
-        description: "Controlled removal and foundational transformation to prepare for the new build."
-      },
-      {
-        id: 5,
-        title: "Install & Finishing",
-        image: "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?auto=format&fit=crop&w=800",
-        description: "Expert craftsmanship in plumbing, electric, and carpentry to bring it all together."
-      },
-      {
-        id: 6,
-        title: "Walkthrough & Completion",
-        image: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800",
-        description: "Final inspection and official project handover to ensure your total satisfaction."
-      }
-    ];
-    setJourneySlides(journeyData);
+    // Show empty state instead of fallback images
+    setJourneySlides([]);
   };
 
   // 3D Carousel Functions
@@ -213,7 +176,7 @@ const Renovation = () => {
       </div>
 
       {/* 3D Renovation Journey Carousel */}
-      {journeySlides.length > 0 && (
+      {journeySlides.length > 0 ? (
         <div className="renovation-journey-section">
           <h2>Our Renovation Journey</h2>
           <p className="journey-subtitle">Witness the transformation from old to beautiful</p>
@@ -265,6 +228,26 @@ const Renovation = () => {
                 aria-label={`Go to step ${item.id}`}
               />
             ))}
+          </div>
+        </div>
+      ) : (
+        <div className="empty-journey-section">
+          <div className="empty-journey-card">
+            <svg className="empty-icon" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <circle cx="8.5" cy="8.5" r="1.5"></circle>
+              <polyline points="21 15 16 10 5 21"></polyline>
+            </svg>
+            <h3>No Renovation Journey Images Yet</h3>
+            <p>Upload renovation progress images from the admin panel to showcase your transformation journey.</p>
+            <div className="empty-journey-hint">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+              </svg>
+              <span>Go to Admin Panel → Renovation Gallery → Upload Images</span>
+            </div>
           </div>
         </div>
       )}

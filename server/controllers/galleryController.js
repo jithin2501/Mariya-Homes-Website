@@ -1,6 +1,5 @@
 const Gallery = require('../models/Gallery');
-const fs = require('fs');
-const path = require('path');
+const cloudinary = require('../config/cloudinary');
 
 // Get all gallery items by type
 exports.getGalleryByType = async (req, res) => {
@@ -76,11 +75,23 @@ exports.deleteGallery = async (req, res) => {
       return res.status(404).json({ message: 'Gallery item not found' });
     }
 
-    // Delete image file if it exists
+    // Delete image from Cloudinary if it exists
     if (gallery.image) {
-      const imagePath = path.join(__dirname, '../../uploads', gallery.image.split('/uploads/')[1]);
-      if (fs.existsSync(imagePath)) {
-        fs.unlinkSync(imagePath);
+      try {
+        // Extract public_id from Cloudinary URL
+        // URL format: https://res.cloudinary.com/[cloud_name]/image/upload/v[version]/[public_id].[format]
+        const urlParts = gallery.image.split('/');
+        const publicIdWithExtension = urlParts[urlParts.length - 1];
+        const publicId = publicIdWithExtension.split('.')[0];
+        
+        // Include the folder path in public_id
+        const folderPath = 'mariya-homes/gallery/' + publicId;
+        
+        await cloudinary.uploader.destroy(folderPath);
+        console.log('Image deleted from Cloudinary:', folderPath);
+      } catch (cloudinaryError) {
+        console.error('Error deleting image from Cloudinary:', cloudinaryError);
+        // Continue with database deletion even if Cloudinary deletion fails
       }
     }
 

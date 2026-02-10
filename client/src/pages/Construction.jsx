@@ -50,59 +50,22 @@ const Construction = () => {
         }));
         setJourneySlides(convertedSlides);
       } else {
-        // Fallback to default slides if no images uploaded yet
+        // Show empty state instead of fallback images
         initializeDefaultJourneySlides();
       }
       
       setLoading(false);
     } catch (error) {
       console.error('Error fetching galleries:', error);
-      // Fallback to default slides on error
+      // Show empty state on error
       initializeDefaultJourneySlides();
       setLoading(false);
     }
   };
 
   const initializeDefaultJourneySlides = () => {
-    const journeyData = [
-      {
-        id: 1,
-        title: "Ground Breaking",
-        image: "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?auto=format&fit=crop&w=800",
-        description: "Initial site preparation and foundation work begins with precise measurements and soil testing."
-      },
-      {
-        id: 2,
-        title: "Foundation Work",
-        image: "https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=800",
-        description: "Pouring concrete and establishing a strong structural base for durability."
-      },
-      {
-        id: 3,
-        title: "Framing Stage",
-        image: "https://images.unsplash.com/photo-1513584684374-8bab748fbf90?auto=format&fit=crop&w=800",
-        description: "Erecting the wooden framework that defines the structure's shape and strength."
-      },
-      {
-        id: 4,
-        title: "Roof Installation",
-        image: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=800",
-        description: "Installing roofing materials and waterproofing to protect from elements."
-      },
-      {
-        id: 5,
-        title: "Interior Work",
-        image: "https://images.unsplash.com/photo-1518780664697-55e3ad937233?auto=format&fit=crop&w=800",
-        description: "Electrical, plumbing, insulation, and interior finishing touches."
-      },
-      {
-        id: 6,
-        title: "Final Touches",
-        image: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=800",
-        description: "Landscaping, final inspections, and preparing for handover."
-      }
-    ];
-    setJourneySlides(journeyData);
+    // Show empty state instead of fallback images
+    setJourneySlides([]);
   };
 
   // 3D Carousel Functions
@@ -230,7 +193,7 @@ const Construction = () => {
       </div>
 
       {/* 3D Construction Journey Carousel */}
-      {journeySlides.length > 0 && (
+      {journeySlides.length > 0 ? (
         <div className="construction-journey-section">
           <h2>Our Construction Journey</h2>
           <p className="journey-subtitle">Witness the transformation from empty land to dream home</p>
@@ -282,6 +245,26 @@ const Construction = () => {
                 aria-label={`Go to step ${item.id}`}
               />
             ))}
+          </div>
+        </div>
+      ) : (
+        <div className="empty-journey-section">
+          <div className="empty-journey-card">
+            <svg className="empty-icon" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <circle cx="8.5" cy="8.5" r="1.5"></circle>
+              <polyline points="21 15 16 10 5 21"></polyline>
+            </svg>
+            <h3>No Construction Journey Images Yet</h3>
+            <p>Upload construction progress images from the admin panel to showcase your building journey.</p>
+            <div className="empty-journey-hint">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+              </svg>
+              <span>Go to Admin Panel → Construction Gallery → Upload Images</span>
+            </div>
           </div>
         </div>
       )}
