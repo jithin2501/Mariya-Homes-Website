@@ -8,8 +8,11 @@ const AdminPropertyDetails = () => {
   const [mapUrl, setMapUrl] = useState("");
   const [mainMedia, setMainMedia] = useState(null);
   const [mainMediaPreview, setMainMediaPreview] = useState(null);
+  const [existingMainMedia, setExistingMainMedia] = useState(null);
   const [gallery, setGallery] = useState([]);
+  const [existingGallery, setExistingGallery] = useState([]);
   const [propertyImages, setPropertyImages] = useState([]);
+  const [existingPropertyImages, setExistingPropertyImages] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -63,12 +66,43 @@ const AdminPropertyDetails = () => {
         const data = await res.json();
         setSavedDetails(data);
         console.log("Loaded saved details:", data);
+        
+        // Set existing media for preview
+        if (data.mainMedia) {
+          setExistingMainMedia({
+            url: data.mainMedia,
+            type: data.mainMedia.includes('.mp4') || data.mainMedia.includes('.webm') ? 'video' : 'image',
+            name: data.mainMedia.split('/').pop()
+          });
+        }
+        
+        if (data.gallery && data.gallery.length > 0) {
+          setExistingGallery(data.gallery.map(url => ({
+            url: url,
+            name: url.split('/').pop()
+          })));
+        }
+        
+        if (data.constructionProgress && data.constructionProgress.length > 0) {
+          setExistingPropertyImages(data.constructionProgress.map(item => ({
+            url: item.image,
+            name: item.image.split('/').pop(),
+            label: item.label
+          })));
+        }
       } else {
         setSavedDetails(null);
+        // Clear existing media when no details found
+        setExistingMainMedia(null);
+        setExistingGallery([]);
+        setExistingPropertyImages([]);
       }
     } catch (error) {
       console.error("Error fetching property details:", error);
       setSavedDetails(null);
+      setExistingMainMedia(null);
+      setExistingGallery([]);
+      setExistingPropertyImages([]);
     }
   };
 
@@ -79,8 +113,29 @@ const AdminPropertyDetails = () => {
       setMapUrl(savedDetails.mapUrl || "");
       setAmenities(savedDetails.amenities || []);
       
-      // Note: We can't pre-populate file inputs due to browser security
-      // User will need to re-upload files if they want to change them
+      // Set existing media for display
+      if (savedDetails.mainMedia) {
+        setExistingMainMedia({
+          url: savedDetails.mainMedia,
+          type: savedDetails.mainMedia.includes('.mp4') || savedDetails.mainMedia.includes('.webm') ? 'video' : 'image',
+          name: savedDetails.mainMedia.split('/').pop()
+        });
+      }
+      
+      if (savedDetails.gallery && savedDetails.gallery.length > 0) {
+        setExistingGallery(savedDetails.gallery.map(url => ({
+          url: url,
+          name: url.split('/').pop()
+        })));
+      }
+      
+      if (savedDetails.constructionProgress && savedDetails.constructionProgress.length > 0) {
+        setExistingPropertyImages(savedDetails.constructionProgress.map(item => ({
+          url: item.image,
+          name: item.image.split('/').pop(),
+          label: item.label
+        })));
+      }
       
       setIsEditMode(true);
       
@@ -101,13 +156,16 @@ const AdminPropertyDetails = () => {
         if (res.ok) {
           alert("Property details deleted successfully!");
           setSavedDetails(null);
-          // Clear form
+          // Clear all form data
           setDescription("");
           setMapUrl("");
           setMainMedia(null);
           setMainMediaPreview(null);
+          setExistingMainMedia(null);
           setGallery([]);
+          setExistingGallery([]);
           setPropertyImages([]);
+          setExistingPropertyImages([]);
           setAmenities([]);
           setIsEditMode(false);
         } else {
@@ -124,6 +182,7 @@ const AdminPropertyDetails = () => {
     const file = e.target.files[0];
     if (file) {
       setMainMedia(file);
+      setExistingMainMedia(null); // Clear existing when new file is selected
       
       // Create preview URL
       const previewUrl = URL.createObjectURL(file);
@@ -138,6 +197,7 @@ const AdminPropertyDetails = () => {
   const removeMainMedia = () => {
     setMainMedia(null);
     setMainMediaPreview(null);
+    setExistingMainMedia(null);
     // Reset the file input
     const fileInput = document.getElementById('mainMediaInput');
     if (fileInput) fileInput.value = '';
@@ -154,12 +214,38 @@ const AdminPropertyDetails = () => {
     } else {
       setErrorMessage("");
       setGallery(files);
+      setExistingGallery([]); // Clear existing when new files are selected
     }
+  };
+
+  const removeGalleryImage = (index) => {
+    const newGallery = [...gallery];
+    newGallery.splice(index, 1);
+    setGallery(newGallery);
+  };
+
+  const removeExistingGalleryImage = (index) => {
+    const newGallery = [...existingGallery];
+    newGallery.splice(index, 1);
+    setExistingGallery(newGallery);
   };
 
   const handlePropertyImagesChange = (e) => {
     const files = Array.from(e.target.files);
     setPropertyImages(files);
+    setExistingPropertyImages([]); // Clear existing when new files are selected
+  };
+
+  const removePropertyImage = (index) => {
+    const newImages = [...propertyImages];
+    newImages.splice(index, 1);
+    setPropertyImages(newImages);
+  };
+
+  const removeExistingPropertyImage = (index) => {
+    const newImages = [...existingPropertyImages];
+    newImages.splice(index, 1);
+    setExistingPropertyImages(newImages);
   };
 
   // Amenities handlers
@@ -191,13 +277,19 @@ const AdminPropertyDetails = () => {
     setSelectedPropertyId("");
     setSearchTerm("");
     setSavedDetails(null);
+    setExistingMainMedia(null);
+    setExistingGallery([]);
+    setExistingPropertyImages([]);
+    setIsEditMode(false);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (gallery.length > 4) {
-      alert("Cannot submit more than 4 gallery images!");
+    // Check gallery limit (existing + new)
+    const totalGalleryImages = (existingGallery?.length || 0) + gallery.length;
+    if (totalGalleryImages > 4) {
+      alert("Total gallery images cannot exceed 4! Please remove some images.");
       return;
     }
 
@@ -209,17 +301,24 @@ const AdminPropertyDetails = () => {
       data.append("description", description);
       data.append("mapUrl", mapUrl);
       data.append("amenities", JSON.stringify(amenities));
+      
+      // Append main media if new file is selected
       if (mainMedia) data.append("mainMedia", mainMedia);
+      
+      // Append gallery images if new files are selected
       gallery.forEach(file => data.append("gallery", file));
-
-      // Append all property images at once
+      
+      // Append property images if new files are selected
       propertyImages.forEach((image) => {
         data.append('constructionProgress', image);
-        data.append('constructionLabels', '');
       });
 
       console.log("Submitting form data...");
-      console.log("Property images count:", propertyImages.length);
+      console.log("Main media:", mainMedia ? "New file" : "Using existing");
+      console.log("Gallery images (new):", gallery.length);
+      console.log("Gallery images (existing):", existingGallery.length);
+      console.log("Property images (new):", propertyImages.length);
+      console.log("Property images (existing):", existingPropertyImages.length);
 
       const res = await fetch("http://localhost:5000/api/admin/property-details", {
         method: "POST",
@@ -337,10 +436,38 @@ const AdminPropertyDetails = () => {
                 onChange={handleMainMediaChange}
               />
               
-              {/* Preview Section */}
+              {/* Show existing media in edit mode */}
+              {isEditMode && existingMainMedia && !mainMediaPreview && (
+                <div className="media-preview-container">
+                  <p className="preview-label">Current Media: {existingMainMedia.name}</p>
+                  {existingMainMedia.type === 'video' ? (
+                    <video 
+                      src={existingMainMedia.url} 
+                      className="media-preview"
+                      controls
+                    />
+                  ) : (
+                    <img 
+                      src={existingMainMedia.url} 
+                      alt="Current Media" 
+                      className="media-preview"
+                    />
+                  )}
+                  <p className="file-info">This is your current media. Upload a new file to replace it.</p>
+                  <button
+                    type="button"
+                    onClick={removeMainMedia}
+                    className="remove-media-btn"
+                  >
+                    Remove & Upload New
+                  </button>
+                </div>
+              )}
+              
+              {/* Preview new selected media */}
               {mainMediaPreview && (
                 <div className="media-preview-container">
-                  <p className="preview-label">Preview: {mainMediaPreview.name}</p>
+                  <p className="preview-label">New Media: {mainMediaPreview.name}</p>
                   {mainMediaPreview.type === 'video' ? (
                     <video 
                       src={mainMediaPreview.url} 
@@ -395,11 +522,57 @@ const AdminPropertyDetails = () => {
                 {errorMessage && (
                   <div className="error-message">{errorMessage}</div>
                 )}
+                
+                {/* Show existing gallery images in edit mode */}
+                {isEditMode && existingGallery.length > 0 && (
+                  <div className="existing-images-section">
+                    <p className="file-info">Current Gallery Images ({existingGallery.length}):</p>
+                    <div className="existing-images-grid">
+                      {existingGallery.map((img, index) => (
+                        <div key={index} className="existing-image-item">
+                          <img src={img.url} alt={`Current ${index + 1}`} className="existing-image-preview" />
+                          <button
+                            type="button"
+                            onClick={() => removeExistingGalleryImage(index)}
+                            className="remove-existing-btn"
+                            title="Remove"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="file-info">Upload new images to add to or replace these.</p>
+                  </div>
+                )}
+                
+                {/* Show new selected gallery images */}
                 {gallery.length > 0 && (
-                  <p className="file-info">
-                    {gallery.length} image{gallery.length > 1 ? 's' : ''} selected 
-                    {gallery.length < 4 && ` (${4 - gallery.length} more allowed)`}
-                  </p>
+                  <div className="new-images-section">
+                    <p className="file-info">
+                      New Images ({gallery.length}) selected 
+                      {gallery.length < 4 && ` (${4 - (existingGallery.length + gallery.length)} more allowed)`}
+                    </p>
+                    <div className="new-images-grid">
+                      {gallery.map((file, index) => (
+                        <div key={index} className="new-image-item">
+                          <img 
+                            src={URL.createObjectURL(file)} 
+                            alt={`New ${index + 1}`}
+                            className="new-image-preview"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeGalleryImage(index)}
+                            className="remove-new-btn"
+                            title="Remove"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 )}
               </div>
             </div>
@@ -431,9 +604,37 @@ const AdminPropertyDetails = () => {
                 </label>
               </div>
 
+              {/* Show existing property images in edit mode */}
+              {isEditMode && existingPropertyImages.length > 0 && (
+                <div className="existing-property-images">
+                  <p className="preview-title">Current Property Images ({existingPropertyImages.length}):</p>
+                  <div className="images-grid">
+                    {existingPropertyImages.map((img, index) => (
+                      <div key={index} className="image-preview-item">
+                        <img 
+                          src={img.url} 
+                          alt={img.label}
+                          className="preview-thumbnail"
+                        />
+                        <span className="image-label">{img.label}</span>
+                        <button
+                          type="button"
+                          className="remove-image-btn"
+                          onClick={() => removeExistingPropertyImage(index)}
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="file-info">Upload new images to add to or replace these.</p>
+                </div>
+              )}
+
+              {/* Show new selected property images */}
               {propertyImages.length > 0 && (
                 <div className="selected-images-preview">
-                  <p className="preview-title">Selected Images ({propertyImages.length}):</p>
+                  <p className="preview-title">New Images ({propertyImages.length}):</p>
                   <div className="images-grid">
                     {propertyImages.map((file, index) => (
                       <div key={index} className="image-preview-item">
@@ -442,13 +643,11 @@ const AdminPropertyDetails = () => {
                           alt={`Preview ${index + 1}`}
                           className="preview-thumbnail"
                         />
-                        <span className="image-number">{index + 1}</span>
+                        <span className="image-label">Image {index + 1}</span>
                         <button
                           type="button"
                           className="remove-image-btn"
-                          onClick={() => {
-                            setPropertyImages(propertyImages.filter((_, i) => i !== index));
-                          }}
+                          onClick={() => removePropertyImage(index)}
                         >
                           ✕
                         </button>

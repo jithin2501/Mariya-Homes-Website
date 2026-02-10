@@ -5,22 +5,36 @@ const { upsertDetails, getDetailsByPropertyId, deleteDetails } = require('../con
 
 const router = express.Router();
 
-// Configure Multer to keep original file extensions
-const storage = multer.diskStorage({
-  destination: 'uploads/',
-  filename: (req, file, cb) => {
-    // Preserve the original file extension so frontend can identify video vs image
-    cb(null, `${Date.now()}-${file.originalname}`);
+// Configure Multer for memory storage (for Cloudinary upload)
+const storage = multer.memoryStorage();
+
+const upload = multer({ 
+  storage: storage,
+  limits: { 
+    fileSize: 50 * 1024 * 1024, // 50MB limit for videos
+    files: 30 // Maximum total files
+  },
+  fileFilter: function (req, file, cb) {
+    // Allow images and videos
+    const allowedImageTypes = /jpeg|jpg|png|gif|webp/;
+    const allowedVideoTypes = /mp4|webm|ogg/;
+    const extname = path.extname(file.originalname).toLowerCase();
+    
+    if (file.mimetype.startsWith('image/') && allowedImageTypes.test(extname)) {
+      return cb(null, true);
+    } else if (file.mimetype.startsWith('video/') && allowedVideoTypes.test(extname)) {
+      return cb(null, true);
+    } else {
+      cb(new Error('Only image and video files are allowed!'));
+    }
   }
 });
 
-const upload = multer({ storage });
-
 // POST: Create or Update Property Details
 router.post('/property-details', upload.fields([
-  { name: 'mainMedia', maxCount: 1 },
-  { name: 'gallery', maxCount: 10 },
-  { name: 'constructionProgress', maxCount: 20 } // Added support for construction progress images
+  { name: 'mainMedia', maxCount: 1 }, // Can be video or image
+  { name: 'gallery', maxCount: 10 }, // Images only
+  { name: 'constructionProgress', maxCount: 20 } // Property images
 ]), upsertDetails);
 
 // GET: Fetch Details for Frontend

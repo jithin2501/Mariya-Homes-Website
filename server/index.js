@@ -19,9 +19,7 @@ connectDB();
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Configure multer for memory storage (we'll upload to Cloudinary)
 const storage = multer.memoryStorage();
 
 const upload = multer({ 
@@ -128,5 +126,6 @@ app.listen(PORT, () => {
   console.log(`🗑️  DELETE http://localhost:${PORT}/api/admin/contact/:id`);
   console.log(`🖼️  GET   http://localhost:${PORT}/api/gallery`);
   console.log(`📤 POST  http://localhost:${PORT}/api/upload (Cloudinary)`);
+  console.log(`🏠 POST  http://localhost:${PORT}/api/admin/property-details (Property Details - Cloudinary)`);
   console.log('='.repeat(60) + '\n');
 });

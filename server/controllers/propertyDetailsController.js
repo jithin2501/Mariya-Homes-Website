@@ -1,4 +1,36 @@
 const PropertyDetails = require('../models/PropertyDetails');
+const cloudinary = require('../config/cloudinary');
+const streamifier = require('streamifier');
+
+// Helper function to upload to Cloudinary
+const uploadToCloudinary = (file) => {
+  return new Promise((resolve, reject) => {
+    const folder = file.fieldname === 'mainMedia' 
+      ? 'mariya-homes/property-details/main' 
+      : file.fieldname === 'gallery' 
+        ? 'mariya-homes/property-details/gallery'
+        : 'mariya-homes/property-details/property-images';
+    
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder: folder,
+        resource_type: file.mimetype.startsWith('video') ? 'video' : 'image',
+        transformation: [
+          { quality: 'auto', fetch_format: 'auto' }
+        ]
+      },
+      (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.secure_url);
+        }
+      }
+    );
+
+    streamifier.createReadStream(file.buffer).pipe(uploadStream);
+  });
+};
 
 exports.upsertDetails = async (req, res) => {
   try {
@@ -38,12 +70,11 @@ exports.upsertDetails = async (req, res) => {
       propertyId
     };
 
-    // Parse and add amenities if provided - FIXED VERSION
+    // Parse and add amenities if provided
     if (amenities) {
       try {
         let parsedAmenities;
         
-        // Check if amenities is already an array or a string
         if (typeof amenities === 'string') {
           parsedAmenities = JSON.parse(amenities);
           console.log("   ✓ Parsed amenities from string:", parsedAmenities);
@@ -55,7 +86,6 @@ exports.upsertDetails = async (req, res) => {
           parsedAmenities = [];
         }
         
-        // Ensure it's an array of strings and filter out empty values
         updateData.amenities = parsedAmenities
           .filter(item => item && typeof item === 'string' && item.trim() !== '')
           .map(item => item.trim());
@@ -72,18 +102,36 @@ exports.upsertDetails = async (req, res) => {
       updateData.amenities = [];
     }
 
-    // Process main media
+    // Process main media (video or image)
     if (req.files && req.files['mainMedia']) {
-      updateData.mainMedia = `http://localhost:5000/uploads/${req.files['mainMedia'][0].filename}`;
-      console.log("   ✓ Main media:", updateData.mainMedia);
+      console.log("   ☁️ Uploading main media to Cloudinary...");
+      const mainMediaFile = req.files['mainMedia'][0];
+      try {
+        const cloudinaryUrl = await uploadToCloudinary(mainMediaFile);
+        updateData.mainMedia = cloudinaryUrl;
+        console.log("   ✓ Main media uploaded to Cloudinary:", cloudinaryUrl);
+      } catch (error) {
+        console.log("   ❌ Error uploading main media:", error.message);
+        throw error;
+      }
     }
     
-    // Process gallery
+    // Process gallery images
     if (req.files && req.files['gallery']) {
-      updateData.gallery = req.files['gallery'].map(file => 
-        `http://localhost:5000/uploads/${file.filename}`
-      );
-      console.log("   ✓ Gallery images:", updateData.gallery.length);
+      console.log(`   ☁️ Uploading ${req.files['gallery'].length} gallery images to Cloudinary...`);
+      updateData.gallery = [];
+      
+      // Upload each gallery image
+      for (const file of req.files['gallery']) {
+        try {
+          const cloudinaryUrl = await uploadToCloudinary(file);
+          updateData.gallery.push(cloudinaryUrl);
+          console.log(`   ✓ Gallery image uploaded: ${cloudinaryUrl}`);
+        } catch (error) {
+          console.log(`   ❌ Error uploading gallery image:`, error.message);
+          throw error;
+        }
+      }
     }
 
     // Process property images (constructionProgress)
@@ -92,20 +140,25 @@ exports.upsertDetails = async (req, res) => {
       const images = req.files['constructionProgress'];
       console.log(`   Found ${images.length} property image(s)`);
       
-      try {
-        updateData.constructionProgress = images.map((file, index) => {
+      updateData.constructionProgress = [];
+      
+      // Upload each property image
+      for (let i = 0; i < images.length; i++) {
+        const file = images[i];
+        try {
+          const cloudinaryUrl = await uploadToCloudinary(file);
           const imageData = {
-            image: `http://localhost:5000/uploads/${file.filename}`,
-            label: `Image ${index + 1}`
+            image: cloudinaryUrl,
+            label: `Image ${i + 1}`
           };
-          console.log(`   ✓ Image ${index + 1}: ${file.filename}`);
-          return imageData;
-        });
-        console.log(`   ✓ Successfully processed ${updateData.constructionProgress.length} images`);
-      } catch (mapError) {
-        console.log("   ❌ Error processing images:", mapError.message);
-        throw mapError;
+          updateData.constructionProgress.push(imageData);
+          console.log(`   ✓ Property image ${i + 1} uploaded to Cloudinary: ${cloudinaryUrl}`);
+        } catch (error) {
+          console.log(`   ❌ Error uploading property image ${i + 1}:`, error.message);
+          throw error;
+        }
       }
+      console.log(`   ✓ Successfully uploaded ${updateData.constructionProgress.length} images to Cloudinary`);
     } else {
       updateData.constructionProgress = [];
       console.log("   ℹ No property images provided - setting empty array");
@@ -115,18 +168,17 @@ exports.upsertDetails = async (req, res) => {
     console.log("   Query: { propertyId:", propertyId, "}");
     console.log("   Update Data:", JSON.stringify(updateData, null, 2));
     
-    // IMPORTANT: Use $set explicitly to ensure amenities field is updated
     const details = await PropertyDetails.findOneAndUpdate(
       { propertyId: propertyId },
       { $set: updateData },
       { upsert: true, new: true, runValidators: true }
     );
 
-    console.log("\n✅ SUCCESS! Property details saved");
+    console.log("\n✅ SUCCESS! Property details saved to Cloudinary");
     console.log("   Document ID:", details._id);
     console.log("   Saved amenities:", details.amenities);
     console.log("   Amenities count:", details.amenities?.length || 0);
-    console.log("   Full document amenities:", JSON.stringify(details.amenities));
+    console.log("   All images stored in Cloudinary");
     console.log("==========================================\n");
     
     res.status(200).json(details);
@@ -153,7 +205,7 @@ exports.getDetailsByPropertyId = async (req, res) => {
     
     const details = await PropertyDetails.findOne({ propertyId: req.params.id })
       .populate('propertyId')
-      .lean(); // Use lean() for better performance and plain JS object
+      .lean();
     
     if (!details) {
       console.log("❌ No details found for this property");
@@ -163,7 +215,15 @@ exports.getDetailsByPropertyId = async (req, res) => {
     console.log("✓ Details found");
     console.log("✓ Amenities in DB:", details.amenities);
     console.log("✓ Amenities count:", details.amenities?.length || 0);
-    console.log("✓ Amenities type:", Array.isArray(details.amenities) ? 'array' : typeof details.amenities);
+    
+    // Check if URLs are from Cloudinary
+    if (details.mainMedia) {
+      console.log("✓ Main media URL:", details.mainMedia.includes('cloudinary') ? "Cloudinary ✅" : "Local ❌");
+    }
+    if (details.gallery && details.gallery.length > 0) {
+      console.log("✓ Gallery URLs:", details.gallery[0].includes('cloudinary') ? "Cloudinary ✅" : "Local ❌");
+    }
+    
     console.log("================================\n");
     
     res.status(200).json(details);
