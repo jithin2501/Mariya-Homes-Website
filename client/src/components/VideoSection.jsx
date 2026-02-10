@@ -7,7 +7,7 @@ const VideoSection = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch(`${process.env.REACT_APP_API_URL}/api/video`)
+    fetch("http://localhost:5000/api/video")
       .then((res) => res.json())
       .then((data) => {
         if (data && data.videoUrl) {

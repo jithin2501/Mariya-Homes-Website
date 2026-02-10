@@ -52,7 +52,7 @@ const Login = () => {
 const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/admin/login`, {
+      const response = await fetch("http://localhost:5000/api/admin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(credentials),
@@ -62,7 +62,7 @@ const handleLogin = async (e) => {
 
       if (response.ok) {
         // Record the login event in the database
-        await fetch(`${process.env.REACT_APP_API_URL}/api/admin/users/${data.user.username}/last-login`, {
+        await fetch(`http://localhost:5000/api/admin/users/${data.user.username}/last-login`, {
           method: "PATCH",
           headers: { "Authorization": `Bearer ${data.token}` }
         });

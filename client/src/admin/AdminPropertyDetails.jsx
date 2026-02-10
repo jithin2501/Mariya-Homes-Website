@@ -26,7 +26,7 @@ const AdminPropertyDetails = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   useEffect(() => {
-    fetch(`${process.env.REACT_APP_API_URL}/api/admin/properties`)
+    fetch("http://localhost:5000/api/admin/properties")
       .then(res => res.json())
       .then(data => setProperties(data))
       .catch(err => console.error("Error fetching properties:", err));
@@ -58,7 +58,7 @@ const AdminPropertyDetails = () => {
 
   const fetchPropertyDetails = async (propertyId) => {
     try {
-      const res = await fetch(`${process.env.REACT_APP_API_URL}/api/admin/property-details/${propertyId}`);
+      const res = await fetch(`http://localhost:5000/api/admin/property-details/${propertyId}`);
       if (res.ok) {
         const data = await res.json();
         setSavedDetails(data);
@@ -94,18 +94,8 @@ const AdminPropertyDetails = () => {
     
     if (window.confirm("Are you sure you want to delete these property details? This action cannot be undone.")) {
       try {
-        const token = localStorage.getItem('authToken');
-        if (!token) {
-          alert("Authentication required. Please login again.");
-          window.location.href = '/admin/login';
-          return;
-        }
-
-        const res = await fetch(`${process.env.REACT_APP_API_URL}/api/admin/property-details/${savedDetails._id}`, {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
+        const res = await fetch(`http://localhost:5000/api/admin/property-details/${savedDetails._id}`, {
+          method: 'DELETE'
         });
         
         if (res.ok) {
@@ -211,14 +201,6 @@ const AdminPropertyDetails = () => {
       return;
     }
 
-    // Get authentication token
-    const token = localStorage.getItem('authToken');
-    if (!token) {
-      alert("Authentication required. Please login again.");
-      window.location.href = '/admin/login';
-      return;
-    }
-
     setIsSubmitting(true);
 
     try {
@@ -239,11 +221,8 @@ const AdminPropertyDetails = () => {
       console.log("Submitting form data...");
       console.log("Property images count:", propertyImages.length);
 
-      const res = await fetch(`${process.env.REACT_APP_API_URL}/api/admin/property-details`, {
+      const res = await fetch("http://localhost:5000/api/admin/property-details", {
         method: "POST",
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
         body: data
       });
       
