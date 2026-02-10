@@ -16,12 +16,12 @@ const PropertyDetails = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const propRes = await fetch(`http://localhost:5000/api/admin/properties/${id}`);
+        const propRes = await fetch(`${process.env.REACT_APP_API_URL}/api/admin/properties/${id}`);
         if (!propRes.ok) throw new Error("Property not found");
         const propData = await propRes.json();
         setPropertyData(propData);
 
-        const detailRes = await fetch(`http://localhost:5000/api/admin/property-details/${id}`);
+        const detailRes = await fetch(`${process.env.REACT_APP_API_URL}/api/admin/property-details/${id}`);
         
         if (detailRes.ok) {
           const detailData = await detailRes.json();

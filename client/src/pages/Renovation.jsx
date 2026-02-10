@@ -15,7 +15,7 @@ const Renovation = () => {
   const fetchGalleries = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:5000/api/gallery/type/renovation');
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/gallery/type/renovation`);
       const data = await response.json();
       setGalleries(data);
       

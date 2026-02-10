@@ -14,7 +14,7 @@ const PropertiesGrid = ({ filters }) => {
   useEffect(() => {
     const fetchProperties = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/admin/properties");
+        const res = await fetch(`${process.env.REACT_APP_API_URL}/api/admin/properties`);
         if (!res.ok) throw new Error("Failed to fetch properties");
         const data = await res.json();
         setProperties(data);

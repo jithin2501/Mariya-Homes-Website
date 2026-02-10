@@ -22,7 +22,7 @@ const AdminGallery = () => {
 
   const fetchGalleries = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/gallery');
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/gallery`);
       const data = await response.json();
       
       setConstructionImages(data.filter(item => item.type === 'construction'));
@@ -115,7 +115,7 @@ const AdminGallery = () => {
         const formData = new FormData();
         formData.append('image', file);
 
-        const uploadResponse = await fetch('http://localhost:5000/api/upload', {
+        const uploadResponse = await fetch(`${process.env.REACT_APP_API_URL}/api/upload`, {
           method: 'POST',
           body: formData
         });
@@ -123,7 +123,7 @@ const AdminGallery = () => {
         const uploadData = await uploadResponse.json();
 
         // Create gallery item
-        await fetch('http://localhost:5000/api/gallery', {
+        await fetch(`${process.env.REACT_APP_API_URL}/api/gallery`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -172,7 +172,7 @@ const AdminGallery = () => {
         const formData = new FormData();
         formData.append('image', file);
 
-        const uploadResponse = await fetch('http://localhost:5000/api/upload', {
+        const uploadResponse = await fetch(`${process.env.REACT_APP_API_URL}/api/upload`, {
           method: 'POST',
           body: formData
         });
@@ -180,7 +180,7 @@ const AdminGallery = () => {
         const uploadData = await uploadResponse.json();
 
         // Create gallery item
-        await fetch('http://localhost:5000/api/gallery', {
+        await fetch(`${process.env.REACT_APP_API_URL}/api/gallery`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -213,7 +213,7 @@ const AdminGallery = () => {
     if (!window.confirm('Are you sure you want to delete this item?')) return;
 
     try {
-      const response = await fetch(`http://localhost:5000/api/gallery/${id}`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/gallery/${id}`, {
         method: 'DELETE'
       });
 

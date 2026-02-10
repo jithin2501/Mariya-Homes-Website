@@ -8,7 +8,7 @@ const UserManagement = () => {
   const [error, setError] = useState("");
 
   // Centralized Backend URL pointing to your Express server
-  const API_BASE_URL = "http://localhost:5000/api/admin";
+  const API_BASE_URL = `${process.env.REACT_APP_API_URL}/api/admin`;
 
   // Icon image URLs - replace with your own image paths
   const ICONS = {

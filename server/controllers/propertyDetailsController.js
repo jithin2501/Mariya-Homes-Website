@@ -74,14 +74,14 @@ exports.upsertDetails = async (req, res) => {
 
     // Process main media
     if (req.files && req.files['mainMedia']) {
-      updateData.mainMedia = `http://localhost:5000/uploads/${req.files['mainMedia'][0].filename}`;
+      updateData.mainMedia = `${process.env.BASE_URL}/uploads/${req.files['mainMedia'][0].filename}`;
       console.log("   ✓ Main media:", updateData.mainMedia);
     }
     
     // Process gallery
     if (req.files && req.files['gallery']) {
       updateData.gallery = req.files['gallery'].map(file => 
-        `http://localhost:5000/uploads/${file.filename}`
+        `${process.env.BASE_URL}/uploads/${file.filename}`
       );
       console.log("   ✓ Gallery images:", updateData.gallery.length);
     }
@@ -95,7 +95,7 @@ exports.upsertDetails = async (req, res) => {
       try {
         updateData.constructionProgress = images.map((file, index) => {
           const imageData = {
-            image: `http://localhost:5000/uploads/${file.filename}`,
+            image: `${process.env.BASE_URL}/uploads/${file.filename}`,
             label: `Image ${index + 1}`
           };
           console.log(`   ✓ Image ${index + 1}: ${file.filename}`);
