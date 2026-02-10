@@ -94,8 +94,18 @@ const AdminPropertyDetails = () => {
     
     if (window.confirm("Are you sure you want to delete these property details? This action cannot be undone.")) {
       try {
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+          alert("Authentication required. Please login again.");
+          window.location.href = '/admin/login';
+          return;
+        }
+
         const res = await fetch(`${process.env.REACT_APP_API_URL}/api/admin/property-details/${savedDetails._id}`, {
-          method: 'DELETE'
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
         });
         
         if (res.ok) {
@@ -201,6 +211,14 @@ const AdminPropertyDetails = () => {
       return;
     }
 
+    // Get authentication token
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      alert("Authentication required. Please login again.");
+      window.location.href = '/admin/login';
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -223,6 +241,9 @@ const AdminPropertyDetails = () => {
 
       const res = await fetch(`${process.env.REACT_APP_API_URL}/api/admin/property-details`, {
         method: "POST",
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
         body: data
       });
       
