@@ -129,12 +129,24 @@ const AdminPropertyDetails = () => {
         })));
       }
       
+      // FIXED: Properly set existing property images
       if (savedDetails.constructionProgress && savedDetails.constructionProgress.length > 0) {
-        setExistingPropertyImages(savedDetails.constructionProgress.map(item => ({
-          url: item.image,
-          name: item.image.split('/').pop(),
-          label: item.label
-        })));
+        const propertyImages = savedDetails.constructionProgress.map((item, index) => {
+          // Handle both object and string formats
+          const imageUrl = item.image || item;
+          const label = item.label || `Image ${index + 1}`;
+          const name = imageUrl.split('/').pop();
+          
+          return {
+            url: imageUrl,
+            name: name,
+            label: label
+          };
+        });
+        setExistingPropertyImages(propertyImages);
+        console.log("Loaded property images:", propertyImages);
+      } else {
+        setExistingPropertyImages([]);
       }
       
       setIsEditMode(true);

@@ -388,6 +388,7 @@
   flex: 1;
   min-width: 0; /* Allows flex items to shrink below content size */
 }
+
 /* ========================================
    PROPERTY IMAGES MULTI-UPLOAD SECTION
    ======================================== */
@@ -412,7 +413,7 @@
   color: #000000 !important; /* Black text */
   font-size: 13px;
   margin-bottom: 20px;
-   margin-top: 8px; 
+  margin-top: 8px; 
   font-weight: 400;
 }
 
@@ -540,6 +541,49 @@
 .remove-image-btn:hover {
   background: #dc2626;
   transform: scale(1.1);
+}
+
+/* EXISTING PROPERTY IMAGES SECTION - ADDED */
+.existing-property-images {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 20px;
+  border-radius: 10px;
+  margin-top: 15px;
+  border: 1px dashed rgba(255, 255, 255, 0.3);
+}
+
+.existing-property-images .preview-title {
+  color: white;
+  font-weight: 700;
+  font-size: 15px;
+  margin-bottom: 15px;
+}
+
+.existing-property-images .images-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 15px;
+}
+
+.existing-property-images .image-label {
+  position: absolute;
+  bottom: 5px;
+  left: 5px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.existing-property-images .file-info {
+  margin: 10px 0;
+  font-size: 13px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 8px;
+  border-radius: 4px;
 }
 
 /* ========================================
@@ -716,6 +760,7 @@
   background-color: #9ca3af;
   cursor: not-allowed;
 }
+
 /* ========================================
    SAVED DETAILS PREVIEW SECTION
    ======================================== */
@@ -945,43 +990,6 @@
   cursor: not-allowed;
 }
 
-/* Responsive adjustments */
-@media (max-width: 1024px) {
-  .admin-details-split-top {
-    flex-direction: column;
-  }
-
-  .bottom-split-section {
-    flex-direction: column;
-  }
-
-  .media-preview {
-    height: 180px;
-    max-height: 180px;
-  }
-}
-
-@media (max-width: 600px) {
-  .images-grid {
-    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-    gap: 10px;
-  }
-
-  .upload-button {
-    padding: 14px 24px;
-    font-size: 14px;
-  }
-
-  .media-preview {
-    height: 150px;
-    max-height: 150px;
-  }
-
-  .remove-media-btn {
-    padding: 10px 16px;
-    font-size: 14px;
-  }
-}
 /* Existing Images Preview Styles */
 .existing-images-section,
 .new-images-section,
@@ -1074,6 +1082,21 @@
 }
 
 /* Responsive adjustments */
+@media (max-width: 1024px) {
+  .admin-details-split-top {
+    flex-direction: column;
+  }
+
+  .bottom-split-section {
+    flex-direction: column;
+  }
+
+  .media-preview {
+    height: 180px;
+    max-height: 180px;
+  }
+}
+
 @media (max-width: 768px) {
   .existing-images-grid,
   .new-images-grid {
@@ -1084,5 +1107,33 @@
   .new-image-item {
     width: 60px;
     height: 60px;
+  }
+  
+  .existing-property-images .images-grid {
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 10px;
+  }
+}
+
+@media (max-width: 600px) {
+  .images-grid,
+  .existing-property-images .images-grid {
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 10px;
+  }
+
+  .upload-button {
+    padding: 14px 24px;
+    font-size: 14px;
+  }
+
+  .media-preview {
+    height: 150px;
+    max-height: 150px;
+  }
+
+  .remove-media-btn {
+    padding: 10px 16px;
+    font-size: 14px;
   }
 }
