@@ -11,6 +11,8 @@ const PropertyDetails = () => {
   const [mainMedia, setMainMedia] = useState("");
   const [loading, setLoading] = useState(true);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [originalVideo, setOriginalVideo] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -26,10 +28,19 @@ const PropertyDetails = () => {
         if (detailRes.ok) {
           const detailData = await detailRes.json();
           setDetails(detailData);
-          setMainMedia(detailData.mainMedia || propData.image);
+          const media = detailData.mainMedia || propData.image;
+          setMainMedia(media);
+          // Store original video URL if it's a video
+          if (isVideo(media)) {
+            setOriginalVideo(media);
+          }
         } else {
           console.log("No property details found for this property");
-          setMainMedia(propData.image);
+          const media = propData.image;
+          setMainMedia(media);
+          if (isVideo(media)) {
+            setOriginalVideo(media);
+          }
         }
       } catch (err) {
         console.error("Error fetching property details:", err);
@@ -44,13 +55,47 @@ const PropertyDetails = () => {
     return url && url.match(/\.(mp4|webm|ogg)$/i);
   };
 
-  const toggleFullscreen = (videoElement) => {
+  const enterFullscreen = (videoElement) => {
     if (videoElement.requestFullscreen) {
       videoElement.requestFullscreen();
     } else if (videoElement.webkitRequestFullscreen) {
       videoElement.webkitRequestFullscreen();
     } else if (videoElement.msRequestFullscreen) {
       videoElement.msRequestFullscreen();
+    }
+    setIsFullscreen(true);
+  };
+
+  const exitFullscreen = () => {
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
+    } else if (document.webkitExitFullscreen) {
+      document.webkitExitFullscreen();
+    } else if (document.msExitFullscreen) {
+      document.msExitFullscreen();
+    }
+    setIsFullscreen(false);
+  };
+
+  // Listen for fullscreen changes
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement || !!document.webkitFullscreenElement);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+    };
+  }, []);
+
+  const handleCloseImage = () => {
+    // Return to original video if available, otherwise keep current media
+    if (originalVideo) {
+      setMainMedia(originalVideo);
     }
   };
 
@@ -104,17 +149,42 @@ const PropertyDetails = () => {
                 className="fullscreen-btn"
                 onClick={() => {
                   const video = document.getElementById('property-video');
-                  toggleFullscreen(video);
+                  enterFullscreen(video);
                 }}
-                title="Fullscreen"
+                title="Enter Fullscreen"
               >
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
                   <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
                 </svg>
               </button>
+              {isFullscreen && (
+                <button 
+                  className="exit-fullscreen-btn"
+                  onClick={exitFullscreen}
+                  title="Exit Fullscreen"
+                >
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                    <path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/>
+                  </svg>
+                </button>
+              )}
             </div>
           ) : (
-            <img src={mainMedia} className="main-gallery-img" alt="Selected View" />
+            <div className="image-wrapper">
+              <img src={mainMedia} className="main-gallery-img" alt="Selected View" />
+              {/* Show close button only if we're viewing a side image (not the original video) */}
+              {originalVideo && mainMedia !== originalVideo && (
+                <button 
+                  className="close-image-btn"
+                  onClick={handleCloseImage}
+                  title="Close Image"
+                >
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                  </svg>
+                </button>
+              )}
+            </div>
           )}
         </div>
 

@@ -63,6 +63,73 @@
     transition: transform 0.2s ease;
 }
 
+/* EXIT FULLSCREEN BUTTON - ONLY VISIBLE IN FULLSCREEN MODE */
+.exit-fullscreen-btn {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(249, 115, 22, 0.9);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50px;
+    padding: 12px 24px;
+    cursor: pointer;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    color: white;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.exit-fullscreen-btn:hover {
+    background: rgba(234, 88, 12, 1);
+    transform: translateX(-50%) scale(1.05);
+    box-shadow: 0 6px 30px rgba(249, 115, 22, 0.6);
+}
+
+.exit-fullscreen-btn svg {
+    transition: transform 0.2s ease;
+}
+
+/* CLOSE IMAGE BUTTON - APPEARS WHEN IMAGE IS DISPLAYED INSTEAD OF VIDEO */
+.close-image-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(15, 23, 42, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    width: 45px;
+    height: 45px;
+    cursor: pointer;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.close-image-btn:hover {
+    background: #ef4444;
+    transform: scale(1.1) rotate(90deg);
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.5);
+}
+
+.close-image-btn svg {
+    transition: transform 0.2s ease;
+}
+
+/* IMAGE WRAPPER */
+.image-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
 /* CRITICAL: HIDE NATIVE VIDEO CONTROLS */
 #property-video::-webkit-media-controls {
     display: none !important;
