@@ -31,7 +31,7 @@
   color: #0f172a;
   font-weight: 600;
   padding: 14px 16px;
-  text-align: center; /* CENTER HEADING */
+  text-align: center;
   border-bottom: 1px solid #e5e7eb;
 }
 
@@ -50,7 +50,7 @@
   color: #1e293b;
   border-bottom: 1px solid #e5e7eb;
   vertical-align: middle;
-  text-align: center; /* CENTER DATA */
+  text-align: center;
 }
 
 /* Message column */
@@ -75,6 +75,34 @@
   text-align: center;
 }
 
+/* ===== ACTION BUTTONS CONTAINER ===== */
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+/* ===== VIEW BUTTON ===== */
+.admin-contact-view {
+  background: #3b82f6;
+  color: #ffffff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.admin-contact-view:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+}
+
 /* ===== DELETE BUTTON ===== */
 .admin-contact-delete {
   background: #ef4444;
@@ -85,15 +113,15 @@
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-
-  /* PERFECT CENTERING */
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.2s ease;
 }
 
 .admin-contact-delete:hover {
   background: #dc2626;
+  transform: translateY(-1px);
 }
 
 /* ===== EMPTY STATE ===== */
@@ -106,4 +134,223 @@
   color: #64748b;
   font-size: 16px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* ===== MODAL STYLES ===== */
+.admin-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.admin-modal {
+  background: white;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 600px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.admin-modal-header {
+  background: #0f172a;
+  color: white;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.admin-modal-header h2 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+  color: white;
+}
+
+.admin-modal-close {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 28px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s ease;
+}
+
+.admin-modal-close:hover {
+  opacity: 0.8;
+}
+
+.admin-modal-content {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.message-details {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.detail-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.detail-label {
+  font-weight: 600;
+  color: #0f172a;
+  min-width: 80px;
+  font-size: 14px;
+}
+
+.detail-value {
+  color: #374151;
+  font-size: 14px;
+  flex: 1;
+  line-height: 1.5;
+}
+
+.message-divider {
+  height: 1px;
+  background: #e5e7eb;
+  margin: 20px 0;
+}
+
+.message-content-section {
+  margin-top: 8px;
+}
+
+.message-content-section h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 12px;
+}
+
+.message-content {
+  background: #f8fafc;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  color: #374151;
+  font-size: 14px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.admin-modal-footer {
+  padding: 20px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.admin-modal-close-btn {
+  background: #0f172a;
+  color: white;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.admin-modal-close-btn:hover {
+  background: #1e293b;
+  transform: translateY(-1px);
+}
+
+/* Responsive styles for modal */
+@media (max-width: 768px) {
+  .admin-modal {
+    max-width: 95%;
+    max-height: 90vh;
+  }
+  
+  .admin-modal-header h2 {
+    font-size: 16px;
+  }
+  
+  .detail-row {
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .detail-label {
+    min-width: auto;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .admin-contact-view,
+  .admin-contact-delete {
+    width: 100px;
+  }
+}
+
+/* Responsive table adjustments */
+@media (max-width: 1024px) {
+  .admin-contact-table {
+    font-size: 13px;
+  }
+  
+  .admin-contact-table td,
+  .admin-contact-table th {
+    padding: 10px 12px;
+  }
+  
+  .message-cell {
+    max-width: 200px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-contact-card {
+    padding: 16px;
+    overflow-x: auto;
+  }
+  
+  .admin-contact-table {
+    min-width: 800px;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+    gap: 6px;
+  }
+  
+  .admin-contact-view,
+  .admin-contact-delete {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
 }

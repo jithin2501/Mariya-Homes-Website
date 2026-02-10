@@ -3,6 +3,8 @@ import "./styles/AdminContact.css";
 
 const AdminContact = () => {
   const [messages, setMessages] = useState([]);
+  const [selectedMessage, setSelectedMessage] = useState(null);
+  const [showModal, setShowModal] = useState(false);
 
   // Fetch all contact messages
   useEffect(() => {
@@ -19,6 +21,18 @@ const AdminContact = () => {
     }
   };
 
+  // View message details
+  const handleView = (message) => {
+    setSelectedMessage(message);
+    setShowModal(true);
+  };
+
+  // Close modal
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setSelectedMessage(null);
+  };
+
   // Delete contact message
   const handleDelete = async (id) => {
     const confirmDelete = window.confirm(
@@ -33,6 +47,11 @@ const AdminContact = () => {
 
       // Remove instantly from UI
       setMessages((prev) => prev.filter((msg) => msg._id !== id));
+      
+      // If the deleted message was being viewed, close the modal
+      if (selectedMessage && selectedMessage._id === id) {
+        handleCloseModal();
+      }
     } catch (error) {
       console.error("Error deleting contact message:", error);
     }
@@ -70,7 +89,9 @@ const AdminContact = () => {
                   <td>{msg.phone || "—"}</td>
 
                   <td className="message-cell">
-                    {msg.message}
+                    {msg.message.length > 50 
+                      ? `${msg.message.substring(0, 50)}...` 
+                      : msg.message}
                   </td>
 
                   <td className="date-cell">
@@ -78,17 +99,100 @@ const AdminContact = () => {
                   </td>
 
                   <td className="action-cell">
-                    <button
-                      className="admin-contact-delete"
-                      onClick={() => handleDelete(msg._id)}
-                    >
-                      Delete
-                    </button>
+                    <div className="action-buttons">
+                      <button
+                        className="admin-contact-view"
+                        onClick={() => handleView(msg)}
+                      >
+                        View
+                      </button>
+                      <button
+                        className="admin-contact-delete"
+                        onClick={() => handleDelete(msg._id)}
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* Modal for Viewing Message Details */}
+      {showModal && selectedMessage && (
+        <div className="admin-modal-overlay">
+          <div className="admin-modal">
+            <div className="admin-modal-header">
+              <h2>CONTACT MESSAGE DETAILS</h2>
+              <button 
+                className="admin-modal-close" 
+                onClick={handleCloseModal}
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="admin-modal-content">
+              <div className="message-details">
+                <div className="detail-row">
+                  <span className="detail-label">DATE:</span>
+                  <span className="detail-value">
+                    {new Date(selectedMessage.createdAt).toLocaleDateString("en-IN", {
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric'
+                    })}, {new Date(selectedMessage.createdAt).toLocaleTimeString("en-IN", {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      second: '2-digit',
+                      hour12: false
+                    })}
+                  </span>
+                </div>
+
+                <div className="detail-row">
+                  <span className="detail-label">Name:</span>
+                  <span className="detail-value">{selectedMessage.name}</span>
+                </div>
+
+                <div className="detail-row">
+                  <span className="detail-label">Email:</span>
+                  <span className="detail-value">{selectedMessage.email}</span>
+                </div>
+
+                <div className="detail-row">
+                  <span className="detail-label">Mobile:</span>
+                  <span className="detail-value">{selectedMessage.phone || "Not provided"}</span>
+                </div>
+
+                <div className="detail-row">
+                  <span className="detail-label">Subject:</span>
+                  <span className="detail-value">Contact Form Submission</span>
+                </div>
+
+                <div className="message-divider"></div>
+
+                <div className="message-content-section">
+                  <h3>Message Content</h3>
+                  <div className="message-content">
+                    {selectedMessage.message}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="admin-modal-footer">
+              <button 
+                className="admin-modal-close-btn"
+                onClick={handleCloseModal}
+              >
+                Close
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </>
