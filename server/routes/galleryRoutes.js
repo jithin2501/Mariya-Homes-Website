@@ -15,8 +15,8 @@ const upload = multer({
 // Public routes
 router.get('/type/:type', galleryController.getGalleryByType);
 
-// Admin routes (protected)
-router.get('/', authMiddleware, galleryController.getAllGallery);
+// Admin routes - GET all galleries (accessible without auth for admin panel)
+router.get('/', galleryController.getAllGallery);
 
 // Create gallery with Cloudinary upload
 router.post('/', authMiddleware, upload.single('image'), async (req, res) => {
