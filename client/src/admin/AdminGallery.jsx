@@ -288,20 +288,20 @@ const AdminGallery = () => {
 
   return (
     <div className="admin-gallery-container">
-      <div className="admin-gallery-header">
-        <h1>Gallery Management</h1>
-        <p className="gallery-subtitle">Upload and manage construction and renovation journey images</p>
+      {/* Header matching CONFIGURE PROPERTY DETAILS style */}
+      <div className="gallery-page-header">
+        <h1>GALLERY MANAGEMENT</h1>
       </div>
 
-      <div className="gallery-sections">
-        {/* CONSTRUCTION SECTION */}
-        <div className="gallery-upload-section construction-section">
-          <div className="section-header">
+      <div className="gallery-columns-container">
+        {/* LEFT COLUMN - CONSTRUCTION GALLERY */}
+        <div className="gallery-column construction-column">
+          <div className="gallery-section-header">
             <h2>Construction Gallery</h2>
-            <span className="image-count">{constructionImages.length} images</span>
+            <span className="image-count-badge">{constructionImages.length} images</span>
           </div>
 
-          <div className="upload-area">
+          <div className="upload-controls">
             <input
               type="file"
               id="construction-upload"
@@ -313,15 +313,15 @@ const AdminGallery = () => {
             />
             <label 
               htmlFor="construction-upload" 
-              className={`upload-button ${constructionUploading ? 'disabled' : ''}`}
+              className={`upload-button-primary ${constructionUploading ? 'disabled' : ''}`}
             >
-              {constructionUploading ? 'Uploading...' : 'Choose Images'}
+              Choose Images
             </label>
           </div>
 
           {constructionPreviews.length > 0 && (
-            <div className="selected-images-container">
-              <h3 className="selected-images-title">Selected Images ({constructionPreviews.length}):</h3>
+            <div className="selected-images-section">
+              <h3>Selected Images ({constructionPreviews.length}):</h3>
               <div className="image-preview-grid">
                 {constructionPreviews.map((preview, index) => (
                   <div key={index} className="preview-card">
@@ -348,7 +348,7 @@ const AdminGallery = () => {
                 ))}
               </div>
               <button 
-                className="upload-all-btn construction-btn"
+                className="upload-action-btn construction-action-btn"
                 onClick={handleConstructionUpload}
                 disabled={constructionUploading}
               >
@@ -374,7 +374,7 @@ const AdminGallery = () => {
                     <img src={item.image} alt={item.title} />
                     <div className="existing-image-info">
                       <h4>{item.title}</h4>
-                      <span className="image-order">Order: {item.order}</span>
+                      <span className="image-order-badge">Order: {item.order}</span>
                     </div>
                   </div>
                 ))}
@@ -383,14 +383,14 @@ const AdminGallery = () => {
           )}
         </div>
 
-        {/* RENOVATION SECTION */}
-        <div className="gallery-upload-section renovation-section">
-          <div className="section-header">
+        {/* RIGHT COLUMN - RENOVATION GALLERY */}
+        <div className="gallery-column renovation-column">
+          <div className="gallery-section-header">
             <h2>Renovation Gallery</h2>
-            <span className="image-count">{renovationImages.length} images</span>
+            <span className="image-count-badge">{renovationImages.length} images</span>
           </div>
 
-          <div className="upload-area">
+          <div className="upload-controls">
             <input
               type="file"
               id="renovation-upload"
@@ -402,15 +402,15 @@ const AdminGallery = () => {
             />
             <label 
               htmlFor="renovation-upload" 
-              className={`upload-button ${renovationUploading ? 'disabled' : ''}`}
+              className={`upload-button-primary ${renovationUploading ? 'disabled' : ''}`}
             >
-              {renovationUploading ? 'Uploading...' : 'Choose Images'}
+              Choose Images
             </label>
           </div>
 
           {renovationPreviews.length > 0 && (
-            <div className="selected-images-container">
-              <h3 className="selected-images-title">Selected Images ({renovationPreviews.length}):</h3>
+            <div className="selected-images-section">
+              <h3>Selected Images ({renovationPreviews.length}):</h3>
               <div className="image-preview-grid">
                 {renovationPreviews.map((preview, index) => (
                   <div key={index} className="preview-card">
@@ -437,7 +437,7 @@ const AdminGallery = () => {
                 ))}
               </div>
               <button 
-                className="upload-all-btn renovation-btn"
+                className="upload-action-btn renovation-action-btn"
                 onClick={handleRenovationUpload}
                 disabled={renovationUploading}
               >
@@ -463,7 +463,7 @@ const AdminGallery = () => {
                     <img src={item.image} alt={item.title} />
                     <div className="existing-image-info">
                       <h4>{item.title}</h4>
-                      <span className="image-order">Order: {item.order}</span>
+                      <span className="image-order-badge">Order: {item.order}</span>
                     </div>
                   </div>
                 ))}

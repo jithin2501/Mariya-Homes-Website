@@ -5,11 +5,12 @@
 }
 
 .user-management h1 {
-  font-size: 2rem;
+  font-size: 24px;
   color: #1a202c;
   margin-bottom: 2rem;
   padding-bottom: 0.5rem;
   border-bottom: 2px solid #e2e8f0;
+  font-weight: 700;
 }
 
 .create-user-section,

@@ -89,7 +89,7 @@ const AdminVideo = () => {
 
   return (
     <div className="admin-video-page">
-      <h1 className="admin-page-title">Upload Website Video</h1>
+      <h1 className="admin-page-title">UPLOAD WEBSITE VIDEO</h1>
 
       <div className="admin-video-card">
         {/* Upload Section */}

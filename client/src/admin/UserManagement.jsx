@@ -156,7 +156,7 @@ const UserManagement = () => {
 
   return (
     <div className="user-management">
-      <h1>User Management</h1>
+      <h1>USER MANAGEMENT</h1>
       
       <div className="create-user-section">
         <h2>Create New Admin User</h2>
