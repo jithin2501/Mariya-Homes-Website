@@ -38,14 +38,14 @@ exports.upsertDetails = async (req, res) => {
     console.log("PROPERTY DETAILS UPDATE REQUEST RECEIVED");
     console.log("==========================================");
     
-    const { propertyId, description, additionalDetails, mapUrl, amenities } = req.body;
+    const { propertyId, description, additionalDetails, mapUrl, amenities, existingPropertyImages } = req.body;
     
     console.log("1. Request Body:");
     console.log("   - PropertyId:", propertyId);
     console.log("   - Description:", description ? "Provided" : "Missing");
     console.log("   - MapUrl:", mapUrl ? "Provided" : "Missing");
     console.log("   - Raw amenities from body:", amenities);
-    console.log("   - Amenities type:", typeof amenities);
+    console.log("   - Existing Property Images:", existingPropertyImages);
     
     console.log("\n2. Files Received:");
     if (req.files) {
@@ -63,6 +63,29 @@ exports.upsertDetails = async (req, res) => {
     }
     
     console.log("\n3. Building Update Data...");
+    
+    // Start with existing property images if provided
+    let constructionProgress = [];
+    
+    // Parse existing property images if sent from client
+    if (existingPropertyImages) {
+      try {
+        const parsedImages = typeof existingPropertyImages === 'string' 
+          ? JSON.parse(existingPropertyImages) 
+          : existingPropertyImages;
+        
+        if (Array.isArray(parsedImages)) {
+          constructionProgress = parsedImages.map((img, index) => ({
+            image: img.url,
+            label: img.label || `Image ${index + 1}`
+          }));
+          console.log(`   ✓ Loaded ${constructionProgress.length} existing property images`);
+        }
+      } catch (err) {
+        console.log("   ⚠ Error parsing existingPropertyImages:", err.message);
+      }
+    }
+    
     const updateData = { 
       description, 
       additionalDetails, 
@@ -134,35 +157,34 @@ exports.upsertDetails = async (req, res) => {
       }
     }
 
-    // Process property images (constructionProgress)
+    // Process NEW property images (constructionProgress)
     console.log("\n4. Processing Property Images...");
     if (req.files && req.files['constructionProgress'] && req.files['constructionProgress'].length > 0) {
       const images = req.files['constructionProgress'];
-      console.log(`   Found ${images.length} property image(s)`);
+      console.log(`   Found ${images.length} NEW property image(s)`);
       
-      updateData.constructionProgress = [];
-      
-      // Upload each property image
+      // Upload each NEW property image and add to constructionProgress array
       for (let i = 0; i < images.length; i++) {
         const file = images[i];
         try {
           const cloudinaryUrl = await uploadToCloudinary(file);
           const imageData = {
             image: cloudinaryUrl,
-            label: `Image ${i + 1}`
+            label: `Image ${constructionProgress.length + i + 1}`
           };
-          updateData.constructionProgress.push(imageData);
-          console.log(`   ✓ Property image ${i + 1} uploaded to Cloudinary: ${cloudinaryUrl}`);
+          constructionProgress.push(imageData);
+          console.log(`   ✓ New property image ${i + 1} uploaded to Cloudinary: ${cloudinaryUrl}`);
         } catch (error) {
           console.log(`   ❌ Error uploading property image ${i + 1}:`, error.message);
           throw error;
         }
       }
-      console.log(`   ✓ Successfully uploaded ${updateData.constructionProgress.length} images to Cloudinary`);
-    } else {
-      updateData.constructionProgress = [];
-      console.log("   ℹ No property images provided - setting empty array");
     }
+    
+    // Set the constructionProgress array (existing + new)
+    updateData.constructionProgress = constructionProgress;
+    console.log(`   ✓ Total property images after update: ${constructionProgress.length}`);
+    console.log(`   ✓ Final constructionProgress:`, constructionProgress);
 
     console.log("\n5. Attempting Database Update...");
     console.log("   Query: { propertyId:", propertyId, "}");
@@ -178,6 +200,7 @@ exports.upsertDetails = async (req, res) => {
     console.log("   Document ID:", details._id);
     console.log("   Saved amenities:", details.amenities);
     console.log("   Amenities count:", details.amenities?.length || 0);
+    console.log("   Property images count:", details.constructionProgress?.length || 0);
     console.log("   All images stored in Cloudinary");
     console.log("==========================================\n");
     
@@ -215,6 +238,7 @@ exports.getDetailsByPropertyId = async (req, res) => {
     console.log("✓ Details found");
     console.log("✓ Amenities in DB:", details.amenities);
     console.log("✓ Amenities count:", details.amenities?.length || 0);
+    console.log("✓ Property images count:", details.constructionProgress?.length || 0);
     
     // Check if URLs are from Cloudinary
     if (details.mainMedia) {

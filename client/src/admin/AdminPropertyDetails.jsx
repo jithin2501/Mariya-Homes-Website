@@ -245,7 +245,6 @@ const AdminPropertyDetails = () => {
   const handlePropertyImagesChange = (e) => {
     const files = Array.from(e.target.files);
     setPropertyImages(files);
-    setExistingPropertyImages([]); // Clear existing when new files are selected
   };
 
   const removePropertyImage = (index) => {
@@ -255,9 +254,11 @@ const AdminPropertyDetails = () => {
   };
 
   const removeExistingPropertyImage = (index) => {
+    console.log(`Removing existing property image at index ${index}`);
     const newImages = [...existingPropertyImages];
     newImages.splice(index, 1);
     setExistingPropertyImages(newImages);
+    console.log(`After removal: ${newImages.length} images remaining`);
   };
 
   // Amenities handlers
@@ -325,12 +326,27 @@ const AdminPropertyDetails = () => {
         data.append('constructionProgress', image);
       });
 
+      // IMPORTANT: Also send existing property images that haven't been removed
+      // This ensures existing images are preserved
+      const remainingExistingImages = existingPropertyImages.map(img => ({
+        url: img.url,
+        label: img.label
+      }));
+      
+      if (remainingExistingImages.length > 0) {
+        console.log("Preserving existing property images:", remainingExistingImages.length);
+        data.append("existingPropertyImages", JSON.stringify(remainingExistingImages));
+      }
+
       console.log("Submitting form data...");
+      console.log("Before submit - existingPropertyImages:", existingPropertyImages);
+      console.log("Before submit - propertyImages (new):", propertyImages);
       console.log("Main media:", mainMedia ? "New file" : "Using existing");
       console.log("Gallery images (new):", gallery.length);
       console.log("Gallery images (existing):", existingGallery.length);
       console.log("Property images (new):", propertyImages.length);
       console.log("Property images (existing):", existingPropertyImages.length);
+      console.log("Remaining existing property images:", remainingExistingImages.length);
 
       const res = await fetch("http://localhost:5000/api/admin/property-details", {
         method: "POST",
@@ -339,19 +355,18 @@ const AdminPropertyDetails = () => {
       
       if (res.ok) {
         const result = await res.json();
+        console.log("After update - result.constructionProgress:", result.constructionProgress);
         alert(isEditMode ? "Details updated successfully!" : "Details saved successfully!");
         
         // Refresh saved details
         await fetchPropertyDetails(selectedPropertyId);
         
-        // Reset form
-        setDescription("");
-        setMapUrl("");
+        // Reset only new files, keep existing ones
         setMainMedia(null);
         setMainMediaPreview(null);
         setGallery([]);
         setPropertyImages([]);
-        setAmenities([]);
+        // Keep amenities as they were
         setIsEditMode(false);
         
         // Reset file inputs
@@ -655,7 +670,7 @@ const AdminPropertyDetails = () => {
                           alt={`Preview ${index + 1}`}
                           className="preview-thumbnail"
                         />
-                        <span className="image-label">Image {index + 1}</span>
+                        <span className="image-label">New Image {index + 1}</span>
                         <button
                           type="button"
                           className="remove-image-btn"
