@@ -1,5 +1,6 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import "./styles/AdminLayout.css";
+import AnimatedLogoutButton from "./AnimatedLogoutButton";
 
 const AdminLayout = () => {
   const navigate = useNavigate();
@@ -45,9 +46,9 @@ const AdminLayout = () => {
           </NavLink>
         )}
 
-        <button className="admin-logout" onClick={handleLogout} style={{marginTop: 'auto'}}>
-          Sign Out
-        </button>
+        <div style={{marginTop: 'auto'}}>
+          <AnimatedLogoutButton onClick={handleLogout} />
+        </div>
       </aside>
 
       <main className="admin-content">
