@@ -245,22 +245,91 @@
 @media (max-width: 768px) {
     .footer-container {
         grid-template-columns: 1fr;
-        padding: 0 10px 40px;
-        gap: 35px;
+        padding: 0 20px 40px;
+        gap: 40px;
     }
     
+    /* Center all footer columns */
     .about-col,
     .contact-details-col,
     .links-col {
         grid-column: 1;
         grid-row: auto;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
     }
     
+    /* Center headings */
+    .footer-heading {
+        text-align: center;
+        width: 100%;
+    }
+    
+    /* Center about text */
     .about-text, .about-text-line2 {
         max-width: 100%;
+        text-align: center;
     }
     
+    /* Center tagline */
+    .tagline {
+        text-align: center;
+    }
+    
+    /* Center social icons */
+    .social-icons-contact {
+        justify-content: center;
+    }
+    
+    /* Center contact items */
+    .contact-item {
+        justify-content: center;
+        text-align: center;
+    }
+    
+    .contact-text-item {
+        align-items: center;
+        text-align: center;
+    }
+    
+    .contact-text-line1,
+    .contact-text-line2,
+    .contact-link {
+        text-align: center;
+    }
+    
+    /* Center useful links */
+    .quick-links-list {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+    }
+    
+    .quick-links-list li {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+    
+    .quick-links-list .footer-link-btn {
+        justify-content: center;
+        text-align: center;
+    }
+    
+    .quick-links-list .footer-link-btn:hover {
+        padding-left: 0;
+    }
+    
+    /* Center bottom bar */
     .footer-bottom-bar {
-        padding: 25px 10px;
+        padding: 25px 20px;
+        text-align: center;
+    }
+    
+    .copyright {
+        text-align: center;
     }
 }
