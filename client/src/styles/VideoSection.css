@@ -92,6 +92,11 @@
     .video-overlay-text {
         width: 65%;
     }
+
+    /* Hide paragraph text on mobile */
+    .video-overlay-text p {
+        display: none;
+    }
 }
 
 @media (max-width: 640px) {
@@ -102,10 +107,6 @@
 
     .video-overlay-text h2 {
         font-size: 1.8rem;
-    }
-
-    .video-overlay-text p {
-        font-size: 0.9rem;
         margin-bottom: 15px;
     }
 
