@@ -201,6 +201,49 @@
 }
 
 @media (max-width: 768px) {
+    /* Center all content on mobile */
+    .about-left {
+        align-items: center;
+        text-align: center;
+    }
+
+    .about-tagline {
+        text-align: center;
+    }
+
+    .about-left h2 {
+        text-align: center;
+    }
+
+    .stat-box {
+        align-items: center;
+        text-align: center;
+        max-width: 100%;
+        width: 100%;
+    }
+
+    .stat-header-row {
+        justify-content: center;
+    }
+
+    .stat-text {
+        text-align: center;
+        max-width: 100%;
+    }
+
+    .about-right {
+        text-align: center;
+    }
+
+    .about-right p {
+        text-align: center;
+    }
+
+    .about-right ul {
+        display: inline-block;
+        text-align: left;
+    }
+
     .about-right .btn-group {
         flex-wrap: wrap;
         justify-content: center;
@@ -217,9 +260,34 @@
         padding: 20px 30px;
     }
 
+    /* Keep content centered */
+    .about-left {
+        align-items: center;
+        text-align: center;
+    }
+
+    .stat-box {
+        padding: 25px;
+    }
+
+    .stat-header-row {
+        gap: 40px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .stat-main-number {
+        font-size: 3rem;
+    }
+
+    .about-right {
+        text-align: center;
+    }
+
     .about-right .btn-group {
         gap: 15px;
         flex-wrap: wrap;
+        justify-content: center;
     }
 
     .about-right .action-btn {
@@ -229,10 +297,42 @@
 }
 
 @media (max-width: 480px) {
+    .about-section {
+        padding: 20px 20px;
+    }
+
+    .about-left {
+        align-items: center;
+        text-align: center;
+    }
+
+    .stat-box {
+        padding: 20px;
+    }
+
+    .stat-header-row {
+        gap: 30px;
+    }
+
+    .stat-main-number {
+        font-size: 2.5rem;
+    }
+
+    .avatar,
+    .avatar-plus {
+        width: 38px;
+        height: 38px;
+    }
+
+    .about-right {
+        text-align: center;
+    }
+
     .about-right .btn-group {
         flex-direction: column;
         align-items: stretch;
         gap: 12px;
+        justify-content: center;
     }
 
     .about-right .action-btn {
