@@ -13,7 +13,7 @@ const AdminContact = () => {
 
   const fetchMessages = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/admin/messages");
+      const res = await fetch("/api/admin/messages");
       const data = await res.json();
       setMessages(data);
     } catch (error) {
@@ -41,7 +41,7 @@ const AdminContact = () => {
     if (!confirmDelete) return;
 
     try {
-      await fetch(`http://localhost:5000/api/admin/messages/${id}`, {
+      await fetch(`/api/admin/messages/${id}`, {
         method: "DELETE",
       });
 

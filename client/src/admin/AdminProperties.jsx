@@ -20,7 +20,7 @@ const AdminProperties = () => {
 
   const fetchProperties = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/admin/properties");
+      const res = await fetch("/api/admin/properties");
       const data = await res.json();
       setProperties(data);
     } catch (err) { 
@@ -74,8 +74,8 @@ const AdminProperties = () => {
     }));
 
     const url = isEditing 
-      ? `http://localhost:5000/api/admin/properties/${isEditing}` 
-      : "http://localhost:5000/api/admin/properties";
+      ? `/api/admin/properties/${isEditing}` 
+      : "/api/admin/properties";
     
     const method = isEditing ? "PUT" : "POST";
 
@@ -99,7 +99,7 @@ const AdminProperties = () => {
 
   const handleDelete = async (id) => {
     if (window.confirm("Delete this property?")) {
-      await fetch(`http://localhost:5000/api/admin/properties/${id}`, { method: "DELETE" });
+      await fetch(`/api/admin/properties/${id}`, { method: "DELETE" });
       fetchProperties();
     }
   };

@@ -7,7 +7,7 @@ const VideoSection = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/video")
+    fetch("/api/video")
       .then((res) => res.json())
       .then((data) => {
         if (data && data.videoUrl) {

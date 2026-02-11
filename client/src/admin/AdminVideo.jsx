@@ -11,7 +11,7 @@ const AdminVideo = () => {
   // Fetch current video
   const fetchVideo = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/video");
+      const res = await fetch("/api/video");
       const data = await res.json();
 
       if (data && data.videoUrl) {
@@ -40,7 +40,7 @@ const AdminVideo = () => {
 
     try {
     setLoading(true);
-    const res = await fetch("http://localhost:5000/api/admin/video", {
+    const res = await fetch("/api/admin/video", {
       method: "POST",
       body: formData,
     });
@@ -75,7 +75,7 @@ const AdminVideo = () => {
       return;
 
     try {
-      await fetch("http://localhost:5000/api/admin/video", {
+      await fetch("/api/admin/video", {
         method: "DELETE",
       });
 

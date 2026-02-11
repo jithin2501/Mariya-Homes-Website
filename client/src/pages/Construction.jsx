@@ -35,7 +35,7 @@ const Construction = () => {
   const fetchGalleries = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:5000/api/gallery/type/construction');
+      const response = await fetch('/api/gallery/type/construction');
       const data = await response.json();
       setGalleries(data);
       setFilteredGalleries(data);
