@@ -234,13 +234,15 @@ const UserDetails = () => {
     <div className="user-details-container">
       <div className="header">
         <h1>User Details</h1>
-        <div className="session-info">
-          <span className="session-label">Session ID:</span>
-          <span className="session-value">{formatSessionId(sessionId)}</span>
+        <div className="header-controls">
+          <button onClick={() => navigate('/admin/analytics')} className="back-btn">
+            ← Back to Analytics
+          </button>
+          <div className="session-info">
+            <span className="session-label">Session ID:</span>
+            <span className="session-value">{formatSessionId(sessionId)}</span>
+          </div>
         </div>
-        <button onClick={() => navigate('/admin/analytics')} className="back-btn">
-          ← Back to Analytics
-        </button>
       </div>
 
       <button onClick={exportUserHistory} className="export-history-btn">
@@ -310,7 +312,6 @@ const UserDetails = () => {
                   </div>
                   <div className="visit-details">
                     <p><strong>Location:</strong> {visit.location}</p>
-                    <p><strong>District:</strong> {visit.district}</p>
                     <p><strong>Time Spent:</strong> {formatTime(visit.timeSpent)}</p>
                     <p><strong>Exit Reason:</strong> {visit.exitReason}</p>
                   </div>
