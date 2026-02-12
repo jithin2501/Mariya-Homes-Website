@@ -1,5 +1,6 @@
-import React from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import React, { useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import analyticsTracker from "./utils/analyticsTracker";
 
 // Public Pages
 import Layout from "./pages/Layout";
@@ -26,6 +27,21 @@ import UserDetails from "./admin/UserDetails";
 import "./styles/App.css";
 
 /**
+ * Analytics Route Tracker Component
+ * Automatically tracks page changes when user navigates
+ */
+function AnalyticsRouteTracker() {
+  const location = useLocation();
+  
+  useEffect(() => {
+    // Track page view whenever route changes
+    analyticsTracker.trackPageView();
+  }, [location.pathname]);
+  
+  return null; // This component doesn't render anything
+}
+
+/**
  * ProtectedRoute Component
  * Checks localStorage for authentication flag.
  * If not authenticated, redirects user to the admin login page.
@@ -38,8 +54,19 @@ const ProtectedRoute = ({ children }) => {
 };
 
 function App() {
+  // Initialize analytics tracking when app loads
+  useEffect(() => {
+    // Initialize tracker for all website visitors
+    analyticsTracker.init('Anonymous');
+    
+    console.log('✅ Analytics tracking initialized - All visitors will be tracked');
+  }, []);
+
   return (
     <Router>
+      {/* This component tracks route changes automatically */}
+      <AnalyticsRouteTracker />
+      
       <Routes>
         {/* --- WEBSITE ROUTES (WITH HEADER & FOOTER) --- */}
         <Route element={<Layout />}>
