@@ -2,7 +2,7 @@
 
 .user-details-container {
   padding: 20px;
-  background: #f5f7fa; /* Changed from purple gradient to light gray */
+  background: #f5f7fa;
   min-height: 100vh;
 }
 
@@ -14,10 +14,41 @@
   margin-bottom: 25px;
 }
 
+.header h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #333;
+  margin: 0;
+  text-shadow: none;
+}
+
+.session-info {
+  background: #e7f3ff;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: 2px solid #007bff;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.session-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #555;
+}
+
+.session-value {
+  font-family: 'Courier New', monospace;
+  font-size: 16px;
+  font-weight: 700;
+  color: #007bff;
+}
+
 .back-btn {
   padding: 10px 20px;
   background: white;
-  color: #333; /* Changed from white to dark gray */
+  color: #333;
   border: 2px solid #e0e0e0;
   border-radius: 8px;
   font-weight: 600;
@@ -29,19 +60,12 @@
 .back-btn:hover {
   background: #f0f0f0;
   transform: translateX(-4px);
-}
-
-.header h1 {
-  font-size: 28px;
-  font-weight: 700;
-  color: #333; /* Changed from white to dark gray/black */
-  margin: 0;
-  text-shadow: none; /* Removed text shadow */
+  border-color: #007bff;
 }
 
 .export-history-btn {
   padding: 12px 24px;
-  background: #28a745; /* Changed from teal to green */
+  background: #28a745;
   color: white;
   border: none;
   border-radius: 8px;
@@ -69,32 +93,65 @@
 
 .location-info h3 {
   margin: 0 0 15px 0;
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 600;
   color: #333;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.location-info p {
-  margin: 5px 0;
+.location-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 12px;
+  margin-bottom: 15px;
+}
+
+.location-details p {
+  margin: 0;
   color: #555;
   font-size: 14px;
+  padding: 8px;
+  background: #f8f9fa;
+  border-radius: 6px;
 }
 
-.location-info strong {
-  color: #007bff; /* Changed from purple to blue */
+.location-details strong {
+  color: #007bff;
   font-weight: 600;
-  margin: 0 8px 0 0;
+  margin-right: 8px;
+}
+
+.user-map-container {
+  margin-top: 20px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .loading {
   text-align: center;
   padding: 60px;
   font-size: 18px;
-  color: #007bff; /* Changed from white to blue */
+  color: #007bff;
   font-weight: 500;
   background: white;
   border-radius: 12px;
   border: 1px solid #e0e0e0;
+}
+
+.visits-header {
+  margin-bottom: 20px;
+}
+
+.visits-header h3 {
+  font-size: 22px;
+  font-weight: 600;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .visits-list {
@@ -107,10 +164,14 @@
   padding: 20px;
   border-radius: 12px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  /* Removed transition and border-left */
   border: 1px solid #e0e0e0;
+  transition: all 0.3s ease;
 }
 
+.visit-card:hover {
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
 
 .visit-header {
   display: flex;
@@ -148,13 +209,16 @@
   font-size: 14px;
   color: #555;
   line-height: 1.6;
+  background: #f8f9fa;
+  padding: 10px;
+  border-radius: 6px;
 }
 
 .visit-details strong {
-  color: #007bff; /* Changed from purple to blue */
+  color: #007bff;
   font-weight: 600;
   display: inline-block;
-  min-width: 70px;
+  min-width: 100px;
 }
 
 .no-data {
@@ -176,6 +240,14 @@
 
   .header h1 {
     font-size: 22px;
+  }
+
+  .session-info {
+    width: 100%;
+  }
+
+  .location-details {
+    grid-template-columns: 1fr;
   }
 
   .visit-header {

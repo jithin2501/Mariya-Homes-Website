@@ -6,11 +6,38 @@ const UserDetails = () => {
   const { sessionId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const username = location.state?.username || 'User';
+  const username = location.state?.username || generateUsername(sessionId);
 
   const [visits, setVisits] = useState([]);
   const [userLocation, setUserLocation] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  // Generate unique username based on session ID (same logic as dashboard)
+  function generateUsername(sessionId) {
+    if (!sessionId) return 'User';
+    
+    const hash = sessionId.split('_').pop() || sessionId;
+    const numericHash = hash.split('').reduce((acc, char) => {
+      return acc + char.charCodeAt(0);
+    }, 0);
+    
+    const prefixes = ['User', 'Visitor', 'Guest'];
+    const prefix = prefixes[numericHash % prefixes.length];
+    const suffix = String(numericHash).slice(-4).padStart(4, '0');
+    
+    return `${prefix}_${suffix}`;
+  }
+
+  // Format session ID to show unique shortened version
+  const formatSessionId = (sessionId) => {
+    if (!sessionId) return 'N/A';
+    
+    const displayId = sessionId.length > 8 
+      ? sessionId.slice(-8).toUpperCase() 
+      : sessionId.toUpperCase();
+    
+    return displayId;
+  };
 
   useEffect(() => {
     fetchUserDetails();
@@ -85,27 +112,53 @@ const UserDetails = () => {
     <div className="user-details-container">
       <div className="header">
         <h1>User Details — {username}</h1>
+        <div className="session-info">
+          <span className="session-label">Session ID:</span>
+          <span className="session-value">{formatSessionId(sessionId)}</span>
+        </div>
         <button onClick={() => navigate('/admin/analytics')} className="back-btn">
           ← Back to Analytics
         </button>
       </div>
 
       <button onClick={exportUserHistory} className="export-history-btn">
-        EXPORT THIS USER'S FULL HISTORY
+        📥 EXPORT THIS USER'S FULL HISTORY
       </button>
 
       {userLocation && (
         <div className="location-info">
-          <h3>User Location Information</h3>
-          <p>
-            <strong>City:</strong> {userLocation.city || 'N/A'} | 
-            <strong> Region:</strong> {userLocation.region || 'N/A'} | 
-            <strong> Country:</strong> {userLocation.country || 'N/A'}
-          </p>
-          {userLocation.latitude && userLocation.longitude && (
+          <h3>📍 User Location Information</h3>
+          <div className="location-details">
             <p>
-              <strong>Coordinates:</strong> {userLocation.latitude.toFixed(4)}, {userLocation.longitude.toFixed(4)}
+              <strong>City:</strong> {userLocation.city || 'N/A'}
             </p>
+            <p>
+              <strong>Region:</strong> {userLocation.region || 'N/A'}
+            </p>
+            <p>
+              <strong>Country:</strong> {userLocation.country || 'N/A'}
+            </p>
+            {userLocation.latitude && userLocation.longitude && (
+              <p>
+                <strong>Coordinates:</strong> {userLocation.latitude.toFixed(4)}, {userLocation.longitude.toFixed(4)}
+              </p>
+            )}
+          </div>
+          
+          {/* Google Maps embed showing user's location */}
+          {userLocation.latitude && userLocation.longitude && (
+            <div className="user-map-container">
+              <iframe
+                width="100%"
+                height="300"
+                style={{ border: 0, borderRadius: '8px', marginTop: '15px' }}
+                loading="lazy"
+                allowFullScreen
+                referrerPolicy="no-referrer-when-downgrade"
+                src={`https://www.google.com/maps/embed/v1/place?key=YOUR_GOOGLE_MAPS_API_KEY&q=${userLocation.latitude},${userLocation.longitude}&zoom=10`}
+                title="User Location Map"
+              />
+            </div>
           )}
         </div>
       )}
@@ -117,20 +170,25 @@ const UserDetails = () => {
           {visits.length === 0 ? (
             <p className="no-data">No visit history available for this user</p>
           ) : (
-            visits.map((visit, index) => (
-              <div key={index} className="visit-card">
-                <div className="visit-header">
-                  <h4>Visit #{visits.length - index}</h4>
-                  <span className="visit-time">{new Date(visit.timestamp).toLocaleString()}</span>
-                </div>
-                <div className="visit-details">
-                  <p><strong>Location:</strong> {visit.location}</p>
-                  <p><strong>District:</strong> {visit.district}</p>
-                  <p><strong>Time:</strong> {formatTime(visit.timeSpent)}</p>
-                  <p><strong>Exit:</strong> {visit.exitReason}</p>
-                </div>
+            <>
+              <div className="visits-header">
+                <h3>📊 Visit History ({visits.length} visits)</h3>
               </div>
-            ))
+              {visits.map((visit, index) => (
+                <div key={index} className="visit-card">
+                  <div className="visit-header">
+                    <h4>Visit #{visits.length - index}</h4>
+                    <span className="visit-time">{new Date(visit.timestamp).toLocaleString()}</span>
+                  </div>
+                  <div className="visit-details">
+                    <p><strong>Location:</strong> {visit.location}</p>
+                    <p><strong>District:</strong> {visit.district}</p>
+                    <p><strong>Time Spent:</strong> {formatTime(visit.timeSpent)}</p>
+                    <p><strong>Exit Reason:</strong> {visit.exitReason}</p>
+                  </div>
+                </div>
+              ))}
+            </>
           )}
         </div>
       )}

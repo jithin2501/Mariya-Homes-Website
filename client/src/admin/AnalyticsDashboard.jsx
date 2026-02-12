@@ -121,6 +121,36 @@ const AnalyticsDashboard = () => {
     }
   };
 
+  // Generate unique username based on session ID
+  const generateUsername = (sessionId) => {
+    if (!sessionId) return 'User';
+    
+    // Extract a unique identifier from the session ID
+    const hash = sessionId.split('_').pop() || sessionId;
+    const numericHash = hash.split('').reduce((acc, char) => {
+      return acc + char.charCodeAt(0);
+    }, 0);
+    
+    // Generate a username like "User_4582" or "Visitor_7821"
+    const prefixes = ['User', 'Visitor', 'Guest'];
+    const prefix = prefixes[numericHash % prefixes.length];
+    const suffix = String(numericHash).slice(-4).padStart(4, '0');
+    
+    return `${prefix}_${suffix}`;
+  };
+
+  // Format session ID to show unique shortened version
+  const formatSessionId = (sessionId) => {
+    if (!sessionId) return 'N/A';
+    
+    // Show last 8 characters of the session ID to make it unique and identifiable
+    const displayId = sessionId.length > 8 
+      ? sessionId.slice(-8).toUpperCase() 
+      : sessionId.toUpperCase();
+    
+    return displayId;
+  };
+
   const fetchAnalytics = async () => {
     if (!startDate || !endDate || backendStatus !== 'connected') return;
     
@@ -132,7 +162,15 @@ const AnalyticsDashboard = () => {
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       
       const data = await response.json();
-      setUserAnalytics(data.userAnalytics || []);
+      
+      // Process user analytics to add unique usernames
+      const processedAnalytics = (data.userAnalytics || []).map(user => ({
+        ...user,
+        displayUsername: generateUsername(user.sessionId),
+        originalUsername: user.username
+      }));
+      
+      setUserAnalytics(processedAnalytics);
     } catch (error) {
       console.error('Error fetching analytics:', error);
       setError(error.message);
@@ -201,12 +239,6 @@ const AnalyticsDashboard = () => {
     }, 100);
   };
 
-  const formatSessionId = (sessionId) => {
-    if (!sessionId) return 'N/A';
-    const numericPart = sessionId.replace('session_', '').replace(/_.*/, '');
-    return numericPart.substring(0, 5);
-  };
-
   const exportUsers = () => {
     if (userAnalytics.length === 0) return;
     
@@ -215,7 +247,7 @@ const AnalyticsDashboard = () => {
     
     userAnalytics.forEach(user => {
       const values = [
-        user.username,
+        user.displayUsername || user.username,
         user.sessionId,
         user.locations,
         user.visitCount,
@@ -226,56 +258,34 @@ const AnalyticsDashboard = () => {
     });
     
     const csv = csvRows.join('\n');
-    downloadCSV(csv, `analytics_users_${startDate}_to_${endDate}.csv`);
+    downloadCSV(csv, 'user_analytics.csv');
   };
 
-  const exportFullVisitDetails = async () => {
+  const exportFullVisitDetails = () => {
     if (userAnalytics.length === 0) return;
     
-    try {
-      const allVisits = [];
-      
-      for (const user of userAnalytics) {
-        const response = await fetch(`/api/analytics/user/${user.sessionId}`);
-        const data = await response.json();
-        
-        if (data.visits) {
-          data.visits.forEach(visit => {
-            allVisits.push({
-              username: user.username,
-              sessionId: user.sessionId,
-              location: visit.location,
-              district: visit.district,
-              timeSpent: visit.timeSpent,
-              exitReason: visit.exitReason,
-              timestamp: new Date(visit.timestamp).toLocaleString()
-            });
-          });
-        }
+    const headers = ['Username', 'Session ID', 'Location', 'District', 'Time (seconds)', 'Exit Reason', 'Timestamp'];
+    const csvRows = [headers.join(',')];
+    
+    userAnalytics.forEach(user => {
+      if (user.visits && user.visits.length > 0) {
+        user.visits.forEach(visit => {
+          const values = [
+            user.displayUsername || user.username,
+            user.sessionId,
+            visit.location,
+            visit.district,
+            visit.timeSpent,
+            `"${visit.exitReason}"`,
+            new Date(visit.timestamp).toLocaleString()
+          ];
+          csvRows.push(values.join(','));
+        });
       }
-      
-      const headers = ['Username', 'Session ID', 'Location', 'District', 'Time (seconds)', 'Exit Reason', 'Timestamp'];
-      const csvRows = [headers.join(',')];
-      
-      allVisits.forEach(visit => {
-        const values = [
-          visit.username,
-          visit.sessionId,
-          visit.location,
-          visit.district,
-          visit.timeSpent,
-          `"${visit.exitReason}"`,
-          visit.timestamp
-        ];
-        csvRows.push(values.join(','));
-      });
-      
-      const csv = csvRows.join('\n');
-      downloadCSV(csv, `analytics_full_details_${startDate}_to_${endDate}.csv`);
-    } catch (error) {
-      console.error('Error exporting full visit details:', error);
-      alert('Error exporting data. Please try again.');
-    }
+    });
+    
+    const csv = csvRows.join('\n');
+    downloadCSV(csv, 'full_visit_details.csv');
   };
 
   const downloadCSV = (csv, filename) => {
@@ -288,106 +298,46 @@ const AnalyticsDashboard = () => {
     window.URL.revokeObjectURL(url);
   };
 
-  const renderBackendStatus = () => {
-    if (isCheckingBackend) {
-      return (
-        <div className="connection-status testing">
-          <div className="spinner"></div>
-          <span>Checking connection to backend server...</span>
-        </div>
-      );
-    }
-    
-    if (backendStatus === 'connected') {
-      return (
-        <div className="connection-status success">
-          <span>✅ Connected to backend server</span>
-        </div>
-      );
-    }
-    
-    if (backendStatus === 'disconnected') {
-      return (
-        <div className="connection-status error">
-          <span>❌ Cannot connect to backend server</span>
-        </div>
-      );
-    }
-    
-    return null;
-  };
-
   return (
     <div className="analytics-dashboard">
-      <h1 className="analytics-title">Analytics Dashboard</h1>
-
-      {renderBackendStatus()}
-
-      {error && (
-        <div className="error-message">
-          <h3>⚠️ Connection Error</h3>
-          <p>{error}</p>
-          
-          <div className="troubleshooting">
-            <h4>🔧 Troubleshooting Steps:</h4>
-            <ol>
-              <li>
-                <strong>Verify backend is running:</strong>
-                <div>Open <a href="/api/analytics/test" target="_blank" rel="noopener noreferrer">/api/analytics/test</a> in your browser</div>
-              </li>
-            </ol>
-            
-            <div className="action-buttons">
-              <button onClick={checkBackendConnection} className="retry-btn">
-                🔄 Test Connection Again
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <h1 className="analytics-title">📊 Analytics Dashboard</h1>
 
       <div className="filter-section">
-        <h3>Filter by Date</h3>
+        <h3>Filter by Date Range</h3>
         <div className="date-filters">
           <div className="date-input-group">
-            <label>From</label>
+            <label htmlFor="start-date">Start Date</label>
             <input
+              id="start-date"
               type="date"
+              className="date-input"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="date-input"
             />
           </div>
           
           <div className="date-input-group">
-            <label>To</label>
+            <label htmlFor="end-date">End Date</label>
             <input
+              id="end-date"
               type="date"
+              className="date-input"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="date-input"
             />
           </div>
-
+          
           <button 
             onClick={handleApplyFilter} 
             className="apply-btn"
-            disabled={isCheckingBackend}
+            disabled={!startDate || !endDate}
           >
-            {backendStatus === 'connected' ? 'APPLY' : 'CONNECT & APPLY'}
+            Apply Filter
           </button>
 
-          <button onClick={() => setDateRange(1)} className="preset-btn">
-            LAST 1 MONTH
-          </button>
-          
-          <button onClick={() => setDateRange(3)} className="preset-btn">
-            LAST 3 MONTHS
-          </button>
-          
-          <button onClick={() => setDateRange(6)} className="preset-btn">
-            LAST 6 MONTHS
-          </button>
+          <button onClick={() => setDateRange(1)} className="preset-btn">Last Month</button>
+          <button onClick={() => setDateRange(3)} className="preset-btn">Last 3 Months</button>
+          <button onClick={() => setDateRange(6)} className="preset-btn">Last 6 Months</button>
         </div>
       </div>
 
@@ -467,7 +417,7 @@ const AnalyticsDashboard = () => {
                       ) : (
                         userAnalytics.map((user, index) => (
                           <tr key={index}>
-                            <td>{user.username}</td>
+                            <td>{user.displayUsername || user.username}</td>
                             <td className="session-id">{formatSessionId(user.sessionId)}</td>
                             <td>{user.locations}</td>
                             <td className="text-center">{user.visitCount}</td>
@@ -475,7 +425,7 @@ const AnalyticsDashboard = () => {
                             <td>{new Date(user.lastVisit).toLocaleDateString()}</td>
                             <td>
                               <button
-                                onClick={() => handleViewDetails(user.sessionId, user.username)}
+                                onClick={() => handleViewDetails(user.sessionId, user.displayUsername || user.username)}
                                 className="view-details-btn"
                               >
                                 VIEW
@@ -493,7 +443,7 @@ const AnalyticsDashboard = () => {
 
           {activeTab === 'geo' && (
             <div className="geo-map-section">
-              <WorldMap locations={geoMapData} />
+              <GoogleMapView locations={geoMapData} />
             </div>
           )}
         </>
@@ -502,8 +452,49 @@ const AnalyticsDashboard = () => {
   );
 };
 
-// World Map Component with proper world map background
-const WorldMap = ({ locations }) => {
+// Google Maps Component
+const GoogleMapView = ({ locations }) => {
+  const [mapUrl, setMapUrl] = useState('');
+
+  useEffect(() => {
+    if (locations && locations.length > 0) {
+      generateMapUrl();
+    }
+  }, [locations]);
+
+  const generateMapUrl = () => {
+    // Get the center point (average of all locations)
+    const avgLat = locations.reduce((sum, loc) => sum + loc.latitude, 0) / locations.length;
+    const avgLng = locations.reduce((sum, loc) => sum + loc.longitude, 0) / locations.length;
+
+    // Create markers for each location
+    const markers = locations.map(loc => {
+      const label = (loc.city || loc.country || 'Location').substring(0, 1);
+      return `markers=color:red%7Clabel:${label}%7C${loc.latitude},${loc.longitude}`;
+    }).join('&');
+
+    // Determine zoom level based on the spread of locations
+    const latSpread = Math.max(...locations.map(l => l.latitude)) - Math.min(...locations.map(l => l.latitude));
+    const lngSpread = Math.max(...locations.map(l => l.longitude)) - Math.min(...locations.map(l => l.longitude));
+    const maxSpread = Math.max(latSpread, lngSpread);
+    
+    let zoom = 2;
+    if (maxSpread < 1) zoom = 10;
+    else if (maxSpread < 5) zoom = 7;
+    else if (maxSpread < 20) zoom = 5;
+    else if (maxSpread < 50) zoom = 4;
+    else zoom = 2;
+
+    // Build the Google Maps Embed URL
+    const baseUrl = 'https://www.google.com/maps/embed/v1/view';
+    const apiKey = 'YOUR_GOOGLE_MAPS_API_KEY'; // Replace with your actual API key
+    
+    // Alternative: Use the simpler static map approach with multiple markers
+    const url = `${baseUrl}?key=${apiKey}&center=${avgLat},${avgLng}&zoom=${zoom}&${markers}`;
+    
+    setMapUrl(url);
+  };
+
   if (!locations || locations.length === 0) {
     return (
       <div className="map-container">
@@ -518,111 +509,47 @@ const WorldMap = ({ locations }) => {
   return (
     <div className="map-container">
       <h3>🌍 User Locations</h3>
-      <div className="world-map">
-        <svg viewBox="0 0 2000 1000" className="map-svg" preserveAspectRatio="xMidYMid meet">
-          {/* Ocean background */}
-          <rect width="2000" height="1000" fill="#a8dadc"/>
-          
-          {/* Simplified world continents */}
-          {/* North America */}
-          <path d="M 100 200 L 150 150 L 250 170 L 320 140 L 380 160 L 420 200 L 450 280 L 480 350 L 460 420 L 420 450 L 380 480 L 320 490 L 260 480 L 220 450 L 180 400 L 150 350 L 120 280 Z" fill="#457b9d" opacity="0.7"/>
-          
-          {/* South America */}
-          <path d="M 350 520 L 400 550 L 430 620 L 440 710 L 420 780 L 380 820 L 340 840 L 300 830 L 280 780 L 270 700 L 290 620 L 320 550 Z" fill="#457b9d" opacity="0.7"/>
-          
-          {/* Europe */}
-          <path d="M 850 180 L 950 160 L 1050 190 L 1100 240 L 1080 300 L 1020 330 L 950 320 L 880 290 L 840 240 Z" fill="#457b9d" opacity="0.7"/>
-          
-          {/* Africa */}
-          <path d="M 900 380 L 980 360 L 1080 390 L 1130 460 L 1140 550 L 1120 650 L 1080 730 L 1000 780 L 920 760 L 870 700 L 850 620 L 860 530 L 880 440 Z" fill="#457b9d" opacity="0.7"/>
-          
-          {/* Asia */}
-          <path d="M 1200 150 L 1400 120 L 1600 140 L 1750 180 L 1850 240 L 1880 320 L 1860 400 L 1800 460 L 1700 500 L 1600 520 L 1500 510 L 1400 480 L 1300 430 L 1220 360 L 1180 280 L 1170 210 Z" fill="#457b9d" opacity="0.7"/>
-          
-          {/* Australia */}
-          <path d="M 1550 700 L 1650 680 L 1750 700 L 1800 750 L 1790 820 L 1740 870 L 1660 880 L 1580 860 L 1530 810 L 1520 750 Z" fill="#457b9d" opacity="0.7"/>
-          
-          {/* India */}
-          <path d="M 1280 400 L 1360 380 L 1420 420 L 1440 500 L 1420 580 L 1380 620 L 1320 630 L 1270 600 L 1250 530 L 1260 460 Z" fill="#457b9d" opacity="0.7"/>
-          
-          {/* Plot user locations as markers */}
-          {locations.map((location, index) => {
-            // Convert lat/long to SVG coordinates
-            const x = ((location.longitude + 180) / 360) * 2000;
-            const y = ((90 - location.latitude) / 180) * 1000;
-            
-            return (
-              <g key={index} className="location-marker">
-                {/* Pulse circle animation */}
-                <circle 
-                  cx={x} 
-                  cy={y} 
-                  r="30" 
-                  fill="#e63946" 
-                  opacity="0.3"
-                  className="pulse-circle"
-                />
-                
-                {/* Main marker dot */}
-                <circle 
-                  cx={x} 
-                  cy={y} 
-                  r="12" 
-                  fill="#e63946" 
-                  stroke="white" 
-                  strokeWidth="3"
-                  className="marker-dot"
-                />
-                
-                {/* Location label with background */}
-                <g className="location-label-group">
-                  <rect
-                    x={x - 60}
-                    y={y - 35}
-                    width="120"
-                    height="20"
-                    fill="white"
-                    opacity="0.9"
-                    rx="4"
-                  />
-                  <text 
-                    x={x} 
-                    y={y - 20} 
-                    textAnchor="middle" 
-                    className="location-label"
-                    fontSize="14"
-                    fill="#1d3557"
-                    fontWeight="700"
-                  >
-                    {location.city || location.country}
-                  </text>
-                </g>
-                
-                {/* User count badge */}
-                <g className="user-count-badge">
-                  <circle 
-                    cx={x + 15} 
-                    cy={y - 15} 
-                    r="14" 
-                    fill="#f77f00" 
-                    stroke="white" 
-                    strokeWidth="3"
-                  />
-                  <text 
-                    x={x + 15} 
-                    y={y - 10} 
-                    textAnchor="middle" 
-                    fontSize="12" 
-                    fill="white" 
-                    fontWeight="bold"
-                  >
-                    {location.userCount}
-                  </text>
-                </g>
-              </g>
-            );
-          })}
-        </svg>
+      <div className="google-map-wrapper">
+        <iframe
+          width="100%"
+          height="600"
+          style={{ border: 0, borderRadius: '12px' }}
+          loading="lazy"
+          allowFullScreen
+          referrerPolicy="no-referrer-when-downgrade"
+          src={`https://www.google.com/maps/embed/v1/view?key=YOUR_GOOGLE_MAPS_API_KEY&center=${
+            locations.reduce((sum, loc) => sum + loc.latitude, 0) / locations.length
+          },${
+            locations.reduce((sum, loc) => sum + loc.longitude, 0) / locations.length
+          }&zoom=4`}
+        />
+      </div>
+
+      <div className="location-info-cards">
+        <h4>📍 Detected Locations ({locations.length})</h4>
+        <div className="location-cards-grid">
+          {locations.map((location, index) => (
+            <div key={index} className="location-info-card">
+              <div className="location-card-header">
+                <span className="location-icon">📍</span>
+                <strong>{location.city || 'Unknown City'}</strong>
+              </div>
+              <div className="location-card-details">
+                <p><strong>Country:</strong> {location.country || 'N/A'}</p>
+                <p><strong>Region:</strong> {location.region || 'N/A'}</p>
+                <p><strong>Users:</strong> {location.userCount || 1}</p>
+                <p className="coordinates">
+                  {location.latitude?.toFixed(4)}, {location.longitude?.toFixed(4)}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="map-note">
+        <p><strong>Note:</strong> Replace 'YOUR_GOOGLE_MAPS_API_KEY' with your actual Google Maps API key in the code. 
+        Get one at <a href="https://console.cloud.google.com/google/maps-apis" target="_blank" rel="noopener noreferrer">Google Cloud Console</a>.</p>
       </div>
     </div>
   );
