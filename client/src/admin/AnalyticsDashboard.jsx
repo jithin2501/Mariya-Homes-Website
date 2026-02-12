@@ -5,8 +5,8 @@ import './styles/AnalyticsDashboard.css';
 const AnalyticsDashboard = () => {
   const navigate = useNavigate();
   
-  // API configuration - CHANGE THIS TO YOUR BACKEND URL
-  const API_BASE_URL = 'http://localhost:5000'; // Your backend server URL
+  // API configuration - Use relative paths for same-domain deployment
+  const API_BASE_URL = ''; // Empty string = relative URLs, works for both dev and production
   
   // Date filter state
   const [startDate, setStartDate] = useState('');
@@ -48,15 +48,14 @@ const AnalyticsDashboard = () => {
     setError(null);
     
     try {
-      console.log(`Checking backend connection to ${API_BASE_URL}...`);
+      console.log('Checking backend connection...');
       
-      // Try to fetch the test endpoint
-      const response = await fetch(`${API_BASE_URL}/api/analytics/test`, {
+      // Use relative URL - works for both localhost and production
+      const response = await fetch(`/api/analytics/test`, {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
         },
-        mode: 'cors',
       });
       
       if (response.ok) {
@@ -74,7 +73,7 @@ const AnalyticsDashboard = () => {
     } catch (error) {
       console.error('Backend connection failed:', error);
       setBackendStatus('disconnected');
-      setError(`Cannot connect to backend server at ${API_BASE_URL}. Make sure the server is running.`);
+      setError(`Cannot connect to backend server. Make sure the server is running.`);
     } finally {
       setIsCheckingBackend(false);
     }
@@ -85,14 +84,13 @@ const AnalyticsDashboard = () => {
     
     setLoading(true);
     try {
-      const url = `${API_BASE_URL}/api/analytics?startDate=${startDate}&endDate=${endDate}`;
+      const url = `/api/analytics?startDate=${startDate}&endDate=${endDate}`;
       console.log('Fetching analytics from:', url);
       
       const response = await fetch(url, {
         headers: {
           'Accept': 'application/json',
         },
-        mode: 'cors',
       });
       
       if (!response.ok) {
@@ -120,14 +118,13 @@ const AnalyticsDashboard = () => {
     if (!startDate || !endDate || backendStatus !== 'connected') return;
     
     try {
-      const url = `${API_BASE_URL}/api/analytics/geo-map?startDate=${startDate}&endDate=${endDate}`;
+      const url = `/api/analytics/geo-map?startDate=${startDate}&endDate=${endDate}`;
       console.log('Fetching geo map data from:', url);
       
       const response = await fetch(url, {
         headers: {
           'Accept': 'application/json',
         },
-        mode: 'cors',
       });
       
       if (!response.ok) {
@@ -205,7 +202,7 @@ const AnalyticsDashboard = () => {
     if (backendStatus === 'connected') {
       return (
         <div className="connection-status success">
-          <span>✅ Connected to backend server at {API_BASE_URL}</span>
+          <span>✅ Connected to backend server</span>
         </div>
       );
     }
@@ -238,23 +235,17 @@ const AnalyticsDashboard = () => {
             <h4>🔧 Troubleshooting Steps:</h4>
             <ol>
               <li>
-                <strong>Start your backend server:</strong>
-                <div className="code-block">
-                  cd C:\Users\jithi\OneDrive\Desktop\demo mariya\mariyamain\server<br />
-                  npm start
-                </div>
-              </li>
-              <li>
                 <strong>Verify backend is running:</strong>
-                <div>Open <a href="http://localhost:5000/api/analytics/test" target="_blank" rel="noopener noreferrer">http://localhost:5000/api/analytics/test</a> in your browser</div>
+                <div>Open <a href="/api/analytics/test" target="_blank" rel="noopener noreferrer">/api/analytics/test</a> in your browser</div>
                 <div className="expected-response">Expected: {"{"}"message":"Analytics routes are working!","timestamp":"..."{"}"}</div>
               </li>
               <li>
-                <strong>Check if port 5000 is in use:</strong>
-                <div className="code-block">netstat -ano | findstr :5000</div>
+                <strong>Check if the server is responding:</strong>
+                <div>The API should be available at the same domain as this application</div>
               </li>
               <li>
-                <strong>If backend is running on a different port,</strong> update the API_BASE_URL in this component
+                <strong>For local development:</strong>
+                <div>Make sure your backend server is running on the same port or using proxy</div>
               </li>
             </ol>
             
@@ -262,7 +253,7 @@ const AnalyticsDashboard = () => {
               <button onClick={checkBackendConnection} className="retry-btn">
                 🔄 Test Connection Again
               </button>
-              <button onClick={() => window.open('http://localhost:5000/api/analytics/test', '_blank')} className="test-btn">
+              <button onClick={() => window.open('/api/analytics/test', '_blank')} className="test-btn">
                 🧪 Open Test Endpoint
               </button>
             </div>
@@ -339,7 +330,7 @@ const AnalyticsDashboard = () => {
         <div className="connection-required">
           <div className="connection-icon">🔌</div>
           <h3>Backend Connection Required</h3>
-          <p>Please start the backend server to view analytics data.</p>
+          <p>Please ensure the backend server is running to view analytics data.</p>
           <button onClick={checkBackendConnection} className="retry-btn-large">
             Try Connecting Now
           </button>

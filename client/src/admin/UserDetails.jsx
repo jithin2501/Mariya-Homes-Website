@@ -19,6 +19,7 @@ const UserDetails = () => {
   const fetchUserDetails = async () => {
     setLoading(true);
     try {
+      // Use relative URL - works for both localhost and production
       const response = await fetch(`/api/analytics/user/${sessionId}`);
       const data = await response.json();
       
