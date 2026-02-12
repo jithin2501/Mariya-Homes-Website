@@ -13,6 +13,7 @@ const AnalyticsDashboard = () => {
   // Data state
   const [userAnalytics, setUserAnalytics] = useState([]);
   const [geoMapData, setGeoMapData] = useState([]);
+  const [graphData, setGraphData] = useState({ newUsers: [], comparison: null });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [backendStatus, setBackendStatus] = useState(null);
@@ -109,6 +110,7 @@ const AnalyticsDashboard = () => {
         if (!savedUserData || !savedGeoData) {
           fetchAnalytics();
           fetchGeoMapData();
+          fetchGraphData();
         }
       } else {
         throw new Error(`Server responded with status: ${response.status}`);
@@ -209,10 +211,36 @@ const AnalyticsDashboard = () => {
     }
   };
 
+  const fetchGraphData = async () => {
+    if (!startDate || !endDate || backendStatus !== 'connected') return;
+    
+    try {
+      // Make end date inclusive by adding one day for the query
+      const endDateInclusive = new Date(endDate);
+      endDateInclusive.setDate(endDateInclusive.getDate() + 1);
+      const endDateStr = formatDate(endDateInclusive);
+      
+      const url = `/api/analytics/graph-data?startDate=${startDate}&endDate=${endDateStr}`;
+      const response = await fetch(url, { headers: { 'Accept': 'application/json' } });
+      
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      
+      const data = await response.json();
+      setGraphData({
+        newUsers: data.newUsers || [],
+        comparison: data.comparison || null
+      });
+    } catch (error) {
+      console.error('Error fetching graph data:', error);
+      setGraphData({ newUsers: [], comparison: null });
+    }
+  };
+
   const handleApplyFilter = () => {
     if (backendStatus === 'connected') {
       fetchAnalytics();
       fetchGeoMapData();
+      fetchGraphData();
     } else {
       checkBackendConnection();
     }
@@ -247,6 +275,7 @@ const AnalyticsDashboard = () => {
       if (backendStatus === 'connected') {
         fetchAnalytics();
         fetchGeoMapData();
+        fetchGraphData();
       }
     }, 100);
   };
@@ -312,7 +341,7 @@ const AnalyticsDashboard = () => {
 
   return (
     <div className="analytics-dashboard">
-      <h1 className="analytics-title">Analytics Dashboard</h1>
+      <h1 className="analytics-title">📊 Analytics Dashboard</h1>
 
       <div className="filter-section">
         <h3>Filter by Date Range</h3>
@@ -367,6 +396,13 @@ const AnalyticsDashboard = () => {
           disabled={backendStatus !== 'connected'}
         >
           GEO MAP ANALYTICS
+        </button>
+        <button
+          className={`tab-btn ${activeTab === 'graph' ? 'active' : ''}`}
+          onClick={() => setActiveTab('graph')}
+          disabled={backendStatus !== 'connected'}
+        >
+          USERS GRAPH
         </button>
       </div>
 
@@ -456,6 +492,12 @@ const AnalyticsDashboard = () => {
               <OpenStreetMapView locations={geoMapData} />
             </div>
           )}
+
+          {activeTab === 'graph' && (
+            <div className="graph-section">
+              <UsersGraphView graphData={graphData} startDate={startDate} endDate={endDate} />
+            </div>
+          )}
         </>
       )}
     </div>
@@ -467,7 +509,7 @@ const OpenStreetMapView = ({ locations }) => {
   if (!locations || locations.length === 0) {
     return (
       <div className="map-container">
-        <h3>User Locations</h3>
+        <h3>🌍 User Locations</h3>
         <div className="world-map-placeholder">
           <p>No location data to display on map</p>
         </div>
@@ -638,6 +680,105 @@ const generateLeafletMapHTML = (locations, centerLat, centerLng, zoom) => {
   </script>
 </body>
 </html>`;
+};
+
+// Users Graph Component
+const UsersGraphView = ({ graphData, startDate, endDate }) => {
+  if (!graphData || (!graphData.newUsers.length && !graphData.comparison)) {
+    return (
+      <div className="graph-container">
+        <h3>📈 Users Graph</h3>
+        <div className="no-data-graph">
+          <p>No graph data available for the selected date range</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Calculate max value for scaling
+  const maxUsers = Math.max(...graphData.newUsers.map(d => d.count), 1);
+  const barMaxHeight = 300; // pixels
+
+  return (
+    <div className="graph-container">
+      {/* New Users Over Time Graph */}
+      <div className="graph-section-card">
+        <h3>📊 New Users Over Time</h3>
+        <p className="graph-subtitle">
+          From {new Date(startDate).toLocaleDateString()} to {new Date(endDate).toLocaleDateString()}
+        </p>
+        
+        <div className="bar-chart">
+          {graphData.newUsers.map((data, index) => {
+            const barHeight = (data.count / maxUsers) * barMaxHeight;
+            return (
+              <div key={index} className="bar-wrapper">
+                <div className="bar-container">
+                  <div 
+                    className="bar" 
+                    style={{ height: `${barHeight}px` }}
+                    title={`${data.count} users`}
+                  >
+                    <span className="bar-value">{data.count}</span>
+                  </div>
+                </div>
+                <div className="bar-label">{new Date(data.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Month Comparison */}
+      {graphData.comparison && (
+        <div className="comparison-section-card">
+          <h3>📅 Monthly Comparison</h3>
+          <p className="graph-subtitle">Last Month vs Current Period</p>
+          
+          <div className="comparison-grid">
+            <div className="comparison-card last-month">
+              <div className="comparison-icon">📆</div>
+              <h4>Last Month</h4>
+              <div className="comparison-value">{graphData.comparison.lastMonth}</div>
+              <p>Total Users</p>
+            </div>
+
+            <div className="comparison-arrow">
+              {graphData.comparison.currentPeriod > graphData.comparison.lastMonth ? (
+                <span className="arrow-up">↗️</span>
+              ) : graphData.comparison.currentPeriod < graphData.comparison.lastMonth ? (
+                <span className="arrow-down">↘️</span>
+              ) : (
+                <span className="arrow-same">→</span>
+              )}
+            </div>
+
+            <div className="comparison-card current-month">
+              <div className="comparison-icon">📈</div>
+              <h4>Current Period</h4>
+              <div className="comparison-value">{graphData.comparison.currentPeriod}</div>
+              <p>Total Users</p>
+            </div>
+          </div>
+
+          <div className="comparison-stats">
+            <div className="stat-card">
+              <span className="stat-label">Difference:</span>
+              <span className={`stat-value ${graphData.comparison.difference >= 0 ? 'positive' : 'negative'}`}>
+                {graphData.comparison.difference >= 0 ? '+' : ''}{graphData.comparison.difference}
+              </span>
+            </div>
+            <div className="stat-card">
+              <span className="stat-label">Growth:</span>
+              <span className={`stat-value ${graphData.comparison.percentageChange >= 0 ? 'positive' : 'negative'}`}>
+                {graphData.comparison.percentageChange >= 0 ? '+' : ''}{graphData.comparison.percentageChange.toFixed(1)}%
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default AnalyticsDashboard;
