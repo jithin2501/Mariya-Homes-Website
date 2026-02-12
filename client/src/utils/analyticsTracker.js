@@ -59,29 +59,39 @@ class AnalyticsTracker {
     let pageName = 'Home';
     let district = 'N/A';
 
-    // Map routes to page names
+    // Map routes to page names and districts
     if (path === '/' || path === '/home') {
       pageName = 'Home';
+      district = 'Main';
     } else if (path.includes('/properties')) {
       if (path.match(/\/properties\/[^/]+$/)) {
         pageName = 'Property Details';
+        district = 'Properties';
       } else {
         pageName = 'Properties';
+        district = 'Listings';
       }
     } else if (path.includes('/construction')) {
       pageName = 'Construction';
+      district = 'Services';
     } else if (path.includes('/renovation')) {
       pageName = 'Renovation';
+      district = 'Services';
     } else if (path.includes('/contact')) {
       pageName = 'Contact';
+      district = 'Main';
     } else if (path.includes('/admin')) {
       pageName = 'Admin Panel';
+      district = 'Admin';
     } else if (path.includes('/login')) {
       pageName = 'Login';
-    } else if (path.includes('/profile')) {
-      pageName = 'Profile';
+      district = 'Auth';
+    } else if (path.includes('/gallery')) {
+      pageName = 'Gallery';
+      district = 'Media';
     } else {
       pageName = path.replace('/', '') || 'Home';
+      district = 'Other';
     }
 
     return { pageName, district };
