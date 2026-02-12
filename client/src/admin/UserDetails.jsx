@@ -246,7 +246,7 @@ const UserDetails = () => {
       </div>
 
       <button onClick={exportUserHistory} className="export-history-btn">
-        📥 EXPORT THIS USER'S FULL HISTORY
+        EXPORT THIS USER'S FULL HISTORY
       </button>
 
       {userLocation && (
@@ -302,7 +302,7 @@ const UserDetails = () => {
           ) : (
             <>
               <div className="visits-header">
-                <h3>📊 Visit History ({visits.length} visits)</h3>
+                <h3>Visit History ({visits.length} visits)</h3>
               </div>
               {visits.map((visit, index) => (
                 <div key={index} className="visit-card">
