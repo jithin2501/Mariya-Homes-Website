@@ -21,9 +21,6 @@ router.get('/user/:sessionId', analyticsController.getUserDetails);
 // Get geo map data
 router.get('/geo-map', analyticsController.getGeoMapData);
 
-// Get graph data
-router.get('/graph-data', analyticsController.getGraphData);
-
 // ============ EXPORT ENDPOINTS ============
 // Export full visit details
 router.get('/export/visits', analyticsController.exportVisitDetails);
