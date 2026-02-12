@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import './styles/UserDetails.css';
 
 // Helper function to generate Leaflet.js map HTML for single user location
@@ -60,7 +60,7 @@ const generateUserLeafletMapHTML = (lat, lng, locationName) => {
     // Initialize the map centered on user location
     const map = L.map('map').setView([${lat}, ${lng}], 11);
     
-    // Add OpenStreetMap tile layer (100% free!)
+    // Add OpenStreetMap tile layer
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       maxZoom: 19,
@@ -124,28 +124,10 @@ const generateUserLeafletMapHTML = (lat, lng, locationName) => {
 const UserDetails = () => {
   const { sessionId } = useParams();
   const navigate = useNavigate();
-  const location = useLocation();
-  const username = location.state?.username || generateUsername(sessionId);
 
   const [visits, setVisits] = useState([]);
   const [userLocation, setUserLocation] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  // Generate unique username based on session ID (same logic as dashboard)
-  function generateUsername(sessionId) {
-    if (!sessionId) return 'User';
-    
-    const hash = sessionId.split('_').pop() || sessionId;
-    const numericHash = hash.split('').reduce((acc, char) => {
-      return acc + char.charCodeAt(0);
-    }, 0);
-    
-    const prefixes = ['User', 'Visitor', 'Guest'];
-    const prefix = prefixes[numericHash % prefixes.length];
-    const suffix = String(numericHash).slice(-4).padStart(4, '0');
-    
-    return `${prefix}_${suffix}`;
-  }
 
   // Format session ID to show unique shortened version
   const formatSessionId = (sessionId) => {
@@ -165,7 +147,6 @@ const UserDetails = () => {
   const fetchUserDetails = async () => {
     setLoading(true);
     try {
-      // Use relative URL - works for both localhost and production
       const response = await fetch(`/api/analytics/user/${sessionId}`);
       const data = await response.json();
       
@@ -180,7 +161,7 @@ const UserDetails = () => {
 
   const exportUserHistory = () => {
     const csv = convertToCSV(visits);
-    downloadCSV(csv, `${username}_visit_history.csv`);
+    downloadCSV(csv, `session_${formatSessionId(sessionId)}_visit_history.csv`);
   };
 
   const convertToCSV = (data) => {
@@ -230,7 +211,7 @@ const UserDetails = () => {
   return (
     <div className="user-details-container">
       <div className="header">
-        <h1>User Details — {username}</h1>
+        <h1>User Details — Session {formatSessionId(sessionId)}</h1>
         <div className="session-info">
           <span className="session-label">Session ID:</span>
           <span className="session-value">{formatSessionId(sessionId)}</span>
@@ -281,7 +262,7 @@ const UserDetails = () => {
                 title="User Location Map"
               />
               <p className="map-instruction">
-                🗺️ Free map powered by OpenStreetMap & Leaflet.js - No API key needed!
+                🗺️ Free map powered by OpenStreetMap & Leaflet.js
               </p>
             </div>
           )}

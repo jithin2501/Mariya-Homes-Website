@@ -265,135 +265,6 @@
   margin-bottom: 30px;
 }
 
-/* Map Note - Success/Free Version */
-.map-note-success {
-  background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
-  border: 2px solid #28a745;
-  padding: 20px;
-  border-radius: 10px;
-  color: #155724;
-  margin-top: 20px;
-}
-
-.map-note-success p {
-  margin: 8px 0;
-  font-size: 14px;
-  line-height: 1.6;
-}
-
-.map-note-success strong {
-  font-weight: 700;
-  color: #0d4423;
-}
-
-/* Location Info Cards */
-.location-info-cards {
-  margin-top: 30px;
-}
-
-.location-info-cards h4 {
-  font-size: 20px;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 20px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.location-cards-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 20px;
-  margin-top: 15px;
-}
-
-.location-info-card {
-  background: #f8f9fa;
-  border: 2px solid #e0e0e0;
-  border-radius: 12px;
-  padding: 20px;
-  transition: all 0.3s ease;
-}
-
-.location-info-card:hover {
-  border-color: #007bff;
-  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.15);
-  transform: translateY(-2px);
-}
-
-.location-card-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 15px;
-  padding-bottom: 12px;
-  border-bottom: 2px solid #e0e0e0;
-}
-
-.location-icon {
-  font-size: 24px;
-}
-
-.location-card-header strong {
-  font-size: 18px;
-  color: #007bff;
-  font-weight: 600;
-}
-
-.location-card-details p {
-  margin: 8px 0;
-  font-size: 14px;
-  color: #555;
-}
-
-.location-card-details strong {
-  color: #333;
-  font-weight: 600;
-  display: inline-block;
-  min-width: 90px;
-}
-
-.coordinates {
-  font-family: 'Courier New', monospace;
-  font-size: 12px;
-  color: #666;
-  background: white;
-  padding: 8px;
-  border-radius: 6px;
-  margin-top: 10px !important;
-  border: 1px solid #e0e0e0;
-}
-
-/* Map Note */
-.map-note {
-  background: #fff3cd;
-  border: 1px solid #ffc107;
-  padding: 15px;
-  border-radius: 8px;
-  color: #856404;
-  margin-top: 20px;
-}
-
-.map-note p {
-  margin: 0;
-  font-size: 14px;
-  line-height: 1.6;
-}
-
-.map-note strong {
-  font-weight: 600;
-}
-
-.map-note a {
-  color: #007bff;
-  text-decoration: underline;
-}
-
-.map-note a:hover {
-  color: #0056b3;
-}
-
 /* World Map Placeholder */
 .world-map-placeholder {
   background: #f8f9fa;
@@ -467,6 +338,35 @@
   100% { transform: rotate(360deg); }
 }
 
+/* Map Note */
+.map-note {
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  padding: 15px;
+  border-radius: 8px;
+  color: #856404;
+  margin-top: 20px;
+}
+
+.map-note p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.map-note strong {
+  font-weight: 600;
+}
+
+.map-note a {
+  color: #007bff;
+  text-decoration: underline;
+}
+
+.map-note a:hover {
+  color: #0056b3;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .date-filters {
@@ -484,10 +384,6 @@
 
   .export-buttons {
     flex-direction: column;
-  }
-
-  .location-cards-grid {
-    grid-template-columns: 1fr;
   }
 
   .analytics-table {
