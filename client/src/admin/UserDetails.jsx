@@ -189,13 +189,12 @@ const UserDetails = () => {
   const convertToCSV = (data) => {
     if (!data || data.length === 0) return '';
     
-    const headers = ['Location', 'District', 'Time (seconds)', 'Exit Reason', 'Timestamp'];
+    const headers = ['Location', 'Time (seconds)', 'Exit Reason', 'Timestamp'];
     const csvRows = [headers.join(',')];
     
     data.forEach(visit => {
       const values = [
         visit.location,
-        visit.district,
         visit.timeSpent,
         `"${visit.exitReason}"`,
         new Date(visit.timestamp).toLocaleString()
@@ -246,7 +245,7 @@ const UserDetails = () => {
       </div>
 
       <button onClick={exportUserHistory} className="export-history-btn">
-        EXPORT THIS USER'S FULL HISTORY
+        📥 EXPORT THIS USER'S FULL HISTORY
       </button>
 
       {userLocation && (
@@ -302,7 +301,7 @@ const UserDetails = () => {
           ) : (
             <>
               <div className="visits-header">
-                <h3>Visit History ({visits.length} visits)</h3>
+                <h3>📊 Visit History ({visits.length} visits)</h3>
               </div>
               {visits.map((visit, index) => (
                 <div key={index} className="visit-card">

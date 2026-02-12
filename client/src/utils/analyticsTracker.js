@@ -23,18 +23,12 @@ class AnalyticsTracker {
   init(username = 'Anonymous') {
     if (this.initialized) return;
     
-    // Check if user is logged in as admin/superadmin
-    const adminUsername = localStorage.getItem('adminUsername');
-    const userRole = localStorage.getItem('userRole');
-    
-    // Use admin username if available, otherwise use provided username
-    if (adminUsername && (userRole === 'admin' || userRole === 'superadmin')) {
-      this.username = adminUsername;
-    } else {
-      this.username = username;
-    }
-    
+    this.username = username;
     this.initialized = true;
+
+    console.log('🎯 Analytics Tracker Initialized');
+    console.log('📊 Tracking: PUBLIC WEBSITE ONLY (Admin panel excluded)');
+    console.log('👤 Session ID:', this.sessionId);
 
     // Track page views
     this.trackPageView();
@@ -58,26 +52,18 @@ class AnalyticsTracker {
     });
   }
 
-  // Set username when user logs in (call this after successful login)
-  setUsername(username, role = null) {
-    this.username = username;
-    
-    // Store in localStorage for persistence
-    if (role === 'admin' || role === 'superadmin') {
-      localStorage.setItem('adminUsername', username);
-      localStorage.setItem('userRole', role);
-    }
-    
-    console.log('Analytics username updated to:', username);
-  }
-
   // Get current page information
   getCurrentPageInfo() {
     const path = window.location.pathname;
     let pageName = 'Home';
     let district = 'N/A';
 
-    // Map routes to page names and districts
+    // ⛔ DO NOT TRACK ADMIN PANEL - Return null to skip tracking
+    if (path.includes('/admin')) {
+      return null;
+    }
+
+    // Map routes to page names and districts (ONLY PUBLIC PAGES)
     if (path === '/' || path === '/home') {
       pageName = 'Home';
       district = 'Main';
@@ -98,15 +84,6 @@ class AnalyticsTracker {
     } else if (path.includes('/contact')) {
       pageName = 'Contact';
       district = 'Main';
-    } else if (path.includes('/admin')) {
-      pageName = 'Admin Panel';
-      district = 'Admin';
-    } else if (path.includes('/login')) {
-      pageName = 'Login';
-      district = 'Auth';
-    } else if (path.includes('/gallery')) {
-      pageName = 'Gallery';
-      district = 'Media';
     } else {
       pageName = path.replace('/', '') || 'Home';
       district = 'Other';
@@ -117,16 +94,24 @@ class AnalyticsTracker {
 
   // Track page view
   trackPageView() {
+    const pageInfo = this.getCurrentPageInfo();
+    
+    // ⛔ Skip tracking if on admin panel
+    if (!pageInfo) {
+      console.log('⛔ Skipping analytics tracking - Admin panel detected');
+      return;
+    }
+
     // If there's a previous page, track exit
     if (this.currentPage) {
       this.trackPageExit();
     }
 
-    const { pageName, district } = this.getCurrentPageInfo();
+    const { pageName, district } = pageInfo;
     this.currentPage = pageName;
     this.pageStartTime = Date.now();
 
-    console.log('Tracking page view:', pageName);
+    console.log('✅ Tracking page view:', pageName);
   }
 
   // Track page exit
@@ -134,18 +119,28 @@ class AnalyticsTracker {
     if (!this.currentPage || !this.pageStartTime) return;
 
     const timeSpent = Math.floor((Date.now() - this.pageStartTime) / 1000); // Convert to seconds
-    const { pageName: nextPage } = this.getCurrentPageInfo();
+    const pageInfo = this.getCurrentPageInfo();
+    
+    // ⛔ If navigating to admin panel, don't track the exit
+    if (!pageInfo) {
+      console.log('⛔ User navigated to admin panel - Not tracking exit');
+      this.currentPage = null;
+      this.pageStartTime = null;
+      return;
+    }
+
+    const { pageName: nextPage } = pageInfo;
     
     let exitReason = 'Unknown';
     if (nextPage !== this.currentPage) {
-      exitReason = `User navigated inside site (from ${this.currentPage} → ${nextPage})`;
+      exitReason = `Navigated to ${nextPage}`;
     } else if (document.hidden) {
       exitReason = 'Tab switched or minimized';
     } else {
-      exitReason = `Tab closed or reloaded (from ${this.currentPage} → Unknown Location)`;
+      exitReason = 'Tab closed or left website';
     }
 
-    const { district } = this.getCurrentPageInfo();
+    const { district } = pageInfo;
 
     this.sendTrackingData({
       location: this.currentPage,
@@ -154,7 +149,7 @@ class AnalyticsTracker {
       exitReason
     });
 
-    console.log('Tracking exit:', this.currentPage, timeSpent + 's');
+    console.log('✅ Tracking exit:', this.currentPage, timeSpent + 's');
   }
 
   // Send tracking data to server
