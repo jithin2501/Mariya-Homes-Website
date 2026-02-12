@@ -121,9 +121,9 @@ const AnalyticsDashboard = () => {
     }
   };
 
-  // Generate unique username based on session ID
+  // Generate unique 5-digit session ID based on session ID
   const generateUsername = (sessionId) => {
-    if (!sessionId) return 'User';
+    if (!sessionId) return '00000';
     
     // Extract a unique identifier from the session ID
     const hash = sessionId.split('_').pop() || sessionId;
@@ -131,24 +131,25 @@ const AnalyticsDashboard = () => {
       return acc + char.charCodeAt(0);
     }, 0);
     
-    // Generate a username like "User_4582" or "Visitor_7821"
-    const prefixes = ['User', 'Visitor', 'Guest'];
-    const prefix = prefixes[numericHash % prefixes.length];
-    const suffix = String(numericHash).slice(-4).padStart(4, '0');
+    // Generate a 5-digit number (00000-99999)
+    const fiveDigit = String(numericHash % 100000).padStart(5, '0');
     
-    return `${prefix}_${suffix}`;
+    return fiveDigit;
   };
 
-  // Format session ID to show unique shortened version
+  // Format session ID to show unique 5-digit version
   const formatSessionId = (sessionId) => {
-    if (!sessionId) return 'N/A';
+    if (!sessionId) return '00000';
     
-    // Show last 8 characters of the session ID to make it unique and identifiable
-    const displayId = sessionId.length > 8 
-      ? sessionId.slice(-8).toUpperCase() 
-      : sessionId.toUpperCase();
+    // Use the same logic as generateUsername to ensure consistency
+    const hash = sessionId.split('_').pop() || sessionId;
+    const numericHash = hash.split('').reduce((acc, char) => {
+      return acc + char.charCodeAt(0);
+    }, 0);
     
-    return displayId;
+    const fiveDigit = String(numericHash % 100000).padStart(5, '0');
+    
+    return fiveDigit;
   };
 
   const fetchAnalytics = async () => {
@@ -398,7 +399,6 @@ const AnalyticsDashboard = () => {
                   <table className="analytics-table">
                     <thead>
                       <tr>
-                        <th>Username</th>
                         <th>Session ID</th>
                         <th>Locations</th>
                         <th>Visits</th>
@@ -410,14 +410,13 @@ const AnalyticsDashboard = () => {
                     <tbody>
                       {userAnalytics.length === 0 ? (
                         <tr>
-                          <td colSpan="7" className="no-data">
+                          <td colSpan="6" className="no-data">
                             No analytics data available for the selected date range
                           </td>
                         </tr>
                       ) : (
                         userAnalytics.map((user, index) => (
                           <tr key={index}>
-                            <td>{user.displayUsername || user.username}</td>
                             <td className="session-id">{formatSessionId(user.sessionId)}</td>
                             <td>{user.locations}</td>
                             <td className="text-center">{user.visitCount}</td>
@@ -498,32 +497,7 @@ const OpenStreetMapView = ({ locations }) => {
         />
       </div>
 
-      <div className="location-info-cards">
-        <h4>📍 Detected Locations ({locations.length})</h4>
-        <div className="location-cards-grid">
-          {locations.map((location, index) => (
-            <div key={index} className="location-info-card">
-              <div className="location-card-header">
-                <span className="location-icon">📍</span>
-                <strong>{location.city || 'Unknown City'}</strong>
-              </div>
-              <div className="location-card-details">
-                <p><strong>Country:</strong> {location.country || 'N/A'}</p>
-                <p><strong>Region:</strong> {location.region || 'N/A'}</p>
-                <p><strong>Users:</strong> {location.userCount || 1}</p>
-                <p className="coordinates">
-                  {location.latitude?.toFixed(4)}, {location.longitude?.toFixed(4)}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
 
-      <div className="map-note-success">
-        <p><strong>✅ 100% Free & Open Source!</strong> This map uses OpenStreetMap and Leaflet.js - no API keys required!</p>
-        <p><strong>🗺️ Powered by:</strong> OpenStreetMap contributors | Leaflet.js mapping library</p>
-      </div>
     </div>
   );
 };

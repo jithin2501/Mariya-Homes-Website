@@ -131,31 +131,34 @@ const UserDetails = () => {
   const [userLocation, setUserLocation] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Generate unique username based on session ID (same logic as dashboard)
+  // Generate unique 5-digit session ID based on session ID (same logic as dashboard)
   function generateUsername(sessionId) {
-    if (!sessionId) return 'User';
+    if (!sessionId) return '00000';
     
     const hash = sessionId.split('_').pop() || sessionId;
     const numericHash = hash.split('').reduce((acc, char) => {
       return acc + char.charCodeAt(0);
     }, 0);
     
-    const prefixes = ['User', 'Visitor', 'Guest'];
-    const prefix = prefixes[numericHash % prefixes.length];
-    const suffix = String(numericHash).slice(-4).padStart(4, '0');
+    // Generate a 5-digit number (00000-99999)
+    const fiveDigit = String(numericHash % 100000).padStart(5, '0');
     
-    return `${prefix}_${suffix}`;
+    return fiveDigit;
   }
 
-  // Format session ID to show unique shortened version
+  // Format session ID to show unique 5-digit version
   const formatSessionId = (sessionId) => {
-    if (!sessionId) return 'N/A';
+    if (!sessionId) return '00000';
     
-    const displayId = sessionId.length > 8 
-      ? sessionId.slice(-8).toUpperCase() 
-      : sessionId.toUpperCase();
+    // Use the same logic as generateUsername to ensure consistency
+    const hash = sessionId.split('_').pop() || sessionId;
+    const numericHash = hash.split('').reduce((acc, char) => {
+      return acc + char.charCodeAt(0);
+    }, 0);
     
-    return displayId;
+    const fiveDigit = String(numericHash % 100000).padStart(5, '0');
+    
+    return fiveDigit;
   };
 
   useEffect(() => {
@@ -180,7 +183,7 @@ const UserDetails = () => {
 
   const exportUserHistory = () => {
     const csv = convertToCSV(visits);
-    downloadCSV(csv, `${username}_visit_history.csv`);
+    downloadCSV(csv, `session_${formatSessionId(sessionId)}_visit_history.csv`);
   };
 
   const convertToCSV = (data) => {
@@ -230,7 +233,7 @@ const UserDetails = () => {
   return (
     <div className="user-details-container">
       <div className="header">
-        <h1>User Details — {username}</h1>
+        <h1>User Details</h1>
         <div className="session-info">
           <span className="session-label">Session ID:</span>
           <span className="session-value">{formatSessionId(sessionId)}</span>
