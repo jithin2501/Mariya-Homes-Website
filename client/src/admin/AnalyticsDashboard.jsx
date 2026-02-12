@@ -301,7 +301,7 @@ const AnalyticsDashboard = () => {
 
   return (
     <div className="analytics-dashboard">
-      <h1 className="analytics-title">📊 Analytics Dashboard</h1>
+      <h1 className="analytics-title">ANALYTICS DASHBOARD</h1>
 
       <div className="filter-section">
         <h3>Filter by Date Range</h3>
@@ -483,7 +483,7 @@ const OpenStreetMapView = ({ locations }) => {
 
   return (
     <div className="map-container">
-      <h3>🌍 User Locations ({locations.length} {locations.length === 1 ? 'Location' : 'Locations'})</h3>
+      <h3>User Locations ({locations.length} {locations.length === 1 ? 'Location' : 'Locations'})</h3>
       
       <div className="openstreetmap-wrapper">
         <iframe
