@@ -257,12 +257,33 @@
   gap: 10px !important;
 }
 
-/* Google Maps Wrapper */
-.google-map-wrapper {
+/* OpenStreetMap Wrapper */
+.openstreetmap-wrapper {
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   margin-bottom: 30px;
+}
+
+/* Map Note - Success/Free Version */
+.map-note-success {
+  background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+  border: 2px solid #28a745;
+  padding: 20px;
+  border-radius: 10px;
+  color: #155724;
+  margin-top: 20px;
+}
+
+.map-note-success p {
+  margin: 8px 0;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.map-note-success strong {
+  font-weight: 700;
+  color: #0d4423;
 }
 
 /* Location Info Cards */

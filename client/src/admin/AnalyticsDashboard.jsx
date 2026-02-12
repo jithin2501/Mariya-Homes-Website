@@ -443,7 +443,7 @@ const AnalyticsDashboard = () => {
 
           {activeTab === 'geo' && (
             <div className="geo-map-section">
-              <GoogleMapView locations={geoMapData} />
+              <OpenStreetMapView locations={geoMapData} />
             </div>
           )}
         </>
@@ -452,49 +452,8 @@ const AnalyticsDashboard = () => {
   );
 };
 
-// Google Maps Component
-const GoogleMapView = ({ locations }) => {
-  const [mapUrl, setMapUrl] = useState('');
-
-  useEffect(() => {
-    if (locations && locations.length > 0) {
-      generateMapUrl();
-    }
-  }, [locations]);
-
-  const generateMapUrl = () => {
-    // Get the center point (average of all locations)
-    const avgLat = locations.reduce((sum, loc) => sum + loc.latitude, 0) / locations.length;
-    const avgLng = locations.reduce((sum, loc) => sum + loc.longitude, 0) / locations.length;
-
-    // Create markers for each location
-    const markers = locations.map(loc => {
-      const label = (loc.city || loc.country || 'Location').substring(0, 1);
-      return `markers=color:red%7Clabel:${label}%7C${loc.latitude},${loc.longitude}`;
-    }).join('&');
-
-    // Determine zoom level based on the spread of locations
-    const latSpread = Math.max(...locations.map(l => l.latitude)) - Math.min(...locations.map(l => l.latitude));
-    const lngSpread = Math.max(...locations.map(l => l.longitude)) - Math.min(...locations.map(l => l.longitude));
-    const maxSpread = Math.max(latSpread, lngSpread);
-    
-    let zoom = 2;
-    if (maxSpread < 1) zoom = 10;
-    else if (maxSpread < 5) zoom = 7;
-    else if (maxSpread < 20) zoom = 5;
-    else if (maxSpread < 50) zoom = 4;
-    else zoom = 2;
-
-    // Build the Google Maps Embed URL
-    const baseUrl = 'https://www.google.com/maps/embed/v1/view';
-    const apiKey = 'YOUR_GOOGLE_MAPS_API_KEY'; // Replace with your actual API key
-    
-    // Alternative: Use the simpler static map approach with multiple markers
-    const url = `${baseUrl}?key=${apiKey}&center=${avgLat},${avgLng}&zoom=${zoom}&${markers}`;
-    
-    setMapUrl(url);
-  };
-
+// OpenStreetMap Component with Leaflet.js - 100% FREE, NO API KEY NEEDED!
+const OpenStreetMapView = ({ locations }) => {
   if (!locations || locations.length === 0) {
     return (
       <div className="map-container">
@@ -506,22 +465,36 @@ const GoogleMapView = ({ locations }) => {
     );
   }
 
+  // Calculate center point
+  const centerLat = locations.reduce((sum, loc) => sum + loc.latitude, 0) / locations.length;
+  const centerLng = locations.reduce((sum, loc) => sum + loc.longitude, 0) / locations.length;
+
+  // Determine zoom level based on spread
+  const latSpread = Math.max(...locations.map(l => l.latitude)) - Math.min(...locations.map(l => l.latitude));
+  const lngSpread = Math.max(...locations.map(l => l.longitude)) - Math.min(...locations.map(l => l.longitude));
+  const maxSpread = Math.max(latSpread, lngSpread);
+  
+  let zoom = 2;
+  if (maxSpread < 1) zoom = 11;
+  else if (maxSpread < 5) zoom = 8;
+  else if (maxSpread < 20) zoom = 6;
+  else if (maxSpread < 50) zoom = 4;
+  else if (maxSpread < 100) zoom = 3;
+  else zoom = 2;
+
   return (
     <div className="map-container">
-      <h3>🌍 User Locations</h3>
-      <div className="google-map-wrapper">
+      <h3>🌍 User Locations ({locations.length} {locations.length === 1 ? 'Location' : 'Locations'})</h3>
+      
+      <div className="openstreetmap-wrapper">
         <iframe
           width="100%"
           height="600"
           style={{ border: 0, borderRadius: '12px' }}
           loading="lazy"
-          allowFullScreen
           referrerPolicy="no-referrer-when-downgrade"
-          src={`https://www.google.com/maps/embed/v1/view?key=YOUR_GOOGLE_MAPS_API_KEY&center=${
-            locations.reduce((sum, loc) => sum + loc.latitude, 0) / locations.length
-          },${
-            locations.reduce((sum, loc) => sum + loc.longitude, 0) / locations.length
-          }&zoom=4`}
+          srcDoc={generateLeafletMapHTML(locations, centerLat, centerLng, zoom)}
+          title="User Locations Map"
         />
       </div>
 
@@ -547,12 +520,139 @@ const GoogleMapView = ({ locations }) => {
         </div>
       </div>
 
-      <div className="map-note">
-        <p><strong>Note:</strong> Replace 'YOUR_GOOGLE_MAPS_API_KEY' with your actual Google Maps API key in the code. 
-        Get one at <a href="https://console.cloud.google.com/google/maps-apis" target="_blank" rel="noopener noreferrer">Google Cloud Console</a>.</p>
+      <div className="map-note-success">
+        <p><strong>✅ 100% Free & Open Source!</strong> This map uses OpenStreetMap and Leaflet.js - no API keys required!</p>
+        <p><strong>🗺️ Powered by:</strong> OpenStreetMap contributors | Leaflet.js mapping library</p>
       </div>
     </div>
   );
+};
+
+// Helper function to generate Leaflet.js map HTML with OpenStreetMap tiles
+const generateLeafletMapHTML = (locations, centerLat, centerLng, zoom) => {
+  const markers = locations.map((loc, index) => {
+    const cityName = (loc.city || loc.country || 'Location').replace(/'/g, "\\'");
+    const region = (loc.region || '').replace(/'/g, "\\'");
+    const country = (loc.country || '').replace(/'/g, "\\'");
+    return `
+      {
+        lat: ${loc.latitude},
+        lng: ${loc.longitude},
+        title: "${cityName}",
+        label: "${index + 1}",
+        info: "<div style='padding:10px; font-family: Arial, sans-serif;'><h3 style='margin:0 0 8px 0; color:#007bff;'>${cityName}</h3><p style='margin:4px 0; color:#555;'><strong>Region:</strong> ${region}</p><p style='margin:4px 0; color:#555;'><strong>Country:</strong> ${country}</p><p style='margin:4px 0; color:#007bff;'><strong>Users:</strong> ${loc.userCount || 1}</p><p style='margin:8px 0 0 0; font-size:12px; color:#666; font-family:monospace;'>${loc.latitude.toFixed(4)}, ${loc.longitude.toFixed(4)}</p></div>"
+      }`;
+  }).join(',');
+
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Locations Map</title>
+  
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" 
+    crossorigin=""/>
+  
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" 
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" 
+    crossorigin=""></script>
+  
+  <style>
+    * { margin: 0; padding: 0; }
+    html, body { height: 100%; width: 100%; }
+    #map { height: 100%; width: 100%; }
+    
+    /* Custom marker styles */
+    .custom-marker {
+      background-color: #FF0000;
+      border: 3px solid #FFFFFF;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 14px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+      cursor: pointer;
+    }
+    
+    .leaflet-popup-content-wrapper {
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    
+    .leaflet-popup-content {
+      margin: 0;
+      min-width: 200px;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  
+  <script>
+    // Initialize the map
+    const map = L.map('map').setView([${centerLat}, ${centerLng}], ${zoom});
+    
+    // Add OpenStreetMap tile layer (100% free!)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      maxZoom: 19,
+      minZoom: 2
+    }).addTo(map);
+    
+    // Location data
+    const locations = [${markers}];
+    
+    // Create custom icon
+    const createCustomIcon = (label) => {
+      return L.divIcon({
+        className: 'custom-div-icon',
+        html: '<div class="custom-marker">' + label + '</div>',
+        iconSize: [30, 30],
+        iconAnchor: [15, 15],
+        popupAnchor: [0, -15]
+      });
+    };
+    
+    // Add markers
+    const markerGroup = L.featureGroup();
+    
+    locations.forEach((location) => {
+      const marker = L.marker([location.lat, location.lng], {
+        icon: createCustomIcon(location.label),
+        title: location.title
+      }).addTo(map);
+      
+      marker.bindPopup(location.info, {
+        maxWidth: 300,
+        className: 'custom-popup'
+      });
+      
+      markerGroup.addLayer(marker);
+    });
+    
+    // Fit map to show all markers
+    if (locations.length > 1) {
+      map.fitBounds(markerGroup.getBounds().pad(0.1));
+    }
+    
+    // Add scale control
+    L.control.scale({
+      imperial: true,
+      metric: true
+    }).addTo(map);
+  </script>
+</body>
+</html>`;
 };
 
 export default AnalyticsDashboard;

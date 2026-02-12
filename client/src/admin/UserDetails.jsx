@@ -2,6 +2,125 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import './styles/UserDetails.css';
 
+// Helper function to generate Leaflet.js map HTML for single user location
+const generateUserLeafletMapHTML = (lat, lng, locationName) => {
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Location</title>
+  
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" 
+    crossorigin=""/>
+  
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" 
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" 
+    crossorigin=""></script>
+  
+  <style>
+    * { margin: 0; padding: 0; }
+    html, body { height: 100%; width: 100%; }
+    #map { height: 100%; width: 100%; }
+    
+    .custom-marker {
+      background-color: #FF0000;
+      border: 3px solid #FFFFFF;
+      border-radius: 50%;
+      width: 35px;
+      height: 35px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.1); opacity: 0.9; }
+    }
+    
+    .leaflet-popup-content-wrapper {
+      border-radius: 10px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+    }
+    
+    .leaflet-popup-content {
+      margin: 0;
+      min-width: 220px;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  
+  <script>
+    // Initialize the map centered on user location
+    const map = L.map('map').setView([${lat}, ${lng}], 11);
+    
+    // Add OpenStreetMap tile layer (100% free!)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      maxZoom: 19,
+      minZoom: 2
+    }).addTo(map);
+    
+    // Create custom pulsing marker icon
+    const customIcon = L.divIcon({
+      className: 'custom-div-icon',
+      html: '<div class="custom-marker"></div>',
+      iconSize: [35, 35],
+      iconAnchor: [17.5, 17.5],
+      popupAnchor: [0, -17.5]
+    });
+    
+    // Add marker at user location
+    const marker = L.marker([${lat}, ${lng}], {
+      icon: customIcon,
+      title: "${locationName.replace(/"/g, '&quot;')}"
+    }).addTo(map);
+    
+    // Create popup content
+    const popupContent = \`
+      <div style="padding:12px; font-family: Arial, sans-serif;">
+        <h3 style="margin:0 0 10px 0; color:#007bff; font-size:16px;">📍 ${locationName.replace(/"/g, '&quot;')}</h3>
+        <p style="margin:4px 0; color:#555; font-size:13px;">
+          <strong>Latitude:</strong> ${lat.toFixed(6)}
+        </p>
+        <p style="margin:4px 0; color:#555; font-size:13px;">
+          <strong>Longitude:</strong> ${lng.toFixed(6)}
+        </p>
+        <p style="margin-top:8px; font-size:11px; color:#999;">
+          🗺️ Approximate location based on IP
+        </p>
+      </div>
+    \`;
+    
+    marker.bindPopup(popupContent, {
+      maxWidth: 250,
+      className: 'custom-popup'
+    });
+    
+    // Auto-open popup after a short delay
+    setTimeout(() => {
+      marker.openPopup();
+    }, 500);
+    
+    // Add scale control
+    L.control.scale({
+      imperial: true,
+      metric: true
+    }).addTo(map);
+    
+    // Add zoom control position
+    map.zoomControl.setPosition('topright');
+  </script>
+</body>
+</html>`;
+};
+
 const UserDetails = () => {
   const { sessionId } = useParams();
   const navigate = useNavigate();
@@ -145,19 +264,25 @@ const UserDetails = () => {
             )}
           </div>
           
-          {/* Google Maps embed showing user's location */}
+          {/* OpenStreetMap embed showing user's location with pulsing marker */}
           {userLocation.latitude && userLocation.longitude && (
             <div className="user-map-container">
               <iframe
                 width="100%"
-                height="300"
+                height="400"
                 style={{ border: 0, borderRadius: '8px', marginTop: '15px' }}
                 loading="lazy"
-                allowFullScreen
                 referrerPolicy="no-referrer-when-downgrade"
-                src={`https://www.google.com/maps/embed/v1/place?key=YOUR_GOOGLE_MAPS_API_KEY&q=${userLocation.latitude},${userLocation.longitude}&zoom=10`}
+                srcDoc={generateUserLeafletMapHTML(
+                  userLocation.latitude, 
+                  userLocation.longitude, 
+                  userLocation.city || userLocation.country || 'User Location'
+                )}
                 title="User Location Map"
               />
+              <p className="map-instruction">
+                🗺️ Free map powered by OpenStreetMap & Leaflet.js - No API key needed!
+              </p>
             </div>
           )}
         </div>
