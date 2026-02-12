@@ -188,6 +188,13 @@ const AnalyticsDashboard = () => {
     }, 100);
   };
 
+  // Format session ID to show only the unique number part
+  const formatSessionId = (sessionId) => {
+    if (!sessionId) return 'N/A';
+    // Remove "session_" prefix and show only the unique part
+    return sessionId.replace('session_', '').substring(0, 16);
+  };
+
   // Render backend connection status
   const renderBackendStatus = () => {
     if (isCheckingBackend) {
@@ -370,7 +377,6 @@ const AnalyticsDashboard = () => {
                         <th>Username</th>
                         <th>Session ID</th>
                         <th>Locations</th>
-                        <th>Districts</th>
                         <th>Visits</th>
                         <th>Total Time</th>
                         <th>Last Visit</th>
@@ -380,7 +386,7 @@ const AnalyticsDashboard = () => {
                     <tbody>
                       {userAnalytics.length === 0 ? (
                         <tr>
-                          <td colSpan="8" className="no-data">
+                          <td colSpan="7" className="no-data">
                             No analytics data available for the selected date range
                           </td>
                         </tr>
@@ -388,9 +394,8 @@ const AnalyticsDashboard = () => {
                         userAnalytics.map((user, index) => (
                           <tr key={index}>
                             <td>{user.username}</td>
-                            <td className="session-id">{user.sessionId?.substring(0, 12)}...</td>
+                            <td className="session-id">{formatSessionId(user.sessionId)}</td>
                             <td>{user.locations}</td>
-                            <td>{user.districts}</td>
                             <td className="text-center">{user.visitCount}</td>
                             <td className="text-right">{formatTime(user.totalTime)}</td>
                             <td>{new Date(user.lastVisit).toLocaleDateString()}</td>

@@ -23,7 +23,17 @@ class AnalyticsTracker {
   init(username = 'Anonymous') {
     if (this.initialized) return;
     
-    this.username = username;
+    // Check if user is logged in as admin/superadmin
+    const adminUsername = localStorage.getItem('adminUsername');
+    const userRole = localStorage.getItem('userRole');
+    
+    // Use admin username if available, otherwise use provided username
+    if (adminUsername && (userRole === 'admin' || userRole === 'superadmin')) {
+      this.username = adminUsername;
+    } else {
+      this.username = username;
+    }
+    
     this.initialized = true;
 
     // Track page views
@@ -48,9 +58,17 @@ class AnalyticsTracker {
     });
   }
 
-  // Set username when user logs in
-  setUsername(username) {
+  // Set username when user logs in (call this after successful login)
+  setUsername(username, role = null) {
     this.username = username;
+    
+    // Store in localStorage for persistence
+    if (role === 'admin' || role === 'superadmin') {
+      localStorage.setItem('adminUsername', username);
+      localStorage.setItem('userRole', role);
+    }
+    
+    console.log('Analytics username updated to:', username);
   }
 
   // Get current page information
