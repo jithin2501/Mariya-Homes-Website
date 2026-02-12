@@ -157,7 +157,13 @@ const AnalyticsDashboard = () => {
     
     setLoading(true);
     try {
-      const url = `/api/analytics?startDate=${startDate}&endDate=${endDate}`;
+      // Make end date inclusive by adding one day for the query
+      // This ensures data from the selected end date is included
+      const endDateInclusive = new Date(endDate);
+      endDateInclusive.setDate(endDateInclusive.getDate() + 1);
+      const endDateStr = formatDate(endDateInclusive);
+      
+      const url = `/api/analytics?startDate=${startDate}&endDate=${endDateStr}`;
       const response = await fetch(url, { headers: { 'Accept': 'application/json' } });
       
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -185,7 +191,12 @@ const AnalyticsDashboard = () => {
     if (!startDate || !endDate || backendStatus !== 'connected') return;
     
     try {
-      const url = `/api/analytics/geo-map?startDate=${startDate}&endDate=${endDate}`;
+      // Make end date inclusive by adding one day for the query
+      const endDateInclusive = new Date(endDate);
+      endDateInclusive.setDate(endDateInclusive.getDate() + 1);
+      const endDateStr = formatDate(endDateInclusive);
+      
+      const url = `/api/analytics/geo-map?startDate=${startDate}&endDate=${endDateStr}`;
       const response = await fetch(url, { headers: { 'Accept': 'application/json' } });
       
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -301,7 +312,7 @@ const AnalyticsDashboard = () => {
 
   return (
     <div className="analytics-dashboard">
-      <h1 className="analytics-title">ANALYTICS DASHBOARD</h1>
+      <h1 className="analytics-title">Analytics Dashboard</h1>
 
       <div className="filter-section">
         <h3>Filter by Date Range</h3>
@@ -456,7 +467,7 @@ const OpenStreetMapView = ({ locations }) => {
   if (!locations || locations.length === 0) {
     return (
       <div className="map-container">
-        <h3>🌍 User Locations</h3>
+        <h3>User Locations</h3>
         <div className="world-map-placeholder">
           <p>No location data to display on map</p>
         </div>
@@ -483,7 +494,7 @@ const OpenStreetMapView = ({ locations }) => {
 
   return (
     <div className="map-container">
-      <h3>User Locations ({locations.length} {locations.length === 1 ? 'Location' : 'Locations'})</h3>
+      <h3>🌍 User Locations ({locations.length} {locations.length === 1 ? 'Location' : 'Locations'})</h3>
       
       <div className="openstreetmap-wrapper">
         <iframe
