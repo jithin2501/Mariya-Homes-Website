@@ -242,9 +242,12 @@
 }
 
 .map-container h3 {
-  color: #333;
-  font-size: 20px;
-  margin-bottom: 20px;
+  color: #333 !important; /* Force dark text color */
+  font-size: 24px !important;
+  margin-bottom: 20px !important;
+  font-weight: 600 !important;
+  display: block !important;
+  visibility: visible !important;
 }
 
 .map-placeholder {
@@ -287,6 +290,13 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
+.location-card h4 {
+  margin: 0 0 15px 0;
+  font-size: 18px;
+  color: #333;
+  font-weight: 600;
+}
+
 .location-header {
   display: flex;
   justify-content: space-between;
@@ -314,6 +324,12 @@
   grid-template-columns: repeat(3, 1fr);
   gap: 15px;
   margin-bottom: 15px;
+}
+
+.location-stats span {
+  font-size: 14px;
+  color: #555;
+  font-weight: 500;
 }
 
 .stat {
