@@ -84,10 +84,10 @@ const UserDetails = () => {
   return (
     <div className="user-details-container">
       <div className="header">
+        <h1>User Details — {username}</h1>
         <button onClick={() => navigate('/admin/analytics')} className="back-btn">
           ← Back to Analytics
         </button>
-        <h1>User Details — {username}</h1>
       </div>
 
       <button onClick={exportUserHistory} className="export-history-btn">

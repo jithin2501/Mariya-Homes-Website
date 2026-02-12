@@ -270,6 +270,88 @@
   margin-bottom: 30px;
 }
 
+/* World Map Styles */
+.world-map {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  margin-bottom: 30px;
+  overflow: hidden;
+}
+
+.map-svg {
+  width: 100%;
+  height: auto;
+  max-height: 500px;
+  background: #b8dce8;
+  border-radius: 8px;
+}
+
+.world-map-placeholder {
+  background: #f8f9fa;
+  padding: 60px;
+  border-radius: 12px;
+  text-align: center;
+  border: 2px dashed #e0e0e0;
+}
+
+.world-map-placeholder p {
+  color: #666;
+  font-size: 16px;
+  margin: 0;
+}
+
+/* Location Markers Animation */
+.location-marker {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.location-marker:hover .marker-dot {
+  r: 12;
+  fill: #0056b3;
+}
+
+.location-marker:hover .location-label {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.pulse-circle {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    r: 20;
+    opacity: 0.2;
+  }
+  50% {
+    r: 30;
+    opacity: 0.05;
+  }
+}
+
+.marker-dot {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  transition: all 0.3s ease;
+}
+
+.location-label {
+  font-family: 'Inter', sans-serif;
+  pointer-events: none;
+  text-shadow: 1px 1px 2px white, -1px -1px 2px white, 1px -1px 2px white, -1px 1px 2px white;
+}
+
+.user-count-badge {
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.3));
+}
+
+.map-container {
+  margin-bottom: 30px;
+}
+
 /* Location List */
 .location-list {
   display: grid;

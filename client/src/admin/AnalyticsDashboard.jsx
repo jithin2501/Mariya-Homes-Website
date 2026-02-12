@@ -5,8 +5,8 @@ import './styles/AnalyticsDashboard.css';
 const AnalyticsDashboard = () => {
   const navigate = useNavigate();
   
-  // API configuration - Use relative paths for same-domain deployment
-  const API_BASE_URL = ''; // Empty string = relative URLs, works for both dev and production
+  // API configuration
+  const API_BASE_URL = '';
   
   // Date filter state
   const [startDate, setStartDate] = useState('');
@@ -21,18 +21,15 @@ const AnalyticsDashboard = () => {
   const [backendStatus, setBackendStatus] = useState(null);
   const [isCheckingBackend, setIsCheckingBackend] = useState(false);
 
-  // Initialize dates to last month ONLY ONCE
+  // Initialize dates - check sessionStorage first
   useEffect(() => {
-    // Check if dates are already set in sessionStorage
     const savedStartDate = sessionStorage.getItem('analytics_start_date');
     const savedEndDate = sessionStorage.getItem('analytics_end_date');
     
     if (savedStartDate && savedEndDate) {
-      // Use saved dates
       setStartDate(savedStartDate);
       setEndDate(savedEndDate);
     } else {
-      // Set default dates only if not saved
       const today = new Date();
       const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
       
@@ -42,13 +39,12 @@ const AnalyticsDashboard = () => {
       setStartDate(defaultStart);
       setEndDate(defaultEnd);
       
-      // Save to sessionStorage
       sessionStorage.setItem('analytics_start_date', defaultStart);
       sessionStorage.setItem('analytics_end_date', defaultEnd);
     }
-  }, []); // Only run once on mount
+  }, []);
 
-  // Save dates to sessionStorage whenever they change
+  // Save dates to sessionStorage
   useEffect(() => {
     if (startDate && endDate) {
       sessionStorage.setItem('analytics_start_date', startDate);
@@ -56,7 +52,6 @@ const AnalyticsDashboard = () => {
     }
   }, [startDate, endDate]);
 
-  // Check backend connection on mount
   useEffect(() => {
     checkBackendConnection();
   }, []);
@@ -68,36 +63,26 @@ const AnalyticsDashboard = () => {
     return `${year}-${month}-${day}`;
   };
 
-  // Check if backend is running
   const checkBackendConnection = async () => {
     setIsCheckingBackend(true);
     setError(null);
     
     try {
-      console.log('Checking backend connection...');
-      
-      // Use relative URL - works for both localhost and production
       const response = await fetch(`/api/analytics/test`, {
         method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-        },
+        headers: { 'Accept': 'application/json' },
       });
       
       if (response.ok) {
         const data = await response.json();
-        console.log('Backend connection successful:', data);
         setBackendStatus('connected');
         setError(null);
-        
-        // Now fetch analytics data
         fetchAnalytics();
         fetchGeoMapData();
       } else {
         throw new Error(`Server responded with status: ${response.status}`);
       }
     } catch (error) {
-      console.error('Backend connection failed:', error);
       setBackendStatus('disconnected');
       setError(`Cannot connect to backend server. Make sure the server is running.`);
     } finally {
@@ -111,25 +96,11 @@ const AnalyticsDashboard = () => {
     setLoading(true);
     try {
       const url = `/api/analytics?startDate=${startDate}&endDate=${endDate}`;
-      console.log('Fetching analytics from:', url);
+      const response = await fetch(url, { headers: { 'Accept': 'application/json' } });
       
-      const response = await fetch(url, {
-        headers: {
-          'Accept': 'application/json',
-        },
-      });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        throw new Error('Server returned non-JSON response');
-      }
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       
       const data = await response.json();
-      console.log('Analytics data received:', data);
       setUserAnalytics(data.userAnalytics || []);
     } catch (error) {
       console.error('Error fetching analytics:', error);
@@ -145,25 +116,11 @@ const AnalyticsDashboard = () => {
     
     try {
       const url = `/api/analytics/geo-map?startDate=${startDate}&endDate=${endDate}`;
-      console.log('Fetching geo map data from:', url);
+      const response = await fetch(url, { headers: { 'Accept': 'application/json' } });
       
-      const response = await fetch(url, {
-        headers: {
-          'Accept': 'application/json',
-        },
-      });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        throw new Error('Server returned non-JSON response for geo map data');
-      }
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       
       const data = await response.json();
-      console.log('Geo map data received:', data);
       setGeoMapData(data.mapData || []);
     } catch (error) {
       console.error('Error fetching geo map data:', error);
@@ -202,15 +159,9 @@ const AnalyticsDashboard = () => {
     const today = new Date();
     const pastDate = new Date(today.getFullYear(), today.getMonth() - months, today.getDate());
     
-    const newStartDate = formatDate(pastDate);
-    const newEndDate = formatDate(today);
+    setStartDate(formatDate(pastDate));
+    setEndDate(formatDate(today));
     
-    setStartDate(newStartDate);
-    setEndDate(newEndDate);
-    
-    // Dates will be saved automatically by the useEffect
-    
-    // Auto-fetch after setting date range if backend is connected
     setTimeout(() => {
       if (backendStatus === 'connected') {
         fetchAnalytics();
@@ -219,15 +170,98 @@ const AnalyticsDashboard = () => {
     }, 100);
   };
 
-  // Format session ID to show only 5 digits
   const formatSessionId = (sessionId) => {
     if (!sessionId) return 'N/A';
-    // Remove "session_" prefix and show only first 5 digits
     const numericPart = sessionId.replace('session_', '').replace(/_.*/, '');
     return numericPart.substring(0, 5);
   };
 
-  // Render backend connection status
+  // Export Users function
+  const exportUsers = () => {
+    if (userAnalytics.length === 0) return;
+    
+    const headers = ['Username', 'Session ID', 'Locations', 'Visits', 'Total Time (seconds)', 'Last Visit'];
+    const csvRows = [headers.join(',')];
+    
+    userAnalytics.forEach(user => {
+      const values = [
+        user.username,
+        user.sessionId,
+        user.locations,
+        user.visitCount,
+        user.totalTime,
+        new Date(user.lastVisit).toLocaleString()
+      ];
+      csvRows.push(values.join(','));
+    });
+    
+    const csv = csvRows.join('\n');
+    downloadCSV(csv, `analytics_users_${startDate}_to_${endDate}.csv`);
+  };
+
+  // Export Full Visit Details function
+  const exportFullVisitDetails = async () => {
+    if (userAnalytics.length === 0) return;
+    
+    try {
+      const allVisits = [];
+      
+      // Fetch detailed visit data for each user
+      for (const user of userAnalytics) {
+        const response = await fetch(`/api/analytics/user/${user.sessionId}`);
+        const data = await response.json();
+        
+        if (data.visits) {
+          data.visits.forEach(visit => {
+            allVisits.push({
+              username: user.username,
+              sessionId: user.sessionId,
+              location: visit.location,
+              district: visit.district,
+              timeSpent: visit.timeSpent,
+              exitReason: visit.exitReason,
+              timestamp: new Date(visit.timestamp).toLocaleString()
+            });
+          });
+        }
+      }
+      
+      // Create CSV
+      const headers = ['Username', 'Session ID', 'Location', 'District', 'Time (seconds)', 'Exit Reason', 'Timestamp'];
+      const csvRows = [headers.join(',')];
+      
+      allVisits.forEach(visit => {
+        const values = [
+          visit.username,
+          visit.sessionId,
+          visit.location,
+          visit.district,
+          visit.timeSpent,
+          `"${visit.exitReason}"`,
+          visit.timestamp
+        ];
+        csvRows.push(values.join(','));
+      });
+      
+      const csv = csvRows.join('\n');
+      downloadCSV(csv, `analytics_full_details_${startDate}_to_${endDate}.csv`);
+    } catch (error) {
+      console.error('Error exporting full visit details:', error);
+      alert('Error exporting data. Please try again.');
+    }
+  };
+
+  // Download CSV helper
+  const downloadCSV = (csv, filename) => {
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
+
   const renderBackendStatus = () => {
     if (isCheckingBackend) {
       return (
@@ -261,10 +295,8 @@ const AnalyticsDashboard = () => {
     <div className="analytics-dashboard">
       <h1 className="analytics-title">Analytics Dashboard</h1>
 
-      {/* Backend Connection Status */}
       {renderBackendStatus()}
 
-      {/* Error Message with Troubleshooting */}
       {error && (
         <div className="error-message">
           <h3>⚠️ Connection Error</h3>
@@ -276,15 +308,10 @@ const AnalyticsDashboard = () => {
               <li>
                 <strong>Verify backend is running:</strong>
                 <div>Open <a href="/api/analytics/test" target="_blank" rel="noopener noreferrer">/api/analytics/test</a> in your browser</div>
-                <div className="expected-response">Expected: {"{"}"message":"Analytics routes are working!","timestamp":"..."{"}"}</div>
               </li>
               <li>
                 <strong>Check if the server is responding:</strong>
                 <div>The API should be available at the same domain as this application</div>
-              </li>
-              <li>
-                <strong>For local development:</strong>
-                <div>Make sure your backend server is running on the same port or using proxy</div>
               </li>
             </ol>
             
@@ -292,15 +319,11 @@ const AnalyticsDashboard = () => {
               <button onClick={checkBackendConnection} className="retry-btn">
                 🔄 Test Connection Again
               </button>
-              <button onClick={() => window.open('/api/analytics/test', '_blank')} className="test-btn">
-                🧪 Open Test Endpoint
-              </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Date Filter Section */}
       <div className="filter-section">
         <h3>Filter by Date</h3>
         <div className="date-filters">
@@ -346,7 +369,6 @@ const AnalyticsDashboard = () => {
         </div>
       </div>
 
-      {/* Tabs */}
       <div className="analytics-tabs">
         <button
           className={`tab-btn ${activeTab === 'user' ? 'active' : ''}`}
@@ -364,7 +386,6 @@ const AnalyticsDashboard = () => {
         </button>
       </div>
 
-      {/* Content based on connection status */}
       {backendStatus !== 'connected' ? (
         <div className="connection-required">
           <div className="connection-icon">🔌</div>
@@ -376,19 +397,18 @@ const AnalyticsDashboard = () => {
         </div>
       ) : (
         <>
-          {/* User Analytics Tab */}
           {activeTab === 'user' && (
             <div className="user-analytics-section">
               <div className="export-buttons">
                 <button 
-                  onClick={() => {/* export function */}} 
+                  onClick={exportUsers} 
                   className="export-btn"
                   disabled={loading || userAnalytics.length === 0}
                 >
                   EXPORT USERS
                 </button>
                 <button 
-                  onClick={() => {/* export function */}} 
+                  onClick={exportFullVisitDetails} 
                   className="export-btn"
                   disabled={loading || userAnalytics.length === 0}
                 >
@@ -449,32 +469,127 @@ const AnalyticsDashboard = () => {
             </div>
           )}
 
-          {/* Geo Map Analytics Tab */}
           {activeTab === 'geo' && (
             <div className="geo-map-section">
-              <div className="map-container">
-                <h3>🌍 User Locations</h3>
+              <WorldMap locations={geoMapData} />
+              
+              <div className="location-list">
                 {geoMapData.length === 0 ? (
                   <p className="no-data">No location data available</p>
                 ) : (
-                  <div className="location-list">
-                    {geoMapData.map((location, index) => (
-                      <div key={index} className="location-card">
-                        <h4>{location.city || 'Unknown'}, {location.country || 'Unknown'}</h4>
-                        <div className="location-stats">
-                          <span>Users: {location.userCount}</span>
-                          <span>Visits: {location.totalVisits}</span>
-                          <span>Time: {formatTime(location.totalTime)}</span>
-                        </div>
+                  geoMapData.map((location, index) => (
+                    <div key={index} className="location-card">
+                      <h4>{location.city || 'Unknown'}, {location.country || 'Unknown'}</h4>
+                      <div className="location-stats">
+                        <span>Users: {location.userCount}</span>
+                        <span>Visits: {location.totalVisits}</span>
+                        <span>Time: {formatTime(location.totalTime)}</span>
                       </div>
-                    ))}
-                  </div>
+                    </div>
+                  ))
                 )}
               </div>
             </div>
           )}
         </>
       )}
+    </div>
+  );
+};
+
+// World Map Component
+const WorldMap = ({ locations }) => {
+  if (!locations || locations.length === 0) {
+    return (
+      <div className="map-container">
+        <h3>🌍 User Locations</h3>
+        <div className="world-map-placeholder">
+          <p>No location data to display on map</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="map-container">
+      <h3>🌍 User Locations</h3>
+      <div className="world-map">
+        <svg viewBox="0 0 1000 500" className="map-svg">
+          {/* Simple world map outline */}
+          <image 
+            href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 500'%3E%3Crect fill='%23e8f4f8' width='1000' height='500'/%3E%3Cpath fill='%2393c5db' d='M0 0h1000v500H0z'/%3E%3Cpath fill='%23b8dce8' d='M150 100h700v300H150z'/%3E%3C/svg%3E"
+            width="1000" 
+            height="500"
+          />
+          
+          {/* Plot user locations as markers */}
+          {locations.map((location, index) => {
+            // Convert lat/long to SVG coordinates (simplified projection)
+            const x = ((location.longitude + 180) / 360) * 1000;
+            const y = ((90 - location.latitude) / 180) * 500;
+            
+            return (
+              <g key={index} className="location-marker">
+                {/* Pulse circle animation */}
+                <circle 
+                  cx={x} 
+                  cy={y} 
+                  r="20" 
+                  fill="#007bff" 
+                  opacity="0.2"
+                  className="pulse-circle"
+                />
+                
+                {/* Main marker */}
+                <circle 
+                  cx={x} 
+                  cy={y} 
+                  r="8" 
+                  fill="#007bff" 
+                  stroke="white" 
+                  strokeWidth="2"
+                  className="marker-dot"
+                />
+                
+                {/* Location label */}
+                <text 
+                  x={x} 
+                  y={y - 15} 
+                  textAnchor="middle" 
+                  className="location-label"
+                  fontSize="12"
+                  fill="#333"
+                  fontWeight="600"
+                >
+                  {location.city || location.country}
+                </text>
+                
+                {/* User count badge */}
+                <g className="user-count-badge">
+                  <circle 
+                    cx={x + 10} 
+                    cy={y - 10} 
+                    r="10" 
+                    fill="#ff4757" 
+                    stroke="white" 
+                    strokeWidth="2"
+                  />
+                  <text 
+                    x={x + 10} 
+                    y={y - 6} 
+                    textAnchor="middle" 
+                    fontSize="10" 
+                    fill="white" 
+                    fontWeight="bold"
+                  >
+                    {location.userCount}
+                  </text>
+                </g>
+              </g>
+            );
+          })}
+        </svg>
+      </div>
     </div>
   );
 };
