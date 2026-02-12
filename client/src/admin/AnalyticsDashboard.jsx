@@ -18,12 +18,6 @@ const AnalyticsDashboard = () => {
   const [backendStatus, setBackendStatus] = useState(null);
   const [isCheckingBackend, setIsCheckingBackend] = useState(false);
 
-  // Session ID mapping to persist IDs across visits
-  const [sessionIdMap, setSessionIdMap] = useState(() => {
-    const saved = localStorage.getItem('session_id_map');
-    return saved ? JSON.parse(saved) : {};
-  });
-
   // Initialize dates from sessionStorage or set defaults
   useEffect(() => {
     const savedStartDate = sessionStorage.getItem('analytics_start_date');
@@ -87,11 +81,6 @@ const AnalyticsDashboard = () => {
     checkBackendConnection();
   }, []);
 
-  // Save session ID map to localStorage whenever it changes
-  useEffect(() => {
-    localStorage.setItem('session_id_map', JSON.stringify(sessionIdMap));
-  }, [sessionIdMap]);
-
   const formatDate = (date) => {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -132,30 +121,34 @@ const AnalyticsDashboard = () => {
     }
   };
 
-  // Generate 5-digit unique session ID - persistent for each session
-  const getOrCreateSessionId = (originalSessionId) => {
-    if (!originalSessionId) return '00000';
+  // Generate unique username based on session ID
+  const generateUsername = (sessionId) => {
+    if (!sessionId) return 'User';
     
-    // Check if we already have a mapping for this session
-    if (sessionIdMap[originalSessionId]) {
-      return sessionIdMap[originalSessionId];
-    }
-    
-    // Generate new 5-digit ID based on hash
-    const hash = originalSessionId.split('').reduce((acc, char) => {
+    // Extract a unique identifier from the session ID
+    const hash = sessionId.split('_').pop() || sessionId;
+    const numericHash = hash.split('').reduce((acc, char) => {
       return acc + char.charCodeAt(0);
     }, 0);
     
-    // Convert to 5-digit number (10000-99999)
-    const fiveDigitId = String((hash % 90000) + 10000);
+    // Generate a username like "User_4582" or "Visitor_7821"
+    const prefixes = ['User', 'Visitor', 'Guest'];
+    const prefix = prefixes[numericHash % prefixes.length];
+    const suffix = String(numericHash).slice(-4).padStart(4, '0');
     
-    // Save mapping
-    setSessionIdMap(prev => ({
-      ...prev,
-      [originalSessionId]: fiveDigitId
-    }));
+    return `${prefix}_${suffix}`;
+  };
+
+  // Format session ID to show unique shortened version
+  const formatSessionId = (sessionId) => {
+    if (!sessionId) return 'N/A';
     
-    return fiveDigitId;
+    // Show last 8 characters of the session ID to make it unique and identifiable
+    const displayId = sessionId.length > 8 
+      ? sessionId.slice(-8).toUpperCase() 
+      : sessionId.toUpperCase();
+    
+    return displayId;
   };
 
   const fetchAnalytics = async () => {
@@ -170,11 +163,11 @@ const AnalyticsDashboard = () => {
       
       const data = await response.json();
       
-      // Process user analytics with persistent 5-digit session IDs
+      // Process user analytics to add unique usernames
       const processedAnalytics = (data.userAnalytics || []).map(user => ({
         ...user,
-        displaySessionId: getOrCreateSessionId(user.sessionId),
-        originalSessionId: user.sessionId
+        displayUsername: generateUsername(user.sessionId),
+        originalUsername: user.username
       }));
       
       setUserAnalytics(processedAnalytics);
@@ -213,10 +206,8 @@ const AnalyticsDashboard = () => {
     }
   };
 
-  const handleViewDetails = (originalSessionId, displaySessionId) => {
-    navigate(`/admin/analytics/user/${originalSessionId}`, { 
-      state: { displaySessionId } 
-    });
+  const handleViewDetails = (sessionId, username) => {
+    navigate(`/admin/analytics/user/${sessionId}`, { state: { username } });
   };
 
   const formatTime = (seconds) => {
@@ -248,44 +239,61 @@ const AnalyticsDashboard = () => {
     }, 100);
   };
 
-  const exportToCSV = () => {
-    const headers = ['Session ID', 'Location', 'Visit Count', 'Total Time (s)', 'Last Visit'];
-    const csvData = [headers];
+  const exportUsers = () => {
+    if (userAnalytics.length === 0) return;
+    
+    const headers = ['Username', 'Session ID', 'Locations', 'Visits', 'Total Time (seconds)', 'Last Visit'];
+    const csvRows = [headers.join(',')];
     
     userAnalytics.forEach(user => {
-      csvData.push([
-        user.displaySessionId || '00000',
-        user.location || 'N/A',
-        user.visitCount || 0,
-        user.totalTime || 0,
+      const values = [
+        user.displayUsername || user.username,
+        user.sessionId,
+        user.locations,
+        user.visitCount,
+        user.totalTime,
         new Date(user.lastVisit).toLocaleString()
-      ]);
+      ];
+      csvRows.push(values.join(','));
     });
     
-    const csvContent = csvData.map(row => row.join(',')).join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `analytics_${new Date().toISOString().split('T')[0]}.csv`;
-    a.click();
-    window.URL.revokeObjectURL(url);
+    const csv = csvRows.join('\n');
+    downloadCSV(csv, 'user_analytics.csv');
   };
 
-  const exportToJSON = () => {
-    const jsonData = userAnalytics.map(user => ({
-      sessionId: user.displaySessionId || '00000',
-      location: user.location || 'N/A',
-      visitCount: user.visitCount || 0,
-      totalTime: user.totalTime || 0,
-      lastVisit: new Date(user.lastVisit).toLocaleString()
-    }));
+  const exportFullVisitDetails = () => {
+    if (userAnalytics.length === 0) return;
     
-    const blob = new Blob([JSON.stringify(jsonData, null, 2)], { type: 'application/json' });
+    const headers = ['Username', 'Session ID', 'Location', 'District', 'Time (seconds)', 'Exit Reason', 'Timestamp'];
+    const csvRows = [headers.join(',')];
+    
+    userAnalytics.forEach(user => {
+      if (user.visits && user.visits.length > 0) {
+        user.visits.forEach(visit => {
+          const values = [
+            user.displayUsername || user.username,
+            user.sessionId,
+            visit.location,
+            visit.district,
+            visit.timeSpent,
+            `"${visit.exitReason}"`,
+            new Date(visit.timestamp).toLocaleString()
+          ];
+          csvRows.push(values.join(','));
+        });
+      }
+    });
+    
+    const csv = csvRows.join('\n');
+    downloadCSV(csv, 'full_visit_details.csv');
+  };
+
+  const downloadCSV = (csv, filename) => {
+    const blob = new Blob([csv], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `analytics_${new Date().toISOString().split('T')[0]}.json`;
+    a.download = filename;
     a.click();
     window.URL.revokeObjectURL(url);
   };
@@ -293,87 +301,108 @@ const AnalyticsDashboard = () => {
   return (
     <div className="analytics-dashboard">
       <h1 className="analytics-title">📊 Analytics Dashboard</h1>
-      
+
       <div className="filter-section">
-        <h3>🗓️ Filter by Date Range</h3>
+        <h3>Filter by Date Range</h3>
         <div className="date-filters">
           <div className="date-input-group">
-            <label>Start Date</label>
+            <label htmlFor="start-date">Start Date</label>
             <input
+              id="start-date"
               type="date"
               className="date-input"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
             />
           </div>
+          
           <div className="date-input-group">
-            <label>End Date</label>
+            <label htmlFor="end-date">End Date</label>
             <input
+              id="end-date"
               type="date"
               className="date-input"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
             />
           </div>
-          <button onClick={handleApplyFilter} className="apply-btn">
-            {backendStatus === 'connected' ? 'Apply Filter' : 'Retry Connection'}
+          
+          <button 
+            onClick={handleApplyFilter} 
+            className="apply-btn"
+            disabled={!startDate || !endDate}
+          >
+            Apply Filter
           </button>
+
           <button onClick={() => setDateRange(1)} className="preset-btn">Last Month</button>
           <button onClick={() => setDateRange(3)} className="preset-btn">Last 3 Months</button>
           <button onClick={() => setDateRange(6)} className="preset-btn">Last 6 Months</button>
         </div>
       </div>
 
-      {isCheckingBackend && (
-        <div className="loading">🔄 Checking backend connection...</div>
-      )}
+      <div className="analytics-tabs">
+        <button
+          className={`tab-btn ${activeTab === 'user' ? 'active' : ''}`}
+          onClick={() => setActiveTab('user')}
+          disabled={backendStatus !== 'connected'}
+        >
+          USER ANALYTICS
+        </button>
+        <button
+          className={`tab-btn ${activeTab === 'geo' ? 'active' : ''}`}
+          onClick={() => setActiveTab('geo')}
+          disabled={backendStatus !== 'connected'}
+        >
+          GEO MAP ANALYTICS
+        </button>
+      </div>
 
-      {error && backendStatus === 'disconnected' && (
+      {backendStatus !== 'connected' ? (
         <div className="connection-required">
-          <div className="connection-icon">⚠️</div>
+          <div className="connection-icon">🔌</div>
           <h3>Backend Connection Required</h3>
-          <p>{error}</p>
+          <p>Please ensure the backend server is running to view analytics data.</p>
           <button onClick={checkBackendConnection} className="retry-btn-large">
-            🔄 Retry Connection
+            Try Connecting Now
           </button>
         </div>
-      )}
-
-      {backendStatus === 'connected' && (
+      ) : (
         <>
-          <div className="analytics-tabs">
-            <button
-              className={`tab-btn ${activeTab === 'user' ? 'active' : ''}`}
-              onClick={() => setActiveTab('user')}
-            >
-              👥 USER ANALYTICS
-            </button>
-            <button
-              className={`tab-btn ${activeTab === 'geo' ? 'active' : ''}`}
-              onClick={() => setActiveTab('geo')}
-            >
-              🌍 GEO MAP ANALYTICS
-            </button>
-          </div>
-
           {activeTab === 'user' && (
             <div className="user-analytics-section">
               <div className="export-buttons">
-                <button onClick={exportToCSV} className="export-btn">📥 Export CSV</button>
-                <button onClick={exportToJSON} className="export-btn">📥 Export JSON</button>
+                <button 
+                  onClick={exportUsers} 
+                  className="export-btn"
+                  disabled={loading || userAnalytics.length === 0}
+                >
+                  EXPORT USERS
+                </button>
+                <button 
+                  onClick={exportFullVisitDetails} 
+                  className="export-btn"
+                  disabled={loading || userAnalytics.length === 0}
+                >
+                  EXPORT FULL VISIT DETAILS
+                </button>
               </div>
 
               {loading ? (
-                <div className="loading">Loading analytics data...</div>
+                <div className="loading">
+                  <div className="spinner"></div>
+                  <p>Loading analytics data...</p>
+                </div>
               ) : (
                 <div className="table-wrapper">
                   <table className="analytics-table">
                     <thead>
                       <tr>
+                        <th>Username</th>
                         <th>Session ID</th>
-                        <th>Location</th>
-                        <th className="text-center">Visit Count</th>
-                        <th className="text-right">Total Time</th>
+                        <th>Locations</th>
+                        <th>Visits</th>
+                        <th>Total Time</th>
                         <th>Last Visit</th>
                         <th>Actions</th>
                       </tr>
@@ -381,25 +410,22 @@ const AnalyticsDashboard = () => {
                     <tbody>
                       {userAnalytics.length === 0 ? (
                         <tr>
-                          <td colSpan="6" className="no-data">
-                            No user data available for selected date range
+                          <td colSpan="7" className="no-data">
+                            No analytics data available for the selected date range
                           </td>
                         </tr>
                       ) : (
                         userAnalytics.map((user, index) => (
                           <tr key={index}>
-                            <td>
-                              <span className="session-id">
-                                {user.displaySessionId || '00000'}
-                              </span>
-                            </td>
-                            <td>{user.location || 'N/A'}</td>
+                            <td>{user.displayUsername || user.username}</td>
+                            <td className="session-id">{formatSessionId(user.sessionId)}</td>
+                            <td>{user.locations}</td>
                             <td className="text-center">{user.visitCount}</td>
                             <td className="text-right">{formatTime(user.totalTime)}</td>
                             <td>{new Date(user.lastVisit).toLocaleDateString()}</td>
                             <td>
                               <button
-                                onClick={() => handleViewDetails(user.originalSessionId || user.sessionId, user.displaySessionId)}
+                                onClick={() => handleViewDetails(user.sessionId, user.displayUsername || user.username)}
                                 className="view-details-btn"
                               >
                                 VIEW
@@ -426,7 +452,7 @@ const AnalyticsDashboard = () => {
   );
 };
 
-// OpenStreetMap Component with Leaflet.js
+// OpenStreetMap Component with Leaflet.js - 100% FREE, NO API KEY NEEDED!
 const OpenStreetMapView = ({ locations }) => {
   if (!locations || locations.length === 0) {
     return (
@@ -470,6 +496,33 @@ const OpenStreetMapView = ({ locations }) => {
           srcDoc={generateLeafletMapHTML(locations, centerLat, centerLng, zoom)}
           title="User Locations Map"
         />
+      </div>
+
+      <div className="location-info-cards">
+        <h4>📍 Detected Locations ({locations.length})</h4>
+        <div className="location-cards-grid">
+          {locations.map((location, index) => (
+            <div key={index} className="location-info-card">
+              <div className="location-card-header">
+                <span className="location-icon">📍</span>
+                <strong>{location.city || 'Unknown City'}</strong>
+              </div>
+              <div className="location-card-details">
+                <p><strong>Country:</strong> {location.country || 'N/A'}</p>
+                <p><strong>Region:</strong> {location.region || 'N/A'}</p>
+                <p><strong>Users:</strong> {location.userCount || 1}</p>
+                <p className="coordinates">
+                  {location.latitude?.toFixed(4)}, {location.longitude?.toFixed(4)}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="map-note-success">
+        <p><strong>✅ 100% Free & Open Source!</strong> This map uses OpenStreetMap and Leaflet.js - no API keys required!</p>
+        <p><strong>🗺️ Powered by:</strong> OpenStreetMap contributors | Leaflet.js mapping library</p>
       </div>
     </div>
   );
@@ -549,7 +602,7 @@ const generateLeafletMapHTML = (locations, centerLat, centerLng, zoom) => {
     // Initialize the map
     const map = L.map('map').setView([${centerLat}, ${centerLng}], ${zoom});
     
-    // Add OpenStreetMap tile layer
+    // Add OpenStreetMap tile layer (100% free!)
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       maxZoom: 19,

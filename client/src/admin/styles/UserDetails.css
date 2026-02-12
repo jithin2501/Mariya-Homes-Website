@@ -130,17 +130,6 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.map-instruction {
-  margin-top: 10px;
-  font-size: 13px;
-  color: #666;
-  font-style: italic;
-  text-align: center;
-  padding: 8px;
-  background: #f8f9fa;
-  border-radius: 6px;
-}
-
 .loading {
   text-align: center;
   padding: 60px;
