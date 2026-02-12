@@ -39,6 +39,10 @@ const AdminLayout = () => {
           Gallery Management
         </NavLink>
 
+        <NavLink to="/admin/analytics" className="admin-link">
+          Analytics Dashboard
+        </NavLink>
+
         {/* Only show User Management to superadmin */}
         {isSuperAdmin && (
           <NavLink to="/admin/users" className="admin-link">
