@@ -59,9 +59,7 @@ app.post('/api/upload', upload.single('image'), async (req, res) => {
     });
 
     const result = await uploadPromise;
-
     res.json({ imageUrl: result.secure_url });
-
   } catch (error) {
     res.status(500).json({
       message: 'Error uploading file',
@@ -70,28 +68,59 @@ app.post('/api/upload', upload.single('image'), async (req, res) => {
   }
 });
 
+// ============ IMPORT ROUTES ============
 const contactRoutes = require('./routes/contactRoutes');
 const videoRoutes = require('./routes/videoRoutes');
 const propertyRoutes = require('./routes/propertyRoutes');
 const propertyDetailsRoutes = require('./routes/propertyDetailsRoutes');
 const galleryRoutes = require('./routes/galleryRoutes');
 const userRoutes = require('./routes/userRoutes');
+const analyticsRoutes = require('./routes/analyticsRoutes'); // ✅ Analytics routes
 
+// ============ REGISTER API ROUTES - MUST COME BEFORE STATIC FILES ============
 app.use('/api', contactRoutes);
 app.use('/api', videoRoutes);
 app.use('/api/admin', propertyRoutes);
 app.use('/api/admin', propertyDetailsRoutes);
 app.use('/api/gallery', galleryRoutes);
 app.use('/api/admin', userRoutes);
+app.use('/api/analytics', analyticsRoutes); // ✅ CRITICAL: Register analytics routes here
 
+// ============ SIMPLE ROUTE VERIFICATION ============
+// Instead of complex route logging that can crash, just verify the analytics route is mounted
+console.log('\n=== SERVER STARTUP ===');
+console.log('✅ Contact routes mounted');
+console.log('✅ Video routes mounted');
+console.log('✅ Property routes mounted');
+console.log('✅ Property details routes mounted');
+console.log('✅ Gallery routes mounted');
+console.log('✅ User routes mounted');
+console.log('✅ Analytics routes mounted at /api/analytics');
+console.log('========================\n');
+
+// ============ SERVE STATIC FILES - AFTER API ROUTES ============
 app.use(express.static(path.join(__dirname, '../client/build')));
 
-app.use((req, res) => {
-  res.sendFile(path.join(__dirname, '../client/build/index.html'));
+// ============ CATCH-ALL ROUTE - MUST BE LAST ============
+app.use((req, res, next) => {
+  // Only serve index.html for non-API routes
+  if (!req.path.startsWith('/api/')) {
+    res.sendFile(path.join(__dirname, '../client/build/index.html'));
+  } else {
+    // Return JSON for unmatched API routes
+    res.status(404).json({ 
+      message: 'API endpoint not found',
+      path: req.path,
+      method: req.method
+    });
+  }
 });
 
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`📊 Analytics API available at: http://localhost:${PORT}/api/analytics`);
+  console.log(`🧪 Test endpoint: http://localhost:${PORT}/api/analytics/test`);
+  console.log(`📱 Client app: http://localhost:${PORT}`);
 });

@@ -19,6 +19,8 @@ import Login from "./admin/auth/Login";
 import AdminProperties from "./admin/AdminProperties";
 import AdminPropertyDetails from "./admin/AdminPropertyDetails";
 import UserManagement from "./admin/UserManagement";
+import AnalyticsDashboard from "./admin/AnalyticsDashboard";
+import UserDetails from "./admin/UserDetails";
 
 // Global Styles
 import "./styles/App.css";
@@ -70,6 +72,8 @@ function App() {
           <Route path="property-details" element={<AdminPropertyDetails />} />
           <Route path="gallery" element={<AdminGallery />} />
           <Route path="users" element={<UserManagement />} />
+          <Route path="analytics" element={<AnalyticsDashboard />} />
+          <Route path="analytics/user/:sessionId" element={<UserDetails />} />
         </Route>
 
         {/* --- CATCH-ALL REDIRECTS --- */}
