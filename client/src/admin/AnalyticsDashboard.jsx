@@ -21,14 +21,40 @@ const AnalyticsDashboard = () => {
   const [backendStatus, setBackendStatus] = useState(null);
   const [isCheckingBackend, setIsCheckingBackend] = useState(false);
 
-  // Initialize dates to last month
+  // Initialize dates to last month ONLY ONCE
   useEffect(() => {
-    const today = new Date();
-    const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
+    // Check if dates are already set in sessionStorage
+    const savedStartDate = sessionStorage.getItem('analytics_start_date');
+    const savedEndDate = sessionStorage.getItem('analytics_end_date');
     
-    setStartDate(formatDate(lastMonth));
-    setEndDate(formatDate(today));
-  }, []);
+    if (savedStartDate && savedEndDate) {
+      // Use saved dates
+      setStartDate(savedStartDate);
+      setEndDate(savedEndDate);
+    } else {
+      // Set default dates only if not saved
+      const today = new Date();
+      const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
+      
+      const defaultStart = formatDate(lastMonth);
+      const defaultEnd = formatDate(today);
+      
+      setStartDate(defaultStart);
+      setEndDate(defaultEnd);
+      
+      // Save to sessionStorage
+      sessionStorage.setItem('analytics_start_date', defaultStart);
+      sessionStorage.setItem('analytics_end_date', defaultEnd);
+    }
+  }, []); // Only run once on mount
+
+  // Save dates to sessionStorage whenever they change
+  useEffect(() => {
+    if (startDate && endDate) {
+      sessionStorage.setItem('analytics_start_date', startDate);
+      sessionStorage.setItem('analytics_end_date', endDate);
+    }
+  }, [startDate, endDate]);
 
   // Check backend connection on mount
   useEffect(() => {
@@ -176,8 +202,13 @@ const AnalyticsDashboard = () => {
     const today = new Date();
     const pastDate = new Date(today.getFullYear(), today.getMonth() - months, today.getDate());
     
-    setStartDate(formatDate(pastDate));
-    setEndDate(formatDate(today));
+    const newStartDate = formatDate(pastDate);
+    const newEndDate = formatDate(today);
+    
+    setStartDate(newStartDate);
+    setEndDate(newEndDate);
+    
+    // Dates will be saved automatically by the useEffect
     
     // Auto-fetch after setting date range if backend is connected
     setTimeout(() => {
@@ -188,11 +219,12 @@ const AnalyticsDashboard = () => {
     }, 100);
   };
 
-  // Format session ID to show only the unique number part
+  // Format session ID to show only 5 digits
   const formatSessionId = (sessionId) => {
     if (!sessionId) return 'N/A';
-    // Remove "session_" prefix and show only the unique part
-    return sessionId.replace('session_', '').substring(0, 16);
+    // Remove "session_" prefix and show only first 5 digits
+    const numericPart = sessionId.replace('session_', '').replace(/_.*/, '');
+    return numericPart.substring(0, 5);
   };
 
   // Render backend connection status
