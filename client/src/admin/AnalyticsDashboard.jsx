@@ -5,9 +5,6 @@ import './styles/AnalyticsDashboard.css';
 const AnalyticsDashboard = () => {
   const navigate = useNavigate();
   
-  // API configuration
-  const API_BASE_URL = '';
-  
   // Date filter state
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
@@ -21,7 +18,7 @@ const AnalyticsDashboard = () => {
   const [backendStatus, setBackendStatus] = useState(null);
   const [isCheckingBackend, setIsCheckingBackend] = useState(false);
 
-  // Initialize dates - check sessionStorage first
+  // Initialize dates from sessionStorage or set defaults
   useEffect(() => {
     const savedStartDate = sessionStorage.getItem('analytics_start_date');
     const savedEndDate = sessionStorage.getItem('analytics_end_date');
@@ -44,13 +41,41 @@ const AnalyticsDashboard = () => {
     }
   }, []);
 
-  // Save dates to sessionStorage
+  // Save dates to sessionStorage when changed
   useEffect(() => {
     if (startDate && endDate) {
       sessionStorage.setItem('analytics_start_date', startDate);
       sessionStorage.setItem('analytics_end_date', endDate);
     }
   }, [startDate, endDate]);
+
+  // Save analytics data to sessionStorage
+  useEffect(() => {
+    if (userAnalytics.length > 0) {
+      sessionStorage.setItem('analytics_user_data', JSON.stringify(userAnalytics));
+    }
+  }, [userAnalytics]);
+
+  // Save geo data to sessionStorage
+  useEffect(() => {
+    if (geoMapData.length > 0) {
+      sessionStorage.setItem('analytics_geo_data', JSON.stringify(geoMapData));
+    }
+  }, [geoMapData]);
+
+  // Restore data from sessionStorage on mount
+  useEffect(() => {
+    const savedUserData = sessionStorage.getItem('analytics_user_data');
+    const savedGeoData = sessionStorage.getItem('analytics_geo_data');
+    
+    if (savedUserData) {
+      setUserAnalytics(JSON.parse(savedUserData));
+    }
+    
+    if (savedGeoData) {
+      setGeoMapData(JSON.parse(savedGeoData));
+    }
+  }, []);
 
   useEffect(() => {
     checkBackendConnection();
@@ -74,11 +99,17 @@ const AnalyticsDashboard = () => {
       });
       
       if (response.ok) {
-        const data = await response.json();
         setBackendStatus('connected');
         setError(null);
-        fetchAnalytics();
-        fetchGeoMapData();
+        
+        // Only fetch if we don't have cached data
+        const savedUserData = sessionStorage.getItem('analytics_user_data');
+        const savedGeoData = sessionStorage.getItem('analytics_geo_data');
+        
+        if (!savedUserData || !savedGeoData) {
+          fetchAnalytics();
+          fetchGeoMapData();
+        }
       } else {
         throw new Error(`Server responded with status: ${response.status}`);
       }
@@ -176,7 +207,6 @@ const AnalyticsDashboard = () => {
     return numericPart.substring(0, 5);
   };
 
-  // Export Users function
   const exportUsers = () => {
     if (userAnalytics.length === 0) return;
     
@@ -199,14 +229,12 @@ const AnalyticsDashboard = () => {
     downloadCSV(csv, `analytics_users_${startDate}_to_${endDate}.csv`);
   };
 
-  // Export Full Visit Details function
   const exportFullVisitDetails = async () => {
     if (userAnalytics.length === 0) return;
     
     try {
       const allVisits = [];
       
-      // Fetch detailed visit data for each user
       for (const user of userAnalytics) {
         const response = await fetch(`/api/analytics/user/${user.sessionId}`);
         const data = await response.json();
@@ -226,7 +254,6 @@ const AnalyticsDashboard = () => {
         }
       }
       
-      // Create CSV
       const headers = ['Username', 'Session ID', 'Location', 'District', 'Time (seconds)', 'Exit Reason', 'Timestamp'];
       const csvRows = [headers.join(',')];
       
@@ -251,7 +278,6 @@ const AnalyticsDashboard = () => {
     }
   };
 
-  // Download CSV helper
   const downloadCSV = (csv, filename) => {
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
@@ -308,10 +334,6 @@ const AnalyticsDashboard = () => {
               <li>
                 <strong>Verify backend is running:</strong>
                 <div>Open <a href="/api/analytics/test" target="_blank" rel="noopener noreferrer">/api/analytics/test</a> in your browser</div>
-              </li>
-              <li>
-                <strong>Check if the server is responding:</strong>
-                <div>The API should be available at the same domain as this application</div>
               </li>
             </ol>
             
@@ -472,23 +494,6 @@ const AnalyticsDashboard = () => {
           {activeTab === 'geo' && (
             <div className="geo-map-section">
               <WorldMap locations={geoMapData} />
-              
-              <div className="location-list">
-                {geoMapData.length === 0 ? (
-                  <p className="no-data">No location data available</p>
-                ) : (
-                  geoMapData.map((location, index) => (
-                    <div key={index} className="location-card">
-                      <h4>{location.city || 'Unknown'}, {location.country || 'Unknown'}</h4>
-                      <div className="location-stats">
-                        <span>Users: {location.userCount}</span>
-                        <span>Visits: {location.totalVisits}</span>
-                        <span>Time: {formatTime(location.totalTime)}</span>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
             </div>
           )}
         </>
@@ -497,7 +502,7 @@ const AnalyticsDashboard = () => {
   );
 };
 
-// World Map Component
+// World Map Component with proper world map background
 const WorldMap = ({ locations }) => {
   if (!locations || locations.length === 0) {
     return (
@@ -514,19 +519,37 @@ const WorldMap = ({ locations }) => {
     <div className="map-container">
       <h3>🌍 User Locations</h3>
       <div className="world-map">
-        <svg viewBox="0 0 1000 500" className="map-svg">
-          {/* Simple world map outline */}
-          <image 
-            href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 500'%3E%3Crect fill='%23e8f4f8' width='1000' height='500'/%3E%3Cpath fill='%2393c5db' d='M0 0h1000v500H0z'/%3E%3Cpath fill='%23b8dce8' d='M150 100h700v300H150z'/%3E%3C/svg%3E"
-            width="1000" 
-            height="500"
-          />
+        <svg viewBox="0 0 2000 1000" className="map-svg" preserveAspectRatio="xMidYMid meet">
+          {/* Ocean background */}
+          <rect width="2000" height="1000" fill="#a8dadc"/>
+          
+          {/* Simplified world continents */}
+          {/* North America */}
+          <path d="M 100 200 L 150 150 L 250 170 L 320 140 L 380 160 L 420 200 L 450 280 L 480 350 L 460 420 L 420 450 L 380 480 L 320 490 L 260 480 L 220 450 L 180 400 L 150 350 L 120 280 Z" fill="#457b9d" opacity="0.7"/>
+          
+          {/* South America */}
+          <path d="M 350 520 L 400 550 L 430 620 L 440 710 L 420 780 L 380 820 L 340 840 L 300 830 L 280 780 L 270 700 L 290 620 L 320 550 Z" fill="#457b9d" opacity="0.7"/>
+          
+          {/* Europe */}
+          <path d="M 850 180 L 950 160 L 1050 190 L 1100 240 L 1080 300 L 1020 330 L 950 320 L 880 290 L 840 240 Z" fill="#457b9d" opacity="0.7"/>
+          
+          {/* Africa */}
+          <path d="M 900 380 L 980 360 L 1080 390 L 1130 460 L 1140 550 L 1120 650 L 1080 730 L 1000 780 L 920 760 L 870 700 L 850 620 L 860 530 L 880 440 Z" fill="#457b9d" opacity="0.7"/>
+          
+          {/* Asia */}
+          <path d="M 1200 150 L 1400 120 L 1600 140 L 1750 180 L 1850 240 L 1880 320 L 1860 400 L 1800 460 L 1700 500 L 1600 520 L 1500 510 L 1400 480 L 1300 430 L 1220 360 L 1180 280 L 1170 210 Z" fill="#457b9d" opacity="0.7"/>
+          
+          {/* Australia */}
+          <path d="M 1550 700 L 1650 680 L 1750 700 L 1800 750 L 1790 820 L 1740 870 L 1660 880 L 1580 860 L 1530 810 L 1520 750 Z" fill="#457b9d" opacity="0.7"/>
+          
+          {/* India */}
+          <path d="M 1280 400 L 1360 380 L 1420 420 L 1440 500 L 1420 580 L 1380 620 L 1320 630 L 1270 600 L 1250 530 L 1260 460 Z" fill="#457b9d" opacity="0.7"/>
           
           {/* Plot user locations as markers */}
           {locations.map((location, index) => {
-            // Convert lat/long to SVG coordinates (simplified projection)
-            const x = ((location.longitude + 180) / 360) * 1000;
-            const y = ((90 - location.latitude) / 180) * 500;
+            // Convert lat/long to SVG coordinates
+            const x = ((location.longitude + 180) / 360) * 2000;
+            const y = ((90 - location.latitude) / 180) * 1000;
             
             return (
               <g key={index} className="location-marker">
@@ -534,51 +557,62 @@ const WorldMap = ({ locations }) => {
                 <circle 
                   cx={x} 
                   cy={y} 
-                  r="20" 
-                  fill="#007bff" 
-                  opacity="0.2"
+                  r="30" 
+                  fill="#e63946" 
+                  opacity="0.3"
                   className="pulse-circle"
                 />
                 
-                {/* Main marker */}
+                {/* Main marker dot */}
                 <circle 
                   cx={x} 
                   cy={y} 
-                  r="8" 
-                  fill="#007bff" 
+                  r="12" 
+                  fill="#e63946" 
                   stroke="white" 
-                  strokeWidth="2"
+                  strokeWidth="3"
                   className="marker-dot"
                 />
                 
-                {/* Location label */}
-                <text 
-                  x={x} 
-                  y={y - 15} 
-                  textAnchor="middle" 
-                  className="location-label"
-                  fontSize="12"
-                  fill="#333"
-                  fontWeight="600"
-                >
-                  {location.city || location.country}
-                </text>
+                {/* Location label with background */}
+                <g className="location-label-group">
+                  <rect
+                    x={x - 60}
+                    y={y - 35}
+                    width="120"
+                    height="20"
+                    fill="white"
+                    opacity="0.9"
+                    rx="4"
+                  />
+                  <text 
+                    x={x} 
+                    y={y - 20} 
+                    textAnchor="middle" 
+                    className="location-label"
+                    fontSize="14"
+                    fill="#1d3557"
+                    fontWeight="700"
+                  >
+                    {location.city || location.country}
+                  </text>
+                </g>
                 
                 {/* User count badge */}
                 <g className="user-count-badge">
                   <circle 
-                    cx={x + 10} 
-                    cy={y - 10} 
-                    r="10" 
-                    fill="#ff4757" 
+                    cx={x + 15} 
+                    cy={y - 15} 
+                    r="14" 
+                    fill="#f77f00" 
                     stroke="white" 
-                    strokeWidth="2"
+                    strokeWidth="3"
                   />
                   <text 
-                    x={x + 10} 
-                    y={y - 6} 
+                    x={x + 15} 
+                    y={y - 10} 
                     textAnchor="middle" 
-                    fontSize="10" 
+                    fontSize="12" 
                     fill="white" 
                     fontWeight="bold"
                   >
