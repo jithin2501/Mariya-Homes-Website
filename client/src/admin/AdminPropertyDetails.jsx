@@ -15,6 +15,7 @@ const AdminPropertyDetails = () => {
   const [existingPropertyImages, setExistingPropertyImages] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState("");
   
   // Amenities state
   const [amenities, setAmenities] = useState([]);
@@ -193,6 +194,29 @@ const AdminPropertyDetails = () => {
   const handleMainMediaChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      // Check file size (warn if over 50MB, reject if over 200MB)
+      const fileSizeMB = file.size / (1024 * 1024);
+      
+      if (fileSizeMB > 200) {
+        alert(`File too large (${fileSizeMB.toFixed(2)}MB). Please use a video under 200MB. Consider compressing your video.`);
+        e.target.value = '';
+        return;
+      }
+      
+      if (fileSizeMB > 50) {
+        const proceed = window.confirm(
+          `Large video detected (${fileSizeMB.toFixed(2)}MB).\n\n` +
+          `Upload may take 5-10 minutes.\n\n` +
+          `For faster uploads, consider compressing your video to under 50MB.\n\n` +
+          `Continue with upload?`
+        );
+        
+        if (!proceed) {
+          e.target.value = '';
+          return;
+        }
+      }
+      
       setMainMedia(file);
       setExistingMainMedia(null); // Clear existing when new file is selected
       
@@ -201,7 +225,8 @@ const AdminPropertyDetails = () => {
       setMainMediaPreview({
         url: previewUrl,
         type: file.type.startsWith('video') ? 'video' : 'image',
-        name: file.name
+        name: file.name,
+        size: fileSizeMB.toFixed(2)
       });
     }
   };
@@ -217,55 +242,49 @@ const AdminPropertyDetails = () => {
 
   const handleGalleryChange = (e) => {
     const files = Array.from(e.target.files);
+    const validFiles = files.filter(file => file.type.startsWith('image/'));
     
-    if (files.length > 4) {
-      setErrorMessage("⚠️ Maximum 4 gallery images allowed!");
-      setGallery([]);
-      e.target.value = "";
-      setTimeout(() => setErrorMessage(""), 3000);
-    } else {
-      setErrorMessage("");
-      setGallery(files);
-      setExistingGallery([]); // Clear existing when new files are selected
+    if (validFiles.length !== files.length) {
+      alert('Only image files are allowed in gallery!');
     }
+    
+    setGallery(prevGallery => [...prevGallery, ...validFiles]);
   };
 
   const removeGalleryImage = (index) => {
-    const newGallery = [...gallery];
-    newGallery.splice(index, 1);
-    setGallery(newGallery);
+    setGallery(prevGallery => prevGallery.filter((_, i) => i !== index));
   };
 
   const removeExistingGalleryImage = (index) => {
-    const newGallery = [...existingGallery];
-    newGallery.splice(index, 1);
-    setExistingGallery(newGallery);
+    setExistingGallery(prev => prev.filter((_, i) => i !== index));
   };
 
   const handlePropertyImagesChange = (e) => {
     const files = Array.from(e.target.files);
-    setPropertyImages(files);
+    const validFiles = files.filter(file => file.type.startsWith('image/'));
+    
+    if (validFiles.length !== files.length) {
+      alert('Only image files are allowed!');
+    }
+    
+    setPropertyImages(prevImages => [...prevImages, ...validFiles]);
   };
 
   const removePropertyImage = (index) => {
-    const newImages = [...propertyImages];
-    newImages.splice(index, 1);
-    setPropertyImages(newImages);
+    setPropertyImages(prevImages => prevImages.filter((_, i) => i !== index));
   };
 
   const removeExistingPropertyImage = (index) => {
-    console.log(`Removing existing property image at index ${index}`);
-    const newImages = [...existingPropertyImages];
-    newImages.splice(index, 1);
-    setExistingPropertyImages(newImages);
-    console.log(`After removal: ${newImages.length} images remaining`);
+    setExistingPropertyImages(prev => prev.filter((_, i) => i !== index));
   };
 
-  // Amenities handlers
   const addAmenity = () => {
-    if (newAmenity.trim()) {
-      setAmenities([...amenities, newAmenity.trim()]);
+    const trimmed = newAmenity.trim();
+    if (trimmed && !amenities.includes(trimmed)) {
+      setAmenities([...amenities, trimmed]);
       setNewAmenity("");
+    } else if (amenities.includes(trimmed)) {
+      alert("This amenity has already been added!");
     }
   };
 
@@ -273,296 +292,309 @@ const AdminPropertyDetails = () => {
     setAmenities(amenities.filter((_, i) => i !== index));
   };
 
-  // Filter properties based on search term
-  const filteredProperties = properties.filter(property =>
-    property.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  // Handle property selection
-  const handlePropertySelect = (propertyId, propertyTitle) => {
-    setSelectedPropertyId(propertyId);
-    setSearchTerm(propertyTitle);
-    setIsDropdownOpen(false);
-  };
-
-  // Clear selection
-  const clearSelection = () => {
-    setSelectedPropertyId("");
-    setSearchTerm("");
-    setSavedDetails(null);
-    setExistingMainMedia(null);
-    setExistingGallery([]);
-    setExistingPropertyImages([]);
-    setIsEditMode(false);
-  };
-
-  const handleSubmit = async (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
     
-    // Check gallery limit (existing + new)
-    const totalGalleryImages = (existingGallery?.length || 0) + gallery.length;
-    if (totalGalleryImages > 4) {
-      alert("Total gallery images cannot exceed 4! Please remove some images.");
+    if (!selectedPropertyId) {
+      setErrorMessage("Please select a property first.");
       return;
     }
 
     setIsSubmitting(true);
+    setErrorMessage("");
+    setUploadProgress("Preparing upload...");
 
     try {
-      const data = new FormData();
-      data.append("propertyId", selectedPropertyId);
-      data.append("description", description);
-      data.append("mapUrl", mapUrl);
-      data.append("amenities", JSON.stringify(amenities));
+      const formData = new FormData();
+      formData.append("propertyId", selectedPropertyId);
+      formData.append("description", description);
+      formData.append("mapUrl", mapUrl);
       
-      // Append main media if new file is selected
-      if (mainMedia) data.append("mainMedia", mainMedia);
-      
-      // Append gallery images if new files are selected
-      gallery.forEach(file => data.append("gallery", file));
-      
-      // Append property images if new files are selected
-      propertyImages.forEach((image) => {
-        data.append('constructionProgress', image);
-      });
+      // Send amenities as JSON array
+      formData.append("amenities", JSON.stringify(amenities));
 
-      // IMPORTANT: Also send existing property images that haven't been removed
-      // This ensures existing images are preserved
-      const remainingExistingImages = existingPropertyImages.map(img => ({
+      // Send existing property images so backend knows to keep them
+      const existingImagesData = existingPropertyImages.map(img => ({
         url: img.url,
         label: img.label
       }));
-      
-      if (remainingExistingImages.length > 0) {
-        console.log("Preserving existing property images:", remainingExistingImages.length);
-        data.append("existingPropertyImages", JSON.stringify(remainingExistingImages));
+      formData.append("existingPropertyImages", JSON.stringify(existingImagesData));
+
+      if (mainMedia) {
+        const fileSizeMB = mainMedia.size / (1024 * 1024);
+        setUploadProgress(`Uploading video (${fileSizeMB.toFixed(2)}MB)... This may take several minutes...`);
+        formData.append("mainMedia", mainMedia);
       }
 
-      console.log("Submitting form data...");
-      console.log("Before submit - existingPropertyImages:", existingPropertyImages);
-      console.log("Before submit - propertyImages (new):", propertyImages);
-      console.log("Main media:", mainMedia ? "New file" : "Using existing");
-      console.log("Gallery images (new):", gallery.length);
-      console.log("Gallery images (existing):", existingGallery.length);
-      console.log("Property images (new):", propertyImages.length);
-      console.log("Property images (existing):", existingPropertyImages.length);
-      console.log("Remaining existing property images:", remainingExistingImages.length);
-
-      const res = await fetch("/api/admin/property-details", {
-        method: "POST",
-        body: data
+      gallery.forEach(file => {
+        formData.append("gallery", file);
       });
-      
-      if (res.ok) {
-        const result = await res.json();
-        console.log("After update - result.constructionProgress:", result.constructionProgress);
-        alert(isEditMode ? "Details updated successfully!" : "Details saved successfully!");
-        
-        // Refresh saved details
-        await fetchPropertyDetails(selectedPropertyId);
-        
-        // Reset only new files, keep existing ones
-        setMainMedia(null);
-        setMainMediaPreview(null);
-        setGallery([]);
-        setPropertyImages([]);
-        // Keep amenities as they were
-        setIsEditMode(false);
-        
-        // Reset file inputs
-        document.querySelectorAll('input[type="file"]').forEach(input => input.value = '');
-        
-        // Scroll to preview
-        setTimeout(() => {
-          const preview = document.getElementById('saved-preview');
-          if (preview) {
-            preview.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          }
-        }, 100);
-      } else {
-        const errorData = await res.json();
-        console.error("Error response:", errorData);
-        alert(`Error: ${errorData.error || 'Failed to save details'}`);
+
+      propertyImages.forEach(file => {
+        formData.append("constructionProgress", file);
+      });
+
+      if (gallery.length > 0) {
+        setUploadProgress(`Uploading ${gallery.length} gallery images...`);
       }
+
+      if (propertyImages.length > 0) {
+        setUploadProgress(`Uploading ${propertyImages.length} property images...`);
+      }
+
+      setUploadProgress("Saving to server...");
+
+      const response = await fetch("/api/admin/property-details", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: "Server error" }));
+        throw new Error(errorData.error || errorData.suggestion || "Failed to save property details");
+      }
+
+      const result = await response.json();
+      
+      setUploadProgress("");
+      alert("Property details saved successfully!");
+      
+      // Refresh saved details
+      await fetchPropertyDetails(selectedPropertyId);
+      
+      // Clear form
+      setDescription("");
+      setMapUrl("");
+      setMainMedia(null);
+      setMainMediaPreview(null);
+      setExistingMainMedia(null);
+      setGallery([]);
+      setExistingGallery([]);
+      setPropertyImages([]);
+      setExistingPropertyImages([]);
+      setAmenities([]);
+      setIsEditMode(false);
+      
+      // Reset file inputs
+      const fileInputs = document.querySelectorAll('input[type="file"]');
+      fileInputs.forEach(input => input.value = '');
+      
     } catch (error) {
       console.error("Submit error:", error);
-      alert("Network error: Unable to connect to server");
+      setErrorMessage(error.message || "An error occurred while saving");
+      setUploadProgress("");
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  // Filter properties based on search
+  const filteredProperties = properties.filter(prop => 
+    prop.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    prop.locationText.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const handlePropertySelect = (propertyId) => {
+    setSelectedPropertyId(propertyId);
+    setSearchTerm(properties.find(p => p._id === propertyId)?.title || "");
+    setIsDropdownOpen(false);
+    
+    // Clear form when selecting a new property
+    setDescription("");
+    setMapUrl("");
+    setMainMedia(null);
+    setMainMediaPreview(null);
+    setExistingMainMedia(null);
+    setGallery([]);
+    setExistingGallery([]);
+    setPropertyImages([]);
+    setExistingPropertyImages([]);
+    setAmenities([]);
+    setIsEditMode(false);
+    setErrorMessage("");
+  };
+
   return (
-    <div className="admin-props-container">
-      <h2>Configure Property Details</h2>
-      
-      {/* Searchable Property Selector */}
-      <div className="searchable-select-container">
-        <div className="search-input-wrapper">
+    <div className="admin-property-details">
+      <h2>Property Details Management</h2>
+
+      {/* Property Selection */}
+      <div className="property-select-section">
+        <label htmlFor="propertySelect">Select Property *</label>
+        <div className="searchable-select-container">
           <input
             type="text"
-            className="admin-search-input"
-            placeholder="Search and select a property..."
+            placeholder="Search properties..."
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
               setIsDropdownOpen(true);
             }}
             onFocus={() => setIsDropdownOpen(true)}
+            className="searchable-input"
           />
-          {selectedPropertyId && (
-            <button
-              className="clear-selection-btn"
-              onClick={clearSelection}
-              title="Clear selection"
-            >
-              ✕
-            </button>
-          )}
-          <svg className="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
-          </svg>
-        </div>
-
-        {/* Dropdown List */}
-        {isDropdownOpen && (
-          <div className="dropdown-list">
-            {filteredProperties.length > 0 ? (
-              filteredProperties.map(property => (
-                <div
-                  key={property._id}
-                  className={`dropdown-item ${selectedPropertyId === property._id ? 'selected' : ''}`}
-                  onClick={() => handlePropertySelect(property._id, property.title)}
-                >
-                  <span className="property-title">{property.title}</span>
-                  {selectedPropertyId === property._id && (
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-                    </svg>
-                  )}
-                </div>
-              ))
-            ) : (
-              <div className="dropdown-item no-results">
-                No properties found
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
-      {selectedPropertyId && (
-        <form onSubmit={handleSubmit} className="admin-details-split">
-          <div className="admin-details-split-top">
-            <div className="left-side-upload">
-              <label>Big Box Media (Video or Image)</label>
-              <input 
-                id="mainMediaInput"
-                type="file" 
-                accept="image/*,video/*"
-                onChange={handleMainMediaChange}
-              />
-              
-              {/* Show existing media in edit mode */}
-              {isEditMode && existingMainMedia && !mainMediaPreview && (
-                <div className="media-preview-container">
-                  <p className="preview-label">Current Media: {existingMainMedia.name}</p>
-                  {existingMainMedia.type === 'video' ? (
-                    <video 
-                      src={existingMainMedia.url} 
-                      className="media-preview"
-                      controls
-                    />
-                  ) : (
-                    <img 
-                      src={existingMainMedia.url} 
-                      alt="Current Media" 
-                      className="media-preview"
-                    />
-                  )}
-                  <p className="file-info">This is your current media. Upload a new file to replace it.</p>
-                  <button
-                    type="button"
-                    onClick={removeMainMedia}
-                    className="remove-media-btn"
+          
+          {isDropdownOpen && (
+            <div className="searchable-dropdown">
+              {filteredProperties.length > 0 ? (
+                filteredProperties.map(prop => (
+                  <div
+                    key={prop._id}
+                    className={`dropdown-item ${selectedPropertyId === prop._id ? 'selected' : ''}`}
+                    onClick={() => handlePropertySelect(prop._id)}
                   >
-                    Remove & Upload New
-                  </button>
-                </div>
-              )}
-              
-              {/* Preview new selected media */}
-              {mainMediaPreview && (
-                <div className="media-preview-container">
-                  <p className="preview-label">New Media: {mainMediaPreview.name}</p>
-                  {mainMediaPreview.type === 'video' ? (
-                    <video 
-                      src={mainMediaPreview.url} 
-                      className="media-preview"
-                      controls
-                    />
-                  ) : (
-                    <img 
-                      src={mainMediaPreview.url} 
-                      alt="Preview" 
-                      className="media-preview"
-                    />
-                  )}
-                  <button
-                    type="button"
-                    onClick={removeMainMedia}
-                    className="remove-media-btn"
-                  >
-                    Remove
-                  </button>
-                </div>
+                    <div className="dropdown-item-title">{prop.title}</div>
+                    <div className="dropdown-item-location">{prop.locationText}</div>
+                  </div>
+                ))
+              ) : (
+                <div className="dropdown-item disabled">No properties found</div>
               )}
             </div>
+          )}
+        </div>
+      </div>
 
-            <div className="right-side-config">
-              <label>Property Description</label>
-              <textarea 
-                className="admin-textarea"
-                placeholder="Enter description..." 
-                value={description}
-                onChange={e => setDescription(e.target.value)} 
-                required
-              />
+      {/* Upload Progress Indicator */}
+      {uploadProgress && (
+        <div className="upload-progress-banner">
+          <div className="progress-spinner"></div>
+          <span>{uploadProgress}</span>
+        </div>
+      )}
 
-              <label>Google Maps Iframe URL</label>
-              <input 
-                type="text" 
-                placeholder="Paste map src URL..." 
-                value={mapUrl}
-                onChange={e => setMapUrl(e.target.value)} 
-              />
+      {/* Error Message */}
+      {errorMessage && (
+        <div className="error-banner">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+          </svg>
+          {errorMessage}
+        </div>
+      )}
 
-              <div className="gallery-upload-group">
-                <label>Gallery Images (Maximum 4 images)</label>
-                <input 
-                  type="file" 
-                  multiple 
-                  accept="image/*"
-                  onChange={handleGalleryChange}
-                  max="4"
-                />
-                {errorMessage && (
-                  <div className="error-message">{errorMessage}</div>
+      {/* Form - only show if property is selected */}
+      {selectedPropertyId && (
+        <form onSubmit={onSubmit} className="details-form">
+          <div className="form-columns">
+            {/* LEFT COLUMN */}
+            <div className="form-column">
+              {/* MAIN MEDIA (VIDEO OR IMAGE) */}
+              <div className="form-group">
+                <label htmlFor="mainMediaInput">Main Media (Video or Hero Image)</label>
+                <p className="field-description">
+                  Upload a video or image for the main display. Videos should be under 50MB for best performance (max 200MB).
+                </p>
+                
+                {/* Show existing main media */}
+                {existingMainMedia && !mainMediaPreview && (
+                  <div className="existing-media-preview">
+                    <p className="preview-title">Current Media:</p>
+                    <div className="media-preview-container">
+                      {existingMainMedia.type === 'video' ? (
+                        <video src={existingMainMedia.url} controls className="preview-media" />
+                      ) : (
+                        <img src={existingMainMedia.url} alt="Main media" className="preview-media" />
+                      )}
+                      <p className="media-name">{existingMainMedia.name}</p>
+                      <button
+                        type="button"
+                        className="remove-media-btn"
+                        onClick={removeMainMedia}
+                      >
+                        ✕ Remove
+                      </button>
+                    </div>
+                    <p className="file-info">Upload a new file to replace this.</p>
+                  </div>
                 )}
                 
-                {/* Show existing gallery images in edit mode */}
-                {isEditMode && existingGallery.length > 0 && (
-                  <div className="existing-images-section">
-                    <p className="file-info">Current Gallery Images ({existingGallery.length}):</p>
-                    <div className="existing-images-grid">
+                {/* Show new media preview */}
+                {mainMediaPreview && (
+                  <div className="new-media-preview">
+                    <p className="preview-title">New Media ({mainMediaPreview.size}MB):</p>
+                    <div className="media-preview-container">
+                      {mainMediaPreview.type === 'video' ? (
+                        <video src={mainMediaPreview.url} controls className="preview-media" />
+                      ) : (
+                        <img src={mainMediaPreview.url} alt="New media" className="preview-media" />
+                      )}
+                      <p className="media-name">{mainMediaPreview.name}</p>
+                      <button
+                        type="button"
+                        className="remove-media-btn"
+                        onClick={removeMainMedia}
+                      >
+                        ✕ Remove
+                      </button>
+                    </div>
+                  </div>
+                )}
+                
+                <input
+                  id="mainMediaInput"
+                  type="file"
+                  accept="video/*,image/*"
+                  onChange={handleMainMediaChange}
+                  disabled={isSubmitting}
+                />
+                <p className="file-hint">
+                  Recommended: Videos under 50MB, MP4 format. Images: JPG, PNG, WebP
+                </p>
+              </div>
+
+              {/* DESCRIPTION */}
+              <div className="form-group">
+                <label htmlFor="description">Property Description *</label>
+                <textarea
+                  id="description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Enter detailed property description..."
+                  required
+                  disabled={isSubmitting}
+                />
+              </div>
+
+              {/* MAP URL */}
+              <div className="form-group">
+                <label htmlFor="mapUrl">Map Embed URL</label>
+                <p className="field-description">
+                  Paste the embed URL from Google Maps (Share → Embed a map)
+                </p>
+                <input
+                  id="mapUrl"
+                  type="text"
+                  value={mapUrl}
+                  onChange={(e) => setMapUrl(e.target.value)}
+                  placeholder="https://www.google.com/maps/embed?pb=..."
+                  disabled={isSubmitting}
+                />
+              </div>
+            </div>
+
+            {/* RIGHT COLUMN */}
+            <div className="form-column">
+              {/* GALLERY IMAGES */}
+              <div className="form-group">
+                <label htmlFor="gallery">Side Gallery Images (Max 4 will show)</label>
+                <p className="field-description">
+                  Upload images for the side gallery. Up to 4 images will be displayed.
+                </p>
+                
+                {/* Show existing gallery */}
+                {existingGallery.length > 0 && (
+                  <div className="existing-images-preview">
+                    <p className="preview-title">Current Gallery ({existingGallery.length}):</p>
+                    <div className="images-grid">
                       {existingGallery.map((img, index) => (
-                        <div key={index} className="existing-image-item">
-                          <img src={img.url} alt={`Current ${index + 1}`} className="existing-image-preview" />
+                        <div key={index} className="image-preview-item">
+                          <img src={img.url} alt={`Gallery ${index + 1}`} className="preview-thumbnail" />
+                          <span className="image-label">{img.name}</span>
                           <button
                             type="button"
+                            className="remove-image-btn"
                             onClick={() => removeExistingGalleryImage(index)}
-                            className="remove-existing-btn"
-                            title="Remove"
                           >
                             ✕
                           </button>
@@ -572,27 +604,157 @@ const AdminPropertyDetails = () => {
                     <p className="file-info">Upload new images to add to or replace these.</p>
                   </div>
                 )}
-                
+
                 {/* Show new selected gallery images */}
                 {gallery.length > 0 && (
-                  <div className="new-images-section">
-                    <p className="file-info">
-                      New Images ({gallery.length}) selected 
-                      {gallery.length < 4 && ` (${4 - (existingGallery.length + gallery.length)} more allowed)`}
-                    </p>
-                    <div className="new-images-grid">
+                  <div className="selected-images-preview">
+                    <p className="preview-title">New Gallery Images ({gallery.length}):</p>
+                    <div className="images-grid">
                       {gallery.map((file, index) => (
-                        <div key={index} className="new-image-item">
+                        <div key={index} className="image-preview-item">
                           <img 
                             src={URL.createObjectURL(file)} 
-                            alt={`New ${index + 1}`}
-                            className="new-image-preview"
+                            alt={`Gallery ${index + 1}`}
+                            className="preview-thumbnail"
                           />
+                          <span className="image-label">{file.name}</span>
                           <button
                             type="button"
+                            className="remove-image-btn"
                             onClick={() => removeGalleryImage(index)}
-                            className="remove-new-btn"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <input
+                  id="gallery"
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleGalleryChange}
+                  disabled={isSubmitting}
+                />
+              </div>
+
+              {/* PROPERTY IMAGES (CAROUSEL) */}
+              <div className="form-group">
+                <label htmlFor="propertyImages">Property Images (3D Carousel)</label>
+                <p className="field-description">
+                  Upload images that will appear in a 3D carousel on the property details page.
+                </p>
+                
+                {/* Show existing property images */}
+                {existingPropertyImages.length > 0 && (
+                  <div className="existing-images-preview">
+                    <p className="preview-title">Current Property Images ({existingPropertyImages.length}):</p>
+                    <div className="images-grid">
+                      {existingPropertyImages.map((img, index) => (
+                        <div key={index} className="image-preview-item">
+                          <img src={img.url} alt={img.label} className="preview-thumbnail" />
+                          <span className="image-label">{img.label}</span>
+                          <button
+                            type="button"
+                            className="remove-image-btn"
+                            onClick={() => removeExistingPropertyImage(index)}
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="file-info">Upload new images to add to or replace these.</p>
+                  </div>
+                )}
+
+                {/* Show new selected property images */}
+                {propertyImages.length > 0 && (
+                  <div className="selected-images-preview">
+                    <p className="preview-title">New Images ({propertyImages.length}):</p>
+                    <div className="images-grid">
+                      {propertyImages.map((file, index) => (
+                        <div key={index} className="image-preview-item">
+                          <img 
+                            src={URL.createObjectURL(file)} 
+                            alt={`Preview ${index + 1}`}
+                            className="preview-thumbnail"
+                          />
+                          <span className="image-label">New Image {index + 1}</span>
+                          <button
+                            type="button"
+                            className="remove-image-btn"
+                            onClick={() => removePropertyImage(index)}
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <input
+                  id="propertyImages"
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handlePropertyImagesChange}
+                  disabled={isSubmitting}
+                />
+              </div>
+
+              {/* AMENITIES SECTION */}
+              <div className="amenities-section">
+                <label>Property Amenities</label>
+                <p className="section-description">
+                  Add custom amenities that will display in a grid (e.g., visiting room, dining area, hall, kitchen).
+                </p>
+                
+                <div className="amenity-input-group">
+                  <input
+                    type="text"
+                    value={newAmenity}
+                    onChange={(e) => setNewAmenity(e.target.value)}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        addAmenity();
+                      }
+                    }}
+                    placeholder="Enter amenity name (e.g., visiting room)"
+                    className="amenity-input"
+                    disabled={isSubmitting}
+                  />
+                  <button
+                    type="button"
+                    onClick={addAmenity}
+                    className="add-amenity-btn"
+                    disabled={isSubmitting}
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                    </svg>
+                    Add
+                  </button>
+                </div>
+
+                {amenities.length > 0 && (
+                  <div className="amenities-list">
+                    <p className="amenities-count">{amenities.length} amenities added:</p>
+                    <div className="amenities-grid">
+                      {amenities.map((amenity, index) => (
+                        <div key={index} className="amenity-tag">
+                          <span>{amenity}</span>
+                          <button
+                            type="button"
+                            onClick={() => removeAmenity(index)}
+                            className="remove-amenity-btn"
                             title="Remove"
+                            disabled={isSubmitting}
                           >
                             ✕
                           </button>
@@ -602,142 +764,6 @@ const AdminPropertyDetails = () => {
                   </div>
                 )}
               </div>
-            </div>
-          </div>
-
-          {/* PROPERTY IMAGES AND AMENITIES SIDE BY SIDE */}
-          <div className="bottom-split-section">
-            {/* PROPERTY IMAGES SECTION - Multi Upload */}
-            <div className="property-images-section">
-              <label>Property Images (Carousel)</label>
-              <p className="section-description">
-                Upload multiple images at once. They will appear in the 3D carousel on the property page.
-              </p>
-              
-              <div className="multi-image-upload">
-                <input 
-                  type="file" 
-                  multiple 
-                  accept="image/*"
-                  onChange={handlePropertyImagesChange}
-                  className="multi-file-input"
-                  id="propertyImagesInput"
-                />
-                <label htmlFor="propertyImagesInput" className="upload-button">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M19 7v2.99s-1.99.01-2 0V7h-3s.01-1.99 0-2h3V2h2v3h3v2h-3zm-3 4V8h-3V5H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-8h-3zM5 19l3-4 2 3 3-4 4 5H5z"/>
-                  </svg>
-                  <span>Choose Images</span>
-                </label>
-              </div>
-
-              {/* Show existing property images in edit mode */}
-              {isEditMode && existingPropertyImages.length > 0 && (
-                <div className="existing-property-images">
-                  <p className="preview-title">Current Property Images ({existingPropertyImages.length}):</p>
-                  <div className="images-grid">
-                    {existingPropertyImages.map((img, index) => (
-                      <div key={index} className="image-preview-item">
-                        <img 
-                          src={img.url} 
-                          alt={img.label}
-                          className="preview-thumbnail"
-                        />
-                        <span className="image-label">{img.label}</span>
-                        <button
-                          type="button"
-                          className="remove-image-btn"
-                          onClick={() => removeExistingPropertyImage(index)}
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                  <p className="file-info">Upload new images to add to or replace these.</p>
-                </div>
-              )}
-
-              {/* Show new selected property images */}
-              {propertyImages.length > 0 && (
-                <div className="selected-images-preview">
-                  <p className="preview-title">New Images ({propertyImages.length}):</p>
-                  <div className="images-grid">
-                    {propertyImages.map((file, index) => (
-                      <div key={index} className="image-preview-item">
-                        <img 
-                          src={URL.createObjectURL(file)} 
-                          alt={`Preview ${index + 1}`}
-                          className="preview-thumbnail"
-                        />
-                        <span className="image-label">New Image {index + 1}</span>
-                        <button
-                          type="button"
-                          className="remove-image-btn"
-                          onClick={() => removePropertyImage(index)}
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* AMENITIES SECTION */}
-            <div className="amenities-section">
-              <label>Property Amenities</label>
-              <p className="section-description">
-                Add custom amenities that will display in a grid (e.g., visiting room, dining area, hall, kitchen).
-              </p>
-              
-              <div className="amenity-input-group">
-                <input
-                  type="text"
-                  value={newAmenity}
-                  onChange={(e) => setNewAmenity(e.target.value)}
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      addAmenity();
-                    }
-                  }}
-                  placeholder="Enter amenity name (e.g., visiting room)"
-                  className="amenity-input"
-                />
-                <button
-                  type="button"
-                  onClick={addAmenity}
-                  className="add-amenity-btn"
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
-                  </svg>
-                  Add
-                </button>
-              </div>
-
-              {amenities.length > 0 && (
-                <div className="amenities-list">
-                  <p className="amenities-count">{amenities.length} amenities added:</p>
-                  <div className="amenities-grid">
-                    {amenities.map((amenity, index) => (
-                      <div key={index} className="amenity-tag">
-                        <span>{amenity}</span>
-                        <button
-                          type="button"
-                          onClick={() => removeAmenity(index)}
-                          className="remove-amenity-btn"
-                          title="Remove"
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
           </div>
 

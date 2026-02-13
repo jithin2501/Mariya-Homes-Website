@@ -13,11 +13,22 @@ const app = express();
 
 connectDB();
 
-app.use(cors());
+// CORS configuration with increased timeout
+app.use(cors({
+  origin: true,
+  credentials: true
+}));
 
-// ⚠️ IMPORTANT: Increase body parser limits for large video uploads (up to 1GB)
-app.use(express.json({ limit: '1200mb' }));
-app.use(express.urlencoded({ limit: '1200mb', extended: true }));
+// ⚠️ IMPORTANT: Increase body parser limits AND timeout for large video uploads
+app.use(express.json({ limit: '500mb' })); // Reduced from 1200mb for stability
+app.use(express.urlencoded({ limit: '500mb', extended: true }));
+
+// Increase server timeout for long uploads (10 minutes)
+app.use((req, res, next) => {
+  req.setTimeout(600000); // 10 minutes
+  res.setTimeout(600000); // 10 minutes
+  next();
+});
 
 const storage = multer.memoryStorage();
 
@@ -98,7 +109,8 @@ console.log('✅ Property details routes mounted');
 console.log('✅ Gallery routes mounted');
 console.log('✅ User routes mounted');
 console.log('✅ Analytics routes mounted at /api/analytics');
-console.log('✅ Body parser limits: 1200MB');
+console.log('✅ Body parser limits: 500MB');
+console.log('✅ Request timeout: 10 minutes');
 console.log('========================\n');
 
 // ============ SERVE STATIC FILES - AFTER API ROUTES ============
@@ -121,9 +133,16 @@ app.use((req, res, next) => {
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📊 Analytics API available at: http://localhost:${PORT}/api/analytics`);
   console.log(`🧪 Test endpoint: http://localhost:${PORT}/api/analytics/test`);
   console.log(`📱 Client app: http://localhost:${PORT}`);
 });
+
+// Increase server timeout to 10 minutes for video uploads
+server.timeout = 600000;
+server.keepAliveTimeout = 610000;
+server.headersTimeout = 620000;
+
+console.log('⏱️  Server timeout set to 10 minutes for large uploads');

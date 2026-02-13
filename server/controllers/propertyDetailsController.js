@@ -2,7 +2,7 @@ const PropertyDetails = require('../models/PropertyDetails');
 const cloudinary = require('../config/cloudinary');
 const streamifier = require('streamifier');
 
-// Helper function to upload to Cloudinary with better timeout handling
+// Helper function to upload to Cloudinary with improved error handling
 const uploadToCloudinary = (file) => {
   return new Promise((resolve, reject) => {
     const folder = file.fieldname === 'mainMedia' 
@@ -16,7 +16,8 @@ const uploadToCloudinary = (file) => {
     const uploadOptions = {
       folder: folder,
       resource_type: isVideo ? 'video' : 'image',
-      timeout: 900000, // 15 minutes timeout for 1GB videos
+      timeout: 600000, // 10 minutes timeout
+      chunk_size: 6000000, // 6MB chunks for better reliability
     };
     
     // Add different transformations for images vs videos
@@ -25,12 +26,12 @@ const uploadToCloudinary = (file) => {
         { quality: 'auto', fetch_format: 'auto' }
       ];
     } else {
-      // For videos, use less aggressive compression
-      uploadOptions.quality = 'auto';
+      // For videos, optimize settings
+      uploadOptions.quality = 'auto:low'; // Compress video for faster upload
       uploadOptions.eager = [
-        { streaming_profile: 'hd', format: 'auto' }
+        { streaming_profile: 'hd', format: 'mp4' }
       ];
-      uploadOptions.eager_async = true; // Process in background for faster upload
+      uploadOptions.eager_async = true; // Process in background
     }
     
     console.log(`\n📤 Uploading ${isVideo ? 'VIDEO' : 'IMAGE'} to Cloudinary...`);
@@ -158,16 +159,37 @@ exports.upsertDetails = async (req, res) => {
     if (req.files && req.files['mainMedia']) {
       console.log("\n☁️ Uploading main media to Cloudinary...");
       const mainMediaFile = req.files['mainMedia'][0];
+      
+      // Check file size - warn if over 100MB
+      const fileSizeMB = mainMediaFile.size / (1024 * 1024);
+      if (fileSizeMB > 100) {
+        console.log(`   ⚠️ WARNING: Large file detected (${fileSizeMB.toFixed(2)}MB)`);
+        console.log(`   ⚠️ Upload may take several minutes. Please be patient...`);
+      }
+      
       try {
         const cloudinaryUrl = await uploadToCloudinary(mainMediaFile);
         updateData.mainMedia = cloudinaryUrl;
         console.log("   ✓ Main media uploaded successfully");
       } catch (error) {
         console.log("   ❌ Error uploading main media:", error.message);
+        
+        // Provide specific error messages
+        let errorMessage = "Failed to upload video to Cloudinary";
+        let suggestion = "Please try again";
+        
+        if (error.message.includes('timeout') || error.message.includes('ESOCKETTIMEDOUT')) {
+          errorMessage = "Upload timeout - video file is too large";
+          suggestion = "Please compress your video to under 50MB or use a shorter clip";
+        } else if (error.message.includes('file size')) {
+          errorMessage = "Video file exceeds size limit";
+          suggestion = "Please use a video under 200MB";
+        }
+        
         return res.status(500).json({ 
-          error: "Failed to upload video to Cloudinary", 
+          error: errorMessage, 
           details: error.message,
-          suggestion: "Video may be too large or Cloudinary timeout occurred. Try compressing the video or check Cloudinary limits."
+          suggestion: suggestion
         });
       }
     }
@@ -184,7 +206,10 @@ exports.upsertDetails = async (req, res) => {
           updateData.gallery.push(cloudinaryUrl);
         } catch (error) {
           console.log(`   ❌ Error uploading gallery image:`, error.message);
-          throw error;
+          return res.status(500).json({ 
+            error: "Failed to upload gallery image", 
+            details: error.message 
+          });
         }
       }
       console.log(`   ✓ All gallery images uploaded`);
@@ -209,7 +234,10 @@ exports.upsertDetails = async (req, res) => {
           console.log(`   ✓ New property image ${i + 1} uploaded`);
         } catch (error) {
           console.log(`   ❌ Error uploading property image ${i + 1}:`, error.message);
-          throw error;
+          return res.status(500).json({ 
+            error: `Failed to upload property image ${i + 1}`, 
+            details: error.message 
+          });
         }
       }
     }
