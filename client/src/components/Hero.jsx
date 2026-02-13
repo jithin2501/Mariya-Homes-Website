@@ -49,7 +49,7 @@ const Hero = () => {
       {/* Left Image Panel */}
       <div className="banner-panel banner-left">
         <img 
-          src="/images/row-1-column-1.png" 
+          src="/images/Hero-Banner/row-1-column-1.png" 
           alt="Left Banner" 
           loading="eager"
         />
@@ -58,7 +58,7 @@ const Hero = () => {
       {/* Center Image Panel */}
       <div className="banner-panel banner-center">
         <img 
-          src="/images/row-1-column-2.png" 
+          src="/images/Hero-Banner/row-1-column-2.png" 
           alt="Center Banner" 
           loading="eager"
         />
@@ -67,7 +67,7 @@ const Hero = () => {
       {/* Right Image Panel */}
       <div className="banner-panel banner-right">
         <img 
-          src="/images/row-1-column-3.png" 
+          src="/images/Hero-Banner/row-1-column-3.png" 
           alt="Right Banner" 
           loading="eager"
         />
