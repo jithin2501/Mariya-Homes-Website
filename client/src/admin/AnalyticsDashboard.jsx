@@ -494,7 +494,7 @@ const OpenStreetMapView = ({ locations }) => {
 
   return (
     <div className="map-container">
-      <h3>🌍 User Locations ({locations.length} {locations.length === 1 ? 'Location' : 'Locations'})</h3>
+      <h3>USER LOCATIONS ({locations.length} {locations.length === 1 ? 'Location' : 'Locations'})</h3>
       
       <div className="openstreetmap-wrapper">
         <iframe
