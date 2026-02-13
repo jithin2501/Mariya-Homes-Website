@@ -2,7 +2,7 @@ const PropertyDetails = require('../models/PropertyDetails');
 const cloudinary = require('../config/cloudinary');
 const streamifier = require('streamifier');
 
-// Helper function to upload to Cloudinary with better timeout handling for 1GB videos
+// Helper function to upload to Cloudinary
 const uploadToCloudinary = (file) => {
   return new Promise((resolve, reject) => {
     const folder = file.fieldname === 'mainMedia' 
@@ -11,44 +11,18 @@ const uploadToCloudinary = (file) => {
         ? 'mariya-homes/property-details/gallery'
         : 'mariya-homes/property-details/property-images';
     
-    const isVideo = file.mimetype.startsWith('video');
-    
-    const uploadOptions = {
-      folder: folder,
-      resource_type: isVideo ? 'video' : 'image',
-      timeout: 1800000, // 30 minutes timeout for 1GB videos
-      chunk_size: 6000000, // 6MB chunks for better stability
-    };
-    
-    // Add different transformations for images vs videos
-    if (!isVideo) {
-      uploadOptions.transformation = [
-        { quality: 'auto', fetch_format: 'auto' }
-      ];
-    } else {
-      // For videos, use less aggressive compression
-      uploadOptions.quality = 'auto';
-      uploadOptions.eager = [
-        { streaming_profile: 'hd', format: 'auto' }
-      ];
-      uploadOptions.eager_async = true; // Process in background for faster upload
-    }
-    
-    console.log(`\n📤 Uploading ${isVideo ? 'VIDEO' : 'IMAGE'} to Cloudinary...`);
-    console.log(`   File size: ${(file.size / (1024 * 1024)).toFixed(2)} MB`);
-    console.log(`   Folder: ${folder}`);
-    
     const uploadStream = cloudinary.uploader.upload_stream(
-      uploadOptions,
+      {
+        folder: folder,
+        resource_type: file.mimetype.startsWith('video') ? 'video' : 'image',
+        transformation: [
+          { quality: 'auto', fetch_format: 'auto' }
+        ]
+      },
       (error, result) => {
         if (error) {
-          console.log(`\n❌ Cloudinary upload failed:`);
-          console.log(`   Error: ${error.message}`);
           reject(error);
         } else {
-          console.log(`\n✅ Upload successful!`);
-          console.log(`   URL: ${result.secure_url}`);
-          console.log(`   Duration: ${result.duration ? result.duration + 's' : 'N/A'}`);
           resolve(result.secure_url);
         }
       }
@@ -76,11 +50,7 @@ exports.upsertDetails = async (req, res) => {
     console.log("\n2. Files Received:");
     if (req.files) {
       Object.keys(req.files).forEach(key => {
-        const files = req.files[key];
-        console.log(`   - ${key}: ${files.length} file(s)`);
-        files.forEach(file => {
-          console.log(`     • ${file.originalname} (${(file.size / (1024 * 1024)).toFixed(2)} MB)`);
-        });
+        console.log(`   - ${key}: ${req.files[key].length} file(s)`);
       });
     } else {
       console.log("   - No files received");
@@ -155,56 +125,23 @@ exports.upsertDetails = async (req, res) => {
       updateData.amenities = [];
     }
 
-    // Process main media (video or image) - SUPPORTS UP TO 1GB
+    // Process main media (video or image)
     if (req.files && req.files['mainMedia']) {
-      console.log("\n☁️ Uploading main media to Cloudinary...");
+      console.log("   ☁️ Uploading main media to Cloudinary...");
       const mainMediaFile = req.files['mainMedia'][0];
-      
-      const fileSizeMB = mainMediaFile.size / (1024 * 1024);
-      console.log(`   File size: ${fileSizeMB.toFixed(2)}MB`);
-      
-      if (fileSizeMB > 1024) {
-        console.log(`   ⚠️ WARNING: File exceeds 1GB limit`);
-        return res.status(400).json({ 
-          error: "File too large", 
-          details: "Maximum file size is 1GB (1024MB)",
-          suggestion: "Please compress your video to under 1GB"
-        });
-      }
-      
-      if (fileSizeMB > 100) {
-        console.log(`   ⚠️ Large file detected - upload may take 10-20 minutes`);
-      }
-      
       try {
         const cloudinaryUrl = await uploadToCloudinary(mainMediaFile);
         updateData.mainMedia = cloudinaryUrl;
-        console.log("   ✓ Main media uploaded successfully");
+        console.log("   ✓ Main media uploaded to Cloudinary:", cloudinaryUrl);
       } catch (error) {
         console.log("   ❌ Error uploading main media:", error.message);
-        
-        let errorMessage = "Failed to upload video to Cloudinary";
-        let suggestion = "Please try again";
-        
-        if (error.message.includes('timeout') || error.message.includes('ESOCKETTIMEDOUT')) {
-          errorMessage = "Upload timeout - this can happen with very large files on slower connections";
-          suggestion = "Try compressing your video or ensure you have a stable internet connection";
-        } else if (error.message.includes('file size')) {
-          errorMessage = "Video file exceeds size limit";
-          suggestion = "Please use a video under 1GB";
-        }
-        
-        return res.status(500).json({ 
-          error: errorMessage, 
-          details: error.message,
-          suggestion: suggestion
-        });
+        throw error;
       }
     }
     
     // Process gallery images
     if (req.files && req.files['gallery']) {
-      console.log(`\n☁️ Uploading ${req.files['gallery'].length} gallery images to Cloudinary...`);
+      console.log(`   ☁️ Uploading ${req.files['gallery'].length} gallery images to Cloudinary...`);
       updateData.gallery = [];
       
       // Upload each gallery image
@@ -212,15 +149,12 @@ exports.upsertDetails = async (req, res) => {
         try {
           const cloudinaryUrl = await uploadToCloudinary(file);
           updateData.gallery.push(cloudinaryUrl);
+          console.log(`   ✓ Gallery image uploaded: ${cloudinaryUrl}`);
         } catch (error) {
           console.log(`   ❌ Error uploading gallery image:`, error.message);
-          return res.status(500).json({ 
-            error: "Failed to upload gallery image", 
-            details: error.message 
-          });
+          throw error;
         }
       }
-      console.log(`   ✓ All gallery images uploaded`);
     }
 
     // Process NEW property images (constructionProgress)
@@ -239,13 +173,10 @@ exports.upsertDetails = async (req, res) => {
             label: `Image ${constructionProgress.length + i + 1}`
           };
           constructionProgress.push(imageData);
-          console.log(`   ✓ New property image ${i + 1} uploaded`);
+          console.log(`   ✓ New property image ${i + 1} uploaded to Cloudinary: ${cloudinaryUrl}`);
         } catch (error) {
           console.log(`   ❌ Error uploading property image ${i + 1}:`, error.message);
-          return res.status(500).json({ 
-            error: `Failed to upload property image ${i + 1}`, 
-            details: error.message 
-          });
+          throw error;
         }
       }
     }
@@ -253,9 +184,11 @@ exports.upsertDetails = async (req, res) => {
     // Set the constructionProgress array (existing + new)
     updateData.constructionProgress = constructionProgress;
     console.log(`   ✓ Total property images after update: ${constructionProgress.length}`);
+    console.log(`   ✓ Final constructionProgress:`, constructionProgress);
 
     console.log("\n5. Attempting Database Update...");
     console.log("   Query: { propertyId:", propertyId, "}");
+    console.log("   Update Data:", JSON.stringify(updateData, null, 2));
     
     const details = await PropertyDetails.findOneAndUpdate(
       { propertyId: propertyId },
@@ -263,11 +196,12 @@ exports.upsertDetails = async (req, res) => {
       { upsert: true, new: true, runValidators: true }
     );
 
-    console.log("\n✅ SUCCESS! Property details saved");
+    console.log("\n✅ SUCCESS! Property details saved to Cloudinary");
     console.log("   Document ID:", details._id);
+    console.log("   Saved amenities:", details.amenities);
     console.log("   Amenities count:", details.amenities?.length || 0);
     console.log("   Property images count:", details.constructionProgress?.length || 0);
-    console.log("   Main media:", details.mainMedia ? 'Uploaded ✓' : 'Not provided');
+    console.log("   All images stored in Cloudinary");
     console.log("==========================================\n");
     
     res.status(200).json(details);
@@ -282,8 +216,7 @@ exports.upsertDetails = async (req, res) => {
     
     res.status(500).json({ 
       error: error.message,
-      details: error.toString(),
-      suggestion: "Check server console for detailed error logs"
+      details: error.toString()
     });
   }
 };
@@ -303,6 +236,7 @@ exports.getDetailsByPropertyId = async (req, res) => {
     }
     
     console.log("✓ Details found");
+    console.log("✓ Amenities in DB:", details.amenities);
     console.log("✓ Amenities count:", details.amenities?.length || 0);
     console.log("✓ Property images count:", details.constructionProgress?.length || 0);
     

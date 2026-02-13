@@ -13,22 +13,8 @@ const app = express();
 
 connectDB();
 
-// CORS configuration
-app.use(cors({
-  origin: true,
-  credentials: true
-}));
-
-// ⚠️ CRITICAL: Increase body parser limits AND timeout for 1GB video uploads
-app.use(express.json({ limit: '1200mb' }));
-app.use(express.urlencoded({ limit: '1200mb', extended: true }));
-
-// Increase server timeout for very long uploads (30 minutes for 1GB videos)
-app.use((req, res, next) => {
-  req.setTimeout(1800000); // 30 minutes
-  res.setTimeout(1800000); // 30 minutes
-  next();
-});
+app.use(cors());
+app.use(express.json());
 
 const storage = multer.memoryStorage();
 
@@ -89,7 +75,7 @@ const propertyRoutes = require('./routes/propertyRoutes');
 const propertyDetailsRoutes = require('./routes/propertyDetailsRoutes');
 const galleryRoutes = require('./routes/galleryRoutes');
 const userRoutes = require('./routes/userRoutes');
-const analyticsRoutes = require('./routes/analyticsRoutes');
+const analyticsRoutes = require('./routes/analyticsRoutes'); // ✅ Analytics routes
 
 // ============ REGISTER API ROUTES - MUST COME BEFORE STATIC FILES ============
 app.use('/api', contactRoutes);
@@ -98,9 +84,10 @@ app.use('/api/admin', propertyRoutes);
 app.use('/api/admin', propertyDetailsRoutes);
 app.use('/api/gallery', galleryRoutes);
 app.use('/api/admin', userRoutes);
-app.use('/api/analytics', analyticsRoutes);
+app.use('/api/analytics', analyticsRoutes); // ✅ CRITICAL: Register analytics routes here
 
 // ============ SIMPLE ROUTE VERIFICATION ============
+// Instead of complex route logging that can crash, just verify the analytics route is mounted
 console.log('\n=== SERVER STARTUP ===');
 console.log('✅ Contact routes mounted');
 console.log('✅ Video routes mounted');
@@ -109,8 +96,6 @@ console.log('✅ Property details routes mounted');
 console.log('✅ Gallery routes mounted');
 console.log('✅ User routes mounted');
 console.log('✅ Analytics routes mounted at /api/analytics');
-console.log('✅ Body parser limits: 1200MB (1GB+ support)');
-console.log('✅ Request timeout: 30 minutes');
 console.log('========================\n');
 
 // ============ SERVE STATIC FILES - AFTER API ROUTES ============
@@ -133,16 +118,9 @@ app.use((req, res, next) => {
 
 const PORT = process.env.PORT || 5000;
 
-const server = app.listen(PORT, () => {
+app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📊 Analytics API available at: http://localhost:${PORT}/api/analytics`);
   console.log(`🧪 Test endpoint: http://localhost:${PORT}/api/analytics/test`);
   console.log(`📱 Client app: http://localhost:${PORT}`);
 });
-
-// ⚠️ CRITICAL: Set server timeout to 30 minutes for 1GB video uploads
-server.timeout = 1800000; // 30 minutes
-server.keepAliveTimeout = 1810000; // 30 minutes + 10 seconds
-server.headersTimeout = 1820000; // 30 minutes + 20 seconds
-
-console.log('⏱️  Server timeout set to 30 minutes for large uploads (1GB support)');
