@@ -6,8 +6,8 @@ cloudinary.config({
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
   secure: true,
-  // ⚠️ IMPORTANT: Increase timeout for large video uploads (up to 1GB)
-  timeout: 900000 // 15 minutes timeout (for 1GB videos)
+  // ⚠️ CRITICAL: Extended timeout for 1GB video uploads (30 minutes)
+  timeout: 1800000 // 30 minutes timeout
 });
 
 // Log configuration status (without exposing secrets)
@@ -15,7 +15,7 @@ console.log('🔧 Cloudinary Configuration:');
 console.log('   Cloud Name:', process.env.CLOUDINARY_CLOUD_NAME || '❌ NOT SET');
 console.log('   API Key:', process.env.CLOUDINARY_API_KEY ? '✅ SET' : '❌ NOT SET');
 console.log('   API Secret:', process.env.CLOUDINARY_API_SECRET ? '✅ SET' : '❌ NOT SET');
-console.log('   Timeout: 15 minutes (for 1GB video uploads)');
+console.log('   Timeout: 30 minutes (supports 1GB video uploads)');
 
 if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
   console.error('\n⚠️  ERROR: Cloudinary credentials missing in .env file!');

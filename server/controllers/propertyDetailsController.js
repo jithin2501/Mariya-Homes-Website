@@ -2,7 +2,7 @@ const PropertyDetails = require('../models/PropertyDetails');
 const cloudinary = require('../config/cloudinary');
 const streamifier = require('streamifier');
 
-// Helper function to upload to Cloudinary with improved error handling
+// Helper function to upload to Cloudinary with better timeout handling for 1GB videos
 const uploadToCloudinary = (file) => {
   return new Promise((resolve, reject) => {
     const folder = file.fieldname === 'mainMedia' 
@@ -16,8 +16,8 @@ const uploadToCloudinary = (file) => {
     const uploadOptions = {
       folder: folder,
       resource_type: isVideo ? 'video' : 'image',
-      timeout: 600000, // 10 minutes timeout
-      chunk_size: 6000000, // 6MB chunks for better reliability
+      timeout: 1800000, // 30 minutes timeout for 1GB videos
+      chunk_size: 6000000, // 6MB chunks for better stability
     };
     
     // Add different transformations for images vs videos
@@ -26,12 +26,12 @@ const uploadToCloudinary = (file) => {
         { quality: 'auto', fetch_format: 'auto' }
       ];
     } else {
-      // For videos, optimize settings
-      uploadOptions.quality = 'auto:low'; // Compress video for faster upload
+      // For videos, use less aggressive compression
+      uploadOptions.quality = 'auto';
       uploadOptions.eager = [
-        { streaming_profile: 'hd', format: 'mp4' }
+        { streaming_profile: 'hd', format: 'auto' }
       ];
-      uploadOptions.eager_async = true; // Process in background
+      uploadOptions.eager_async = true; // Process in background for faster upload
     }
     
     console.log(`\n📤 Uploading ${isVideo ? 'VIDEO' : 'IMAGE'} to Cloudinary...`);
@@ -155,16 +155,25 @@ exports.upsertDetails = async (req, res) => {
       updateData.amenities = [];
     }
 
-    // Process main media (video or image)
+    // Process main media (video or image) - SUPPORTS UP TO 1GB
     if (req.files && req.files['mainMedia']) {
       console.log("\n☁️ Uploading main media to Cloudinary...");
       const mainMediaFile = req.files['mainMedia'][0];
       
-      // Check file size - warn if over 100MB
       const fileSizeMB = mainMediaFile.size / (1024 * 1024);
+      console.log(`   File size: ${fileSizeMB.toFixed(2)}MB`);
+      
+      if (fileSizeMB > 1024) {
+        console.log(`   ⚠️ WARNING: File exceeds 1GB limit`);
+        return res.status(400).json({ 
+          error: "File too large", 
+          details: "Maximum file size is 1GB (1024MB)",
+          suggestion: "Please compress your video to under 1GB"
+        });
+      }
+      
       if (fileSizeMB > 100) {
-        console.log(`   ⚠️ WARNING: Large file detected (${fileSizeMB.toFixed(2)}MB)`);
-        console.log(`   ⚠️ Upload may take several minutes. Please be patient...`);
+        console.log(`   ⚠️ Large file detected - upload may take 10-20 minutes`);
       }
       
       try {
@@ -174,16 +183,15 @@ exports.upsertDetails = async (req, res) => {
       } catch (error) {
         console.log("   ❌ Error uploading main media:", error.message);
         
-        // Provide specific error messages
         let errorMessage = "Failed to upload video to Cloudinary";
         let suggestion = "Please try again";
         
         if (error.message.includes('timeout') || error.message.includes('ESOCKETTIMEDOUT')) {
-          errorMessage = "Upload timeout - video file is too large";
-          suggestion = "Please compress your video to under 50MB or use a shorter clip";
+          errorMessage = "Upload timeout - this can happen with very large files on slower connections";
+          suggestion = "Try compressing your video or ensure you have a stable internet connection";
         } else if (error.message.includes('file size')) {
           errorMessage = "Video file exceeds size limit";
-          suggestion = "Please use a video under 200MB";
+          suggestion = "Please use a video under 1GB";
         }
         
         return res.status(500).json({ 

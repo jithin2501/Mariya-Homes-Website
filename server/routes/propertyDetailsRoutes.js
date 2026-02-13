@@ -11,7 +11,7 @@ const storage = multer.memoryStorage();
 const upload = multer({ 
   storage: storage,
   limits: { 
-    fileSize: 200 * 1024 * 1024, // 200MB limit (more stable than 1GB)
+    fileSize: 1100 * 1024 * 1024, // 1.1GB limit (covers 1GB files with some overhead)
     files: 30 // Maximum total files
   },
   fileFilter: function (req, file, cb) {
@@ -32,13 +32,13 @@ const upload = multer({
 
 // POST: Create or Update Property Details
 router.post('/property-details', upload.fields([
-  { name: 'mainMedia', maxCount: 1 }, // Can be video or image
+  { name: 'mainMedia', maxCount: 1 }, // Can be video or image (up to 1GB)
   { name: 'gallery', maxCount: 10 }, // Images only
   { name: 'constructionProgress', maxCount: 20 } // Property images
 ]), (req, res, next) => {
-  // Add timeout extension for this route specifically
-  req.setTimeout(600000); // 10 minutes
-  res.setTimeout(600000);
+  // Add extended timeout for this route specifically (30 minutes)
+  req.setTimeout(1800000); // 30 minutes
+  res.setTimeout(1800000); // 30 minutes
   next();
 }, upsertDetails);
 

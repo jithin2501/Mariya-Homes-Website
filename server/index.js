@@ -13,20 +13,20 @@ const app = express();
 
 connectDB();
 
-// CORS configuration with increased timeout
+// CORS configuration
 app.use(cors({
   origin: true,
   credentials: true
 }));
 
-// ⚠️ IMPORTANT: Increase body parser limits AND timeout for large video uploads
-app.use(express.json({ limit: '500mb' })); // Reduced from 1200mb for stability
-app.use(express.urlencoded({ limit: '500mb', extended: true }));
+// ⚠️ CRITICAL: Increase body parser limits AND timeout for 1GB video uploads
+app.use(express.json({ limit: '1200mb' }));
+app.use(express.urlencoded({ limit: '1200mb', extended: true }));
 
-// Increase server timeout for long uploads (10 minutes)
+// Increase server timeout for very long uploads (30 minutes for 1GB videos)
 app.use((req, res, next) => {
-  req.setTimeout(600000); // 10 minutes
-  res.setTimeout(600000); // 10 minutes
+  req.setTimeout(1800000); // 30 minutes
+  res.setTimeout(1800000); // 30 minutes
   next();
 });
 
@@ -109,8 +109,8 @@ console.log('✅ Property details routes mounted');
 console.log('✅ Gallery routes mounted');
 console.log('✅ User routes mounted');
 console.log('✅ Analytics routes mounted at /api/analytics');
-console.log('✅ Body parser limits: 500MB');
-console.log('✅ Request timeout: 10 minutes');
+console.log('✅ Body parser limits: 1200MB (1GB+ support)');
+console.log('✅ Request timeout: 30 minutes');
 console.log('========================\n');
 
 // ============ SERVE STATIC FILES - AFTER API ROUTES ============
@@ -140,9 +140,9 @@ const server = app.listen(PORT, () => {
   console.log(`📱 Client app: http://localhost:${PORT}`);
 });
 
-// Increase server timeout to 10 minutes for video uploads
-server.timeout = 600000;
-server.keepAliveTimeout = 610000;
-server.headersTimeout = 620000;
+// ⚠️ CRITICAL: Set server timeout to 30 minutes for 1GB video uploads
+server.timeout = 1800000; // 30 minutes
+server.keepAliveTimeout = 1810000; // 30 minutes + 10 seconds
+server.headersTimeout = 1820000; // 30 minutes + 20 seconds
 
-console.log('⏱️  Server timeout set to 10 minutes for large uploads');
+console.log('⏱️  Server timeout set to 30 minutes for large uploads (1GB support)');
