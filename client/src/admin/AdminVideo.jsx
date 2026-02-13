@@ -115,7 +115,7 @@ const AdminVideo = () => {
             <span>
               {videoFile
                 ? videoFile.name
-                : "Choose video file (max 200MB)"}
+                : "Choose video file (max 100MB)"}
             </span>
           </label>
 
