@@ -14,7 +14,10 @@ const app = express();
 connectDB();
 
 app.use(cors());
-app.use(express.json());
+
+// ⚠️ IMPORTANT: Increase body parser limits for large video uploads (up to 1GB)
+app.use(express.json({ limit: '1200mb' }));
+app.use(express.urlencoded({ limit: '1200mb', extended: true }));
 
 const storage = multer.memoryStorage();
 
@@ -75,7 +78,7 @@ const propertyRoutes = require('./routes/propertyRoutes');
 const propertyDetailsRoutes = require('./routes/propertyDetailsRoutes');
 const galleryRoutes = require('./routes/galleryRoutes');
 const userRoutes = require('./routes/userRoutes');
-const analyticsRoutes = require('./routes/analyticsRoutes'); // ✅ Analytics routes
+const analyticsRoutes = require('./routes/analyticsRoutes');
 
 // ============ REGISTER API ROUTES - MUST COME BEFORE STATIC FILES ============
 app.use('/api', contactRoutes);
@@ -84,10 +87,9 @@ app.use('/api/admin', propertyRoutes);
 app.use('/api/admin', propertyDetailsRoutes);
 app.use('/api/gallery', galleryRoutes);
 app.use('/api/admin', userRoutes);
-app.use('/api/analytics', analyticsRoutes); // ✅ CRITICAL: Register analytics routes here
+app.use('/api/analytics', analyticsRoutes);
 
 // ============ SIMPLE ROUTE VERIFICATION ============
-// Instead of complex route logging that can crash, just verify the analytics route is mounted
 console.log('\n=== SERVER STARTUP ===');
 console.log('✅ Contact routes mounted');
 console.log('✅ Video routes mounted');
@@ -96,6 +98,7 @@ console.log('✅ Property details routes mounted');
 console.log('✅ Gallery routes mounted');
 console.log('✅ User routes mounted');
 console.log('✅ Analytics routes mounted at /api/analytics');
+console.log('✅ Body parser limits: 1200MB');
 console.log('========================\n');
 
 // ============ SERVE STATIC FILES - AFTER API ROUTES ============
