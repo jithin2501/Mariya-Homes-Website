@@ -3,6 +3,8 @@ import '../styles/hero.css';
 
 const Hero = () => {
   const [activeTextIndex, setActiveTextIndex] = useState(0);
+  const [isLoaded, setIsLoaded] = useState(false);
+  
   const texts = [
     "Discover Spaces That Inspire.",
     "Find Homes Designed for Living.",
@@ -26,6 +28,9 @@ const Hero = () => {
   };
 
   useEffect(() => {
+    // Trigger animation after component mounts
+    setTimeout(() => setIsLoaded(true), 100);
+
     const interval = setInterval(() => {
       setActiveTextIndex((prevIndex) => (prevIndex + 1) % texts.length);
     }, 3000);
@@ -40,14 +45,38 @@ const Hero = () => {
   };
 
   return (
-    <div
-      className="top-banner-bg"
-      style={{
-        backgroundImage: "url('/images/Hero-Banner/Banner.png')",
-        backgroundSize: "cover",
-        backgroundPosition: "center"
-      }}
-    >
+    <div className={`top-banner-bg ${isLoaded ? 'loaded' : ''}`}>
+      {/* Left Image Panel */}
+      <div className="banner-panel banner-left">
+        <img 
+          src="/images/row-1-column-1.png" 
+          alt="Left Banner" 
+          loading="eager"
+        />
+      </div>
+
+      {/* Center Image Panel */}
+      <div className="banner-panel banner-center">
+        <img 
+          src="/images/row-1-column-2.png" 
+          alt="Center Banner" 
+          loading="eager"
+        />
+      </div>
+
+      {/* Right Image Panel */}
+      <div className="banner-panel banner-right">
+        <img 
+          src="/images/row-1-column-3.png" 
+          alt="Right Banner" 
+          loading="eager"
+        />
+      </div>
+
+      {/* Overlay gradient */}
+      <div className="banner-overlay"></div>
+
+      {/* Hero Content */}
       <div className="hero-content">
         <div className="hero-tagline rotating-text">
           {texts.map((text, index) => (

@@ -2,42 +2,94 @@
 .top-banner-bg {
     width: 100%;
     min-height: 100vh;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
     position: relative;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: flex-start;
     padding: 120px 60px 80px;
-    filter: none;
+    overflow: hidden;
 }
 
-.top-banner-bg::after {
-    content: "";
+/* Banner Panels - Three Split Images */
+.banner-panel {
     position: absolute;
-    inset: 0;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
+    top: 0;
+    height: 100%;
     z-index: 0;
+    transition: transform 1.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.top-banner-bg::before {
+.banner-panel img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Left Panel - Slides in from left */
+.banner-left {
+    left: 0;
+    width: 33.33%;
+    transform: translateX(-100%);
+}
+
+.top-banner-bg.loaded .banner-left {
+    transform: translateX(0);
+}
+
+/* Center Panel - Starts hidden, fades in */
+.banner-center {
+    left: 33.33%;
+    width: 33.34%;
+    opacity: 0;
+    transform: scale(0.9);
+    transition: opacity 1.5s cubic-bezier(0.4, 0, 0.2, 1) 0.3s, 
+                transform 1.5s cubic-bezier(0.4, 0, 0.2, 1) 0.3s;
+}
+
+.top-banner-bg.loaded .banner-center {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* Right Panel - Slides in from right */
+.banner-right {
+    right: 0;
+    width: 33.33%;
+    transform: translateX(100%);
+}
+
+.top-banner-bg.loaded .banner-right {
+    transform: translateX(0);
+}
+
+/* Overlay Gradient */
+.banner-overlay {
     content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(135deg, rgba(15, 23, 42, 0.2) 0%, rgba(30, 41, 59, 0.1) 100%);
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.3) 0%, rgba(30, 41, 59, 0.2) 100%);
     z-index: 1;
+    pointer-events: none;
 }
 
+/* Hero Content */
 .hero-content {
     max-width: 900px;
     color: #fff;
     position: relative;
     z-index: 2;
+    opacity: 0;
+    transform: translateY(30px);
+    animation: fadeInUp 1s ease forwards 0.8s;
+}
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .hero-tagline {
@@ -81,7 +133,9 @@
 .stat-icon {
     width: 50px;
     height: 50px;
-    background-color: rgba(255, 165, 0, 0.15);
+    background-color: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 165, 0, 0.3);
     border-radius: 8px;
     display: flex;
     align-items: center;
@@ -136,6 +190,7 @@
     display: block;
     max-width: 100%;
     max-height: 100%;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
 }
 
 .fallback-icon {
@@ -145,23 +200,6 @@
     justify-content: center;
     width: 100%;
     height: 100%;
-}
-
-/* ADD THIS FOR BETTER IMAGE VISIBILITY */
-.stat-icon {
-    background-color: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(5px);
-    border: 1px solid rgba(255, 165, 0, 0.3);
-}
-
-/* INCREASE CONTRAST FOR BETTER VISIBILITY */
-.stat-icon-image {
-    filter: brightness(1.2) contrast(1.2);
-}
-
-/* ADD SHADOW TO MAKE IMAGES STAND OUT */
-.stat-icon-image {
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
 }
 
 /* MEDIA QUERIES FOR HERO */
@@ -174,11 +212,48 @@
         flex-direction: column;
         gap: 30px;
     }
+
+    /* Adjust banner panels for tablet */
+    .banner-left,
+    .banner-center,
+    .banner-right {
+        width: 33.33%;
+    }
 }
 
 @media (max-width: 768px) {
     .top-banner-bg {
         padding: 100px 20px 40px;
+    }
+
+    /* Stack panels vertically on mobile */
+    .banner-panel {
+        width: 100% !important;
+        height: 33.33%;
+        left: 0 !important;
+        right: auto !important;
+    }
+
+    .banner-left {
+        top: 0;
+        transform: translateY(-100%);
+    }
+
+    .top-banner-bg.loaded .banner-left {
+        transform: translateY(0);
+    }
+
+    .banner-center {
+        top: 33.33%;
+    }
+
+    .banner-right {
+        top: 66.66%;
+        transform: translateY(100%);
+    }
+
+    .top-banner-bg.loaded .banner-right {
+        transform: translateY(0);
     }
 }
 
