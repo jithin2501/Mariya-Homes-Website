@@ -2,7 +2,7 @@ const PropertyDetails = require('../models/PropertyDetails');
 const cloudinary = require('../config/cloudinary');
 const streamifier = require('streamifier');
 
-// Helper function to upload to Cloudinary
+// Helper function to upload to Cloudinary with large file support
 const uploadToCloudinary = (file) => {
   return new Promise((resolve, reject) => {
     const folder = file.fieldname === 'mainMedia' 
@@ -11,18 +11,42 @@ const uploadToCloudinary = (file) => {
         ? 'mariya-homes/property-details/gallery'
         : 'mariya-homes/property-details/property-images';
     
+    const isVideo = file.mimetype.startsWith('video');
+    const fileSizeMB = file.size / (1024 * 1024);
+    const isLargeFile = file.size > 100 * 1024 * 1024; // 100MB threshold
+    
+    // Base upload options
+    const uploadOptions = {
+      folder: folder,
+      resource_type: isVideo ? 'video' : 'image',
+      chunk_size: 6000000, // 6MB chunks for reliable uploads
+    };
+    
+    // For large videos (>100MB), use async processing to avoid timeout
+    if (isVideo && isLargeFile) {
+      uploadOptions.eager_async = true; // Process transformations asynchronously
+      uploadOptions.eager = [
+        { quality: 'auto' }
+      ];
+      console.log(`      ⚡ Large video detected (${fileSizeMB.toFixed(2)}MB) - using async processing`);
+    } else if (isVideo) {
+      // Small videos - no transformations for faster upload
+      console.log(`      📹 Small video (${fileSizeMB.toFixed(2)}MB) - direct upload`);
+    } else {
+      // Images - apply quality optimization
+      uploadOptions.transformation = [
+        { quality: 'auto', fetch_format: 'auto' }
+      ];
+    }
+    
     const uploadStream = cloudinary.uploader.upload_stream(
-      {
-        folder: folder,
-        resource_type: file.mimetype.startsWith('video') ? 'video' : 'image',
-        transformation: [
-          { quality: 'auto', fetch_format: 'auto' }
-        ]
-      },
+      uploadOptions,
       (error, result) => {
         if (error) {
+          console.log(`      ❌ Cloudinary upload error:`, error.message);
           reject(error);
         } else {
+          console.log(`      ✅ Upload complete: ${result.secure_url}`);
           resolve(result.secure_url);
         }
       }
@@ -37,6 +61,21 @@ exports.upsertDetails = async (req, res) => {
     console.log("\n==========================================");
     console.log("PROPERTY DETAILS UPDATE REQUEST RECEIVED");
     console.log("==========================================");
+    
+    // Log file sizes for debugging
+    if (req.files) {
+      if (req.files['mainMedia']) {
+        const file = req.files['mainMedia'][0];
+        const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+        console.log(`📹 Main Media: ${sizeMB}MB (${file.mimetype})`);
+      }
+      if (req.files['gallery']) {
+        console.log(`🖼️  Gallery Images: ${req.files['gallery'].length} files`);
+      }
+      if (req.files['constructionProgress']) {
+        console.log(`🏗️  Property Images: ${req.files['constructionProgress'].length} files`);
+      }
+    }
     
     const { propertyId, description, additionalDetails, mapUrl, amenities, existingPropertyImages } = req.body;
     
