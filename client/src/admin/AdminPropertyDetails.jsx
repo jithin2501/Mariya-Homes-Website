@@ -69,9 +69,15 @@ const AdminPropertyDetails = () => {
         
         // Set existing media for preview
         if (data.mainMedia) {
+          // Better video detection for Cloudinary URLs
+          const isVideo = data.mainMedia.includes('/video/') || 
+                         data.mainMedia.includes('.mp4') || 
+                         data.mainMedia.includes('.webm') ||
+                         data.mainMedia.includes('.ogg');
+          
           setExistingMainMedia({
             url: data.mainMedia,
-            type: data.mainMedia.includes('.mp4') || data.mainMedia.includes('.webm') ? 'video' : 'image',
+            type: isVideo ? 'video' : 'image',
             name: data.mainMedia.split('/').pop()
           });
         }
@@ -777,8 +783,22 @@ const AdminPropertyDetails = () => {
               <div className="preview-section">
                 <h4>Main Media</h4>
                 <div className="preview-media-container">
-                  {savedDetails.mainMedia.includes('.mp4') || savedDetails.mainMedia.includes('.webm') ? (
-                    <video src={savedDetails.mainMedia} controls className="preview-media" />
+                  {(savedDetails.mainMedia.includes('/video/') || 
+                    savedDetails.mainMedia.includes('.mp4') || 
+                    savedDetails.mainMedia.includes('.webm') ||
+                    savedDetails.mainMedia.includes('.ogg')) ? (
+                    <video 
+                      src={savedDetails.mainMedia} 
+                      controls 
+                      className="preview-media"
+                      preload="metadata"
+                      onError={(e) => {
+                        console.error('Video load error:', e);
+                        console.log('Video URL:', savedDetails.mainMedia);
+                      }}
+                    >
+                      Your browser does not support the video tag.
+                    </video>
                   ) : (
                     <img src={savedDetails.mainMedia} alt="Main media" className="preview-media" />
                   )}
