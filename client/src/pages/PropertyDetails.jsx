@@ -52,7 +52,11 @@ const PropertyDetails = () => {
   }, [id]);
 
   const isVideo = (url) => {
-    return url && url.match(/\.(mp4|webm|ogg)$/i);
+    // Check for Cloudinary video URLs (contains /video/) or file extensions
+    return url && (
+      url.includes('/video/') || 
+      url.match(/\.(mp4|webm|ogg)$/i)
+    );
   };
 
   const enterFullscreen = (videoElement) => {
