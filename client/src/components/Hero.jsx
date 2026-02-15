@@ -4,6 +4,7 @@ import '../styles/hero.css';
 const Hero = () => {
   const [activeTextIndex, setActiveTextIndex] = useState(0);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   
   const texts = [
     "Discover Spaces That Inspire.",
@@ -17,6 +18,9 @@ const Hero = () => {
     families: "/images/Hero-images/Happy Families.webp", 
   });
 
+  // Mobile-specific background image
+  const mobileBackgroundImage = "/images/Hero-Banner/Banner.png";
+
   const [imageErrors, setImageErrors] = useState({
     years: false,
     projects: false,
@@ -28,13 +32,25 @@ const Hero = () => {
   };
 
   useEffect(() => {
-    // Trigger animation after component mounts
+    // Check if mobile on mount and window resize
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+
+    // Trigger animation after component mounts (only for desktop)
     setTimeout(() => setIsLoaded(true), 100);
 
     const interval = setInterval(() => {
       setActiveTextIndex((prevIndex) => (prevIndex + 1) % texts.length);
     }, 3000);
-    return () => clearInterval(interval);
+    
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('resize', checkMobile);
+    };
   }, [texts.length]);
 
   // Fallback icons in case images don't load
@@ -45,33 +61,49 @@ const Hero = () => {
   };
 
   return (
-    <div className={`top-banner-bg ${isLoaded ? 'loaded' : ''}`}>
-      {/* Left Image Panel */}
-      <div className="banner-panel banner-left">
-        <img 
-          src="/images/Hero-Banner/row-1-column-1.png" 
-          alt="Left Banner" 
-          loading="eager"
-        />
-      </div>
+    <div className={`top-banner-bg ${!isMobile && isLoaded ? 'loaded' : ''} ${isMobile ? 'mobile-view' : ''}`}>
+      {/* Mobile-Only Background Image */}
+      {isMobile && (
+        <div className="banner-panel banner-mobile">
+          <img 
+            src={mobileBackgroundImage}
+            alt="Mobile Hero" 
+            loading="eager"
+          />
+        </div>
+      )}
 
-      {/* Center Image Panel */}
-      <div className="banner-panel banner-center">
-        <img 
-          src="/images/Hero-Banner/row-1-column-2.png" 
-          alt="Center Banner" 
-          loading="eager"
-        />
-      </div>
+      {/* Desktop Images - Hidden on Mobile */}
+      {!isMobile && (
+        <>
+          {/* Left Image Panel */}
+          <div className="banner-panel banner-left">
+            <img 
+              src="/images/Hero-Banner/row-1-column-1.png" 
+              alt="Left Banner" 
+              loading="eager"
+            />
+          </div>
 
-      {/* Right Image Panel */}
-      <div className="banner-panel banner-right">
-        <img 
-          src="/images/Hero-Banner/row-1-column-3.png" 
-          alt="Right Banner" 
-          loading="eager"
-        />
-      </div>
+          {/* Center Image Panel */}
+          <div className="banner-panel banner-center">
+            <img 
+              src="/images/Hero-Banner/row-1-column-2.png" 
+              alt="Center Banner" 
+              loading="eager"
+            />
+          </div>
+
+          {/* Right Image Panel */}
+          <div className="banner-panel banner-right">
+            <img 
+              src="/images/Hero-Banner/row-1-column-3.png" 
+              alt="Right Banner" 
+              loading="eager"
+            />
+          </div>
+        </>
+      )}
 
       {/* Overlay gradient */}
       <div className="banner-overlay"></div>
