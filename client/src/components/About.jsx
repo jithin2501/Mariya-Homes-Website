@@ -44,7 +44,7 @@ const About = () => {
             <li>Expert Craftsmanship</li>
             <li>Complete Solutions</li>
             <li>Experienced Team</li>
-            <li>Client-First Approach</li>
+            <li></li>
           </ul>
 
           <div className="btn-group">
