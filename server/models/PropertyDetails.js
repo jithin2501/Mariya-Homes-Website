@@ -5,7 +5,8 @@ const propertyDetailsSchema = new mongoose.Schema({
   description: { type: String, required: true },
   additionalDetails: { type: String }, 
   mainMedia: { type: String }, 
-  gallery: [{ type: String }], 
+  gallery: [{ type: String }],       // Max 4 preview images
+  propertyImages: [{ type: String }], // All remaining full property images
   mapUrl: { type: String },
   constructionProgress: [{
     image: { type: String, required: true },
