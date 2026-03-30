@@ -1184,11 +1184,5 @@
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
   white-space: nowrap;
-}
-
-.back-btn:hover {
-  background: #1e40af;
-  color: #ffffff;
 }
