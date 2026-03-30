@@ -306,7 +306,7 @@ const AdminPropertyDetails = ({ propertyId, propertyTitle, onBack }) => {
       {/* ── BACK BUTTON + HEADER ── */}
       <div className="details-page-header">
         <button className="back-btn" onClick={onBack}>
-          ← Back to Properties
+          Back
         </button>
         <h2>
           {savedDetails
