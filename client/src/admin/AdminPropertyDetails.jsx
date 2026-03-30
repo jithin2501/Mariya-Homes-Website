@@ -68,6 +68,14 @@ const AdminPropertyDetails = ({ propertyId, propertyTitle, onBack }) => {
               label: item.label
             }))
           );
+        } else if (data.propertyImages && data.propertyImages.length > 0) {
+          setExistingPropertyImages(
+            data.propertyImages.map((url, index) => ({
+              url,
+              name: url.split("/").pop(),
+              label: `Image ${index + 1}`
+            }))
+          );
         }
       } else {
         setSavedDetails(null);
@@ -117,6 +125,13 @@ const AdminPropertyDetails = ({ propertyId, propertyTitle, onBack }) => {
           const label = item.label || `Image ${index + 1}`;
           return { url: imageUrl, name: imageUrl.split("/").pop(), label };
         });
+        setExistingPropertyImages(imgs);
+      } else if (savedDetails.propertyImages && savedDetails.propertyImages.length > 0) {
+        const imgs = savedDetails.propertyImages.map((url, index) => ({
+          url,
+          name: url.split("/").pop(),
+          label: `Image ${index + 1}`
+        }));
         setExistingPropertyImages(imgs);
       } else {
         setExistingPropertyImages([]);
@@ -717,17 +732,21 @@ const AdminPropertyDetails = ({ propertyId, propertyTitle, onBack }) => {
               </div>
             )}
 
-            {savedDetails.constructionProgress &&
-              savedDetails.constructionProgress.length > 0 && (
+            {(() => {
+              const previewImgs =
+                savedDetails.constructionProgress?.length > 0
+                  ? savedDetails.constructionProgress.map((item) => ({ url: item.image, label: item.label }))
+                  : savedDetails.propertyImages?.length > 0
+                  ? savedDetails.propertyImages.map((url, i) => ({ url, label: `Image ${i + 1}` }))
+                  : [];
+              return previewImgs.length > 0 ? (
                 <div className="preview-section">
-                  <h4>
-                    Property Images ({savedDetails.constructionProgress.length} images)
-                  </h4>
+                  <h4>Property Images ({previewImgs.length} images)</h4>
                   <div className="preview-gallery-grid">
-                    {savedDetails.constructionProgress.map((item, index) => (
+                    {previewImgs.map((item, index) => (
                       <div key={index} className="preview-property-image">
                         <img
-                          src={item.image}
+                          src={item.url}
                           alt={item.label}
                           className="preview-gallery-img"
                         />
@@ -736,7 +755,8 @@ const AdminPropertyDetails = ({ propertyId, propertyTitle, onBack }) => {
                     ))}
                   </div>
                 </div>
-              )}
+              ) : null;
+            })()}
 
             {savedDetails.amenities && savedDetails.amenities.length > 0 && (
               <div className="preview-section">
