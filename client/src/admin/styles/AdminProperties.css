@@ -226,6 +226,10 @@
     padding-top: 10px;
 }
 
+.admin-actions .details-btn {
+    grid-column: 1 / -1; /* Span full width across both columns */
+}
+
 .edit-btn {
     background: #f3f4f6;
     color: #111;

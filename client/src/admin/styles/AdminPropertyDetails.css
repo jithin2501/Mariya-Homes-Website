@@ -1177,10 +1177,10 @@
   align-items: center;
   gap: 6px;
   padding: 8px 16px;
-  background: transparent;
-  border: 1.5px solid #94a3b8;
+  background: #2563eb;
+  border: none;
   border-radius: 6px;
-  color: #475569;
+  color: #ffffff;
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
@@ -1189,7 +1189,6 @@
 }
 
 .back-btn:hover {
-  background: #f1f5f9;
-  border-color: #64748b;
-  color: #1e293b;
+  background: #1d4ed8;
+  color: #ffffff;
 }

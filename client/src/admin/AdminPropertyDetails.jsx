@@ -14,6 +14,8 @@ const AdminPropertyDetails = ({ propertyId, propertyTitle, onBack }) => {
   const [existingMainMedia, setExistingMainMedia] = useState(null);
   const [gallery, setGallery] = useState([]);
   const [existingGallery, setExistingGallery] = useState([]);
+  const [propertyImages, setPropertyImages] = useState([]);
+  const [existingPropertyImages, setExistingPropertyImages] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -256,7 +258,7 @@ const AdminPropertyDetails = ({ propertyId, propertyTitle, onBack }) => {
 
       if (mainMedia) data.append("mainMedia", mainMedia);
       gallery.forEach((file) => data.append("gallery", file));
-      propertyImages.forEach((image) => data.append("gallery", image));
+      propertyImages.forEach((image) => data.append("constructionProgress", image));
 
       const remainingExistingImages = existingPropertyImages.map((img) => ({
         url: img.url,
@@ -407,7 +409,7 @@ const AdminPropertyDetails = ({ propertyId, propertyTitle, onBack }) => {
               />
 
               <div className="gallery-upload-group">
-                <label>Gallery Images (First 4 used as preview, all used in carousel)</label>
+                <label>Gallery Images (Maximum 4 images)</label>
                 <input
                   type="file"
                   multiple
@@ -715,23 +717,26 @@ const AdminPropertyDetails = ({ propertyId, propertyTitle, onBack }) => {
               </div>
             )}
 
-            {savedDetails.gallery && savedDetails.gallery.length > 0 && (
-  <div className="preview-section">
-    <h4>
-      Property Images ({savedDetails.gallery.length} images)
-    </h4>
-    <div className="preview-gallery-grid">
-      {savedDetails.gallery.map((img, index) => (
-        <img
-          key={index}
-          src={img}
-          alt={`Property ${index + 1}`}
-          className="preview-gallery-img"
-        />
-      ))}
-    </div>
-  </div>
-)}
+            {savedDetails.constructionProgress &&
+              savedDetails.constructionProgress.length > 0 && (
+                <div className="preview-section">
+                  <h4>
+                    Property Images ({savedDetails.constructionProgress.length} images)
+                  </h4>
+                  <div className="preview-gallery-grid">
+                    {savedDetails.constructionProgress.map((item, index) => (
+                      <div key={index} className="preview-property-image">
+                        <img
+                          src={item.image}
+                          alt={item.label}
+                          className="preview-gallery-img"
+                        />
+                        <span className="preview-image-label">{item.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
             {savedDetails.amenities && savedDetails.amenities.length > 0 && (
               <div className="preview-section">
