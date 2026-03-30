@@ -103,24 +103,35 @@ const PropertyDetails = () => {
     }
   };
 
-  const nextSlide = () => {
+  // Unified carousel: uses constructionProgress (admin uploads) OR propertyImages (flat URLs)
+  const carouselImages = (() => {
     if (details?.constructionProgress?.length > 0) {
-      setCurrentSlide((prev) => 
-        prev === details.constructionProgress.length - 1 ? 0 : prev + 1
+      return details.constructionProgress;
+    }
+    if (details?.propertyImages?.length > 0) {
+      return details.propertyImages.map((url, i) => ({ image: url, label: `Image ${i + 1}` }));
+    }
+    return [];
+  })();
+
+  const nextSlide = () => {
+    if (carouselImages.length > 0) {
+      setCurrentSlide((prev) =>
+        prev === carouselImages.length - 1 ? 0 : prev + 1
       );
     }
   };
 
   const prevSlide = () => {
-    if (details?.constructionProgress?.length > 0) {
-      setCurrentSlide((prev) => 
-        prev === 0 ? details.constructionProgress.length - 1 : prev - 1
+    if (carouselImages.length > 0) {
+      setCurrentSlide((prev) =>
+        prev === 0 ? carouselImages.length - 1 : prev - 1
       );
     }
   };
 
   const getSlidePosition = (index) => {
-    const total = details?.constructionProgress?.length || 0;
+    const total = carouselImages.length || 0;
     if (total === 0) return '';
     
     const diff = index - currentSlide;
@@ -254,7 +265,7 @@ const PropertyDetails = () => {
       </div>
 
       {/* 3D Property Images Carousel */}
-      {details?.constructionProgress && details.constructionProgress.length > 0 && (
+      {carouselImages.length > 0 && (
         <div className="construction-progress-section">
           <h2>Property Images</h2>
           <div className="carousel-3d-wrapper">
@@ -265,7 +276,7 @@ const PropertyDetails = () => {
             </button>
 
             <div className="carousel-3d-container">
-              {details.constructionProgress.map((item, index) => (
+              {carouselImages.map((item, index) => (
                 <div
                   key={index}
                   className={`carousel-3d-slide ${getSlidePosition(index)}`}
@@ -274,10 +285,10 @@ const PropertyDetails = () => {
                     if (getSlidePosition(index) === 'right') nextSlide();
                   }}
                 >
-                  <img 
-                    src={item.image} 
-                    alt={`Property view ${index + 1}`} 
-                    className="carousel-3d-image" 
+                  <img
+                    src={item.image}
+                    alt={item.label || `Property view ${index + 1}`}
+                    className="carousel-3d-image"
                   />
                 </div>
               ))}
@@ -292,7 +303,7 @@ const PropertyDetails = () => {
 
           {/* Carousel Indicators */}
           <div className="carousel-indicators">
-            {details.constructionProgress.map((_, index) => (
+            {carouselImages.map((_, index) => (
               <button
                 key={index}
                 className={`indicator ${currentSlide === index ? 'active' : ''}`}
