@@ -34,7 +34,6 @@ const PropertiesGrid = ({ filters }) => {
 
   // Apply filters to properties
   const filteredProperties = properties.filter(property => {
-    // Location filter
     if (filters?.location && filters.location !== 'All') {
       const propertyLocation = property.locationText || property.location || '';
       if (!propertyLocation.toLowerCase().includes(filters.location.toLowerCase())) {
@@ -42,7 +41,6 @@ const PropertiesGrid = ({ filters }) => {
       }
     }
 
-    // Bedrooms filter
     if (filters?.bedrooms && filters.bedrooms !== 'Any') {
       const propertyBed = parseInt(property.features?.bed) || 0;
       if (filters.bedrooms === '5+') {
@@ -53,7 +51,6 @@ const PropertiesGrid = ({ filters }) => {
       }
     }
 
-    // Bathrooms filter
     if (filters?.bathrooms && filters.bathrooms !== 'Any') {
       const propertyBath = parseInt(property.features?.bath) || 0;
       if (filters.bathrooms === '3+') {
@@ -64,7 +61,6 @@ const PropertiesGrid = ({ filters }) => {
       }
     }
 
-    // Parking filter
     if (filters?.parking && filters.parking !== 'Any') {
       const propertyParking = parseInt(property.features?.parking) || 0;
       if (filters.parking === '3+') {
@@ -75,57 +71,39 @@ const PropertiesGrid = ({ filters }) => {
       }
     }
 
-    // Price filter
     if (filters?.priceMin && filters.priceMin !== '') {
-      // Extract numeric value from price string (e.g., "₹1.75 Crore" -> 17500000)
       const priceText = property.price.toLowerCase();
       let priceValue = 0;
-      
       if (priceText.includes('crore')) {
         const match = priceText.match(/[\d.]+/);
-        if (match) {
-          priceValue = parseFloat(match[0]) * 10000000; // 1 crore = 10 million
-        }
+        if (match) priceValue = parseFloat(match[0]) * 10000000;
       } else if (priceText.includes('lakh')) {
         const match = priceText.match(/[\d.]+/);
-        if (match) {
-          priceValue = parseFloat(match[0]) * 100000; // 1 lakh = 100 thousand
-        }
+        if (match) priceValue = parseFloat(match[0]) * 100000;
       } else {
         priceValue = parseFloat(property.price.replace(/[^0-9.]/g, ''));
       }
-      
-      const minPrice = parseFloat(filters.priceMin);
-      if (priceValue < minPrice) return false;
+      if (priceValue < parseFloat(filters.priceMin)) return false;
     }
     
     if (filters?.priceMax && filters.priceMax !== '') {
-      // Extract numeric value from price string
       const priceText = property.price.toLowerCase();
       let priceValue = 0;
-      
       if (priceText.includes('crore')) {
         const match = priceText.match(/[\d.]+/);
-        if (match) {
-          priceValue = parseFloat(match[0]) * 10000000;
-        }
+        if (match) priceValue = parseFloat(match[0]) * 10000000;
       } else if (priceText.includes('lakh')) {
         const match = priceText.match(/[\d.]+/);
-        if (match) {
-          priceValue = parseFloat(match[0]) * 100000;
-        }
+        if (match) priceValue = parseFloat(match[0]) * 100000;
       } else {
         priceValue = parseFloat(property.price.replace(/[^0-9.]/g, ''));
       }
-      
-      const maxPrice = parseFloat(filters.priceMax);
-      if (priceValue > maxPrice) return false;
+      if (priceValue > parseFloat(filters.priceMax)) return false;
     }
 
     return true;
   });
 
-  // Logic to get current items based on filtered properties
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentProperties = filteredProperties.slice(indexOfFirstItem, indexOfLastItem);
@@ -150,7 +128,12 @@ const PropertiesGrid = ({ filters }) => {
     }
   };
 
-  if (loading) return <div className="loading-text">Loading properties...</div>;
+  // ── SPINNER LOADER ──
+  if (loading) return (
+    <div className="spinner-loader">
+      <div className="loader" />
+    </div>
+  );
 
   return (
     <div className="properties-container-wrapper">
@@ -196,7 +179,6 @@ const PropertiesGrid = ({ filters }) => {
         )}
       </div>
 
-      {/* Pagination Controls - Only show when there are MORE than 6 properties */}
       {filteredProperties.length > 6 && (
         <div className="pagination-controls">
           <button 

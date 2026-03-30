@@ -142,7 +142,9 @@ const PropertyDetails = () => {
     return 'hidden';
   };
 
-  if (loading) return <div className="loader">Loading Property...</div>;
+  if (loading) return (
+    <div className="loader" />
+  );
   if (!propertyData) return <div className="error">Property not found.</div>;
 
   return (
