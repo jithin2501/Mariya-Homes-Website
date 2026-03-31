@@ -425,19 +425,17 @@
     min-height: 400px;
 }
 
-.spinner-loader .loader {
+.pg-spinner {
     width: 50px;
     height: 50px;
     border-radius: 50%;
     border: 8px solid lightblue;
     border-right-color: orange;
-    animation: l2 1s infinite linear;
-    /* Reset any inherited flex/positioning */
-    position: static;
+    animation: pg-spin 1s infinite linear;
     display: block;
-    background: none;
+    flex-shrink: 0;
 }
 
-@keyframes l2 {
+@keyframes pg-spin {
     to { transform: rotate(1turn); }
 }

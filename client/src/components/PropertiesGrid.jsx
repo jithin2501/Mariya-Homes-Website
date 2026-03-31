@@ -131,7 +131,7 @@ const PropertiesGrid = ({ filters }) => {
   // ── SPINNER LOADER ──
   if (loading) return (
     <div className="spinner-loader">
-      <div className="loader" />
+      <div className="pg-spinner" />
     </div>
   );
 

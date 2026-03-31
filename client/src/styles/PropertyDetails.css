@@ -653,31 +653,31 @@
     }
 }
 /* ========================================
-   PAGE LOADER SPINNER
+   PAGE LOADER SPINNER - FULLSCREEN OVERLAY
    ======================================== */
-.loader {
+.pd-loader-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
+    background-color: #ffffff;
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: rgba(255, 255, 255, 0.85);
-    z-index: 9999;
+    z-index: 99999;
 }
 
-.loader::after {
-    content: "";
+.pd-spinner {
     width: 50px;
-    aspect-ratio: 1;
+    height: 50px;
     border-radius: 50%;
     border: 8px solid lightblue;
     border-right-color: orange;
-    animation: l2 1s infinite linear;
+    animation: pd-spin 1s infinite linear;
+    display: block;
 }
 
-@keyframes l2 {
+@keyframes pd-spin {
     to { transform: rotate(1turn); }
 }

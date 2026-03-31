@@ -143,7 +143,9 @@ const PropertyDetails = () => {
   };
 
   if (loading) return (
-    <div className="loader" />
+    <div className="pd-loader-overlay">
+      <div className="pd-spinner" />
+    </div>
   );
   if (!propertyData) return <div className="error">Property not found.</div>;
 
