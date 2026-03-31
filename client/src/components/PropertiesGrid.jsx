@@ -131,7 +131,7 @@ const PropertiesGrid = ({ filters }) => {
   // ── SPINNER LOADER ──
   if (loading) return (
     <div className="spinner-loader">
-      <div className="pg-spinner" />
+      <div className="loader" />
     </div>
   );
 
@@ -170,7 +170,7 @@ const PropertiesGrid = ({ filters }) => {
                 <div className="property-footer">
                   <div className="property-price">{property.price}</div>
                   <button className="view-more-link" onClick={() => handleViewMore(property)}>
-                    View More <span>→</span>
+                    View Details
                   </button>
                 </div>
               </div>
