@@ -205,6 +205,7 @@ html {
     .hero-banner-section {
         padding: 40px 0;
         min-height: 250px;
+        margin-top: 75px; /* reduced to match smaller navbar on tablet */
     }
 
     .hero-banner-content h1 {
@@ -219,6 +220,7 @@ html {
 
     .hero-banner-section {
         min-height: 200px;
+        margin-top: 70px; /* match actual mobile navbar height */
     }
 }
 
@@ -238,5 +240,9 @@ html {
 
     .intro-section {
         padding: 60px 15px 30px;
+    }
+
+    .hero-banner-section {
+        margin-top: 65px; /* match compact mobile navbar height */
     }
 }
