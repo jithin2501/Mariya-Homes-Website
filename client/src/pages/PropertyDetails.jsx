@@ -224,7 +224,7 @@ const PropertyDetails = () => {
             <h1>{propertyData.title}</h1>
             <div className="details-price-box">
               <span className="price-label">Price</span>
-              <span className="details-price">₹{propertyData.price}</span>
+              <span className="details-price">₹ {propertyData.price}</span>
             </div>
           </div>
           <div className="details-location">

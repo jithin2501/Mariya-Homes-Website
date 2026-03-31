@@ -179,7 +179,7 @@
 .title-price-row {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: center;
     gap: 20px;
 }
 
@@ -187,8 +187,9 @@
     font-size: 2.5rem;
     color: #0f172a;
     font-weight: 800;
-    margin-bottom: 0;
+    margin: 0;
     line-height: 1.2;
+    flex: 1;
 }
 
 .details-location {
@@ -203,6 +204,10 @@
 .details-price-box {
     text-align: right;
     flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
 }
 
 .details-price {
@@ -210,13 +215,16 @@
     font-weight: 800;
     color: #f97316;
     display: block;
+    line-height: 1;
 }
 
 .price-label {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     color: #64748b;
     font-weight: 600;
     text-transform: uppercase;
+    letter-spacing: 0.5px;
+    line-height: 1;
 }
 
 .details-info-grid {
