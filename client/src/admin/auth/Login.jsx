@@ -11,45 +11,53 @@ const Login = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    gsap.set('.character', { transformOrigin: "50% 100%" });
-    gsap.to('.character', {
-      scaleY: 1.05,
-      scaleX: 0.98,
-      duration: 2,
-      repeat: -1,
-      yoyo: true,
-      ease: "sine.inOut",
-      stagger: 0.2
-    });
+    // Only apply animations on desktop (screen width > 768px)
+    const isDesktop = window.innerWidth > 768;
+    
+    if (isDesktop) {
+      gsap.set('.character', { transformOrigin: "50% 100%" });
+      gsap.to('.character', {
+        scaleY: 1.05,
+        scaleX: 0.98,
+        duration: 2,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut",
+        stagger: 0.2
+      });
 
-    const handleMouseMove = (e) => {
-      if (isFocusedOnPassword || isPasswordVisible) return;
-      const { clientX, clientY } = e;
-      const x = (clientX - window.innerWidth / 2) / 30;
-      const y = (clientY - window.innerHeight / 2) / 30;
+      const handleMouseMove = (e) => {
+        if (isFocusedOnPassword || isPasswordVisible) return;
+        const { clientX, clientY } = e;
+        const x = (clientX - window.innerWidth / 2) / 30;
+        const y = (clientY - window.innerHeight / 2) / 30;
 
-      gsap.to('.eye-group', { x: x * 0.4, y: y * 0.2, duration: 0.4, ease: "power2.out" });
-      gsap.to('#purple-group', { x: x * 0.2, duration: 0.6 });
-      gsap.to('#black-group', { x: x * 0.5, duration: 0.6 });
-      gsap.to('#orange-group', { x: x * 0.4, duration: 0.6 });
-      gsap.to('#yellow-group', { x: x * 0.7, duration: 0.6 });
-    };
+        gsap.to('.eye-group', { x: x * 0.4, y: y * 0.2, duration: 0.4, ease: "power2.out" });
+        gsap.to('#purple-group', { x: x * 0.2, duration: 0.6 });
+        gsap.to('#black-group', { x: x * 0.5, duration: 0.6 });
+        gsap.to('#orange-group', { x: x * 0.4, duration: 0.6 });
+        gsap.to('#yellow-group', { x: x * 0.7, duration: 0.6 });
+      };
 
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mousemove', handleMouseMove);
+      return () => window.removeEventListener('mousemove', handleMouseMove);
+    }
   }, [isFocusedOnPassword, isPasswordVisible]);
 
   const updateEyeState = (focused, visible) => {
-    if (visible) {
-      gsap.to('.eye-group', { x: 0, y: -120, opacity: 0, scale: 0.6, duration: 0.35, ease: "power2.in" });
-    } else if (focused) {
-      gsap.to('.eye-group', { x: -25, y: 0, opacity: 1, scale: 1, duration: 0.4, ease: "power2.out" });
-    } else {
-      gsap.to('.eye-group', { x: 0, y: 0, opacity: 1, scale: 1, duration: 0.4, ease: "back.out(2)" });
+    // Only apply eye animations on desktop
+    if (window.innerWidth > 768) {
+      if (visible) {
+        gsap.to('.eye-group', { x: 0, y: -120, opacity: 0, scale: 0.6, duration: 0.35, ease: "power2.in" });
+      } else if (focused) {
+        gsap.to('.eye-group', { x: -25, y: 0, opacity: 1, scale: 1, duration: 0.4, ease: "power2.out" });
+      } else {
+        gsap.to('.eye-group', { x: 0, y: 0, opacity: 1, scale: 1, duration: 0.4, ease: "back.out(2)" });
+      }
     }
   };
 
-const handleLogin = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     try {
       const response = await fetch("/api/admin/login", {
@@ -135,9 +143,12 @@ const handleLogin = async (e) => {
                 placeholder="Enter username"
                 onChange={(e) => {
                   setCredentials({...credentials, username: e.target.value});
-                  const val = e.target.value.length;
-                  const moveX = Math.min(val * 1.5, 25) - 10;
-                  gsap.to('.eye-group', { x: moveX, duration: 0.3 });
+                  // Only apply animation on desktop
+                  if (window.innerWidth > 768) {
+                    const val = e.target.value.length;
+                    const moveX = Math.min(val * 1.5, 25) - 10;
+                    gsap.to('.eye-group', { x: moveX, duration: 0.3 });
+                  }
                 }}
               />
             </div>
@@ -149,8 +160,14 @@ const handleLogin = async (e) => {
                   type={isPasswordVisible ? "text" : "password"} 
                   className="input-field"
                   placeholder="••••••••"
-                  onFocus={() => { setIsFocusedOnPassword(true); updateEyeState(true, isPasswordVisible); }}
-                  onBlur={() => { setIsFocusedOnPassword(false); updateEyeState(false, isPasswordVisible); }}
+                  onFocus={() => { 
+                    setIsFocusedOnPassword(true); 
+                    updateEyeState(true, isPasswordVisible); 
+                  }}
+                  onBlur={() => { 
+                    setIsFocusedOnPassword(false); 
+                    updateEyeState(false, isPasswordVisible); 
+                  }}
                   onChange={(e) => setCredentials({...credentials, password: e.target.value})}
                 />
                 <button 
