@@ -138,7 +138,7 @@
     border-radius: 15px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
     overflow: hidden;
-    height: 510px;
+    height: 460px;
     border: 1px solid #f0f0f0;
 }
 
@@ -214,16 +214,16 @@
     font-size: 1.3rem;
     font-weight: 800;
     color: #111;
-    margin: 4px 0 10px 0; /* Minimal bottom margin to tighten layout */
+    margin: 4px 0 6px 0;
 }
 
-/* Admin Actions - Buttons at very bottom */
+/* Admin Actions - Buttons right after price */
 .admin-actions {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-top: auto;
-    padding-top: 10px;
+    gap: 8px;
+    margin-top: 0;
+    padding-top: 4px;
 }
 
 .admin-actions .details-btn {
@@ -253,7 +253,7 @@
 /* Tablet & Mobile Breaks */
 @media (max-width: 1024px) {
     .props-list { grid-template-columns: repeat(2, 1fr); }
-    .prop-card-admin { height: 515px; }
+    .prop-card-admin { height: 465px; }
 }
 
 @media (max-width: 650px) {
