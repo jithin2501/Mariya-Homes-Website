@@ -220,15 +220,17 @@ const PropertyDetails = () => {
 
       <div className="property-details-header">
         <div className="details-title-box">
-          <h1>{propertyData.title}</h1>
+          <div className="title-price-row">
+            <h1>{propertyData.title}</h1>
+            <div className="details-price-box">
+              <span className="price-label">Price</span>
+              <span className="details-price">₹{propertyData.price}</span>
+            </div>
+          </div>
           <div className="details-location">
             <img src="https://cdn-icons-png.flaticon.com/512/684/684908.png" className="location-icon" alt="Location" />
             <span>{propertyData.locationText}</span>
           </div>
-        </div>
-        <div className="details-price-box">
-          <span className="price-label">Price</span>
-          <span className="details-price">{propertyData.price}</span>
         </div>
       </div>
 

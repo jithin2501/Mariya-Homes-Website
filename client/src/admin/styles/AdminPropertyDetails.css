@@ -1142,7 +1142,7 @@
 /* "Manage Details" button on each property card */
 .details-btn {
   padding: 8px 14px;
-  background-color: #2563eb;       /* blue — tweak to match your theme */
+  background-color: #2563eb;
   color: #fff;
   border: none;
   border-radius: 6px;
@@ -1185,4 +1185,65 @@
   font-weight: 500;
   cursor: pointer;
   white-space: nowrap;
+}
+
+/* ── FIX: Admin property card — reduce gap between price and buttons ── */
+.admin-property-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-property-card .property-info,
+.admin-property-card .card-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+/* Tighten price margin so buttons sit closer */
+.admin-property-card .property-price,
+.admin-property-card .card-price {
+  margin-bottom: 10px !important;
+  margin-top: auto;
+}
+
+/* Push action buttons up — no extra spacing */
+.admin-property-card .card-actions,
+.admin-property-card .property-actions {
+  margin-top: 0 !important;
+  padding-top: 10px;
+}
+
+/* ── FIX: Add Property form — lock width, prevent expansion ── */
+.add-property-form,
+.add-property-box,
+.admin-add-property {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  overflow: hidden;
+}
+
+/* Prevent file inputs and textareas from blowing out the width */
+.add-property-form input,
+.add-property-form textarea,
+.add-property-form select,
+.admin-add-property input,
+.admin-add-property textarea,
+.admin-add-property select {
+  width: 100% !important;
+  box-sizing: border-box !important;
+  max-width: 100% !important;
+}
+
+/* Loader must stay inside the form box */
+.add-property-form .spinner-loader,
+.add-property-form .pg-spinner,
+.admin-add-property .spinner-loader,
+.admin-add-property .pg-spinner {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px 0;
 }
