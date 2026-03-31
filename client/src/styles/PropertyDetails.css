@@ -364,7 +364,7 @@
 
 .construction-progress-section {
     margin-top: 40px;
-    padding: 20px 0 10px;
+    padding: 20px 0 0;
     border-top: 2px solid #e2e8f0;
 }
 
@@ -393,7 +393,7 @@
     position: relative;
     width: 100%;
     max-width: 700px;
-    height: 500px;
+    height: 450px;
     perspective: 1200px;
     display: flex;
     align-items: center;
