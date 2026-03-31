@@ -427,11 +427,15 @@
 
 .spinner-loader .loader {
     width: 50px;
-    aspect-ratio: 1;
+    height: 50px;
     border-radius: 50%;
     border: 8px solid lightblue;
     border-right-color: orange;
     animation: l2 1s infinite linear;
+    /* Reset any inherited flex/positioning */
+    position: static;
+    display: block;
+    background: none;
 }
 
 @keyframes l2 {
