@@ -1,36 +1,43 @@
+/* =============================================
+   ADMIN LAYOUT — DESKTOP + MOBILE RESPONSIVE
+   ============================================= */
+
 .admin-container {
   display: flex;
   min-height: 100vh;
   background: #f8fafc;
 }
 
-/* SIDEBAR: Locked in place - INCREASED WIDTH */
+/* ── SIDEBAR ── */
 .admin-sidebar {
-  width: 300px; /* CHANGED FROM 260px to 320px */
+  width: 300px;
   background: #0f172a;
   color: white;
   padding: 20px;
-  
-  /* Fixed Positioning Logic */
-  position: fixed;     /* Keeps the sidebar from moving when you scroll */
+  position: fixed;
   top: 0;
   left: 0;
-  bottom: 0;           /* Ensures it stays full height */
-  height: 100vh;       /* Forces it to cover the entire screen height */
-  z-index: 1000;       /* Keeps it on top of other elements */
-  overflow-y: auto;    /* Allows scrolling inside the sidebar if you add more links */
+  bottom: 0;
+  height: 100vh;
+  z-index: 1000;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+
+  /* Ensure sidebar stretches fully even when zoomed out */
+  min-height: 100%;
 }
 
 .admin-sidebar h2 {
   margin-bottom: 32px;
   padding-bottom: 12px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-  font-size: 1.5rem; /* Optional: slightly larger title */
+  font-size: 1.5rem;
 }
 
 .admin-link {
   display: block;
-  padding: 14px 16px; /* Slightly more padding for wider sidebar */
+  padding: 14px 16px;
   margin-bottom: 8px;
   color: white;
   text-decoration: none;
@@ -47,7 +54,7 @@
 .admin-logout {
   margin-top: 20px;
   width: 100%;
-  padding: 12px; /* Slightly larger */
+  padding: 12px;
   background: #ef4444;
   border: none;
   color: white;
@@ -61,18 +68,27 @@
   background: #dc2626;
 }
 
-/* MAIN CONTENT: Offset by sidebar width - UPDATED MARGIN */
+/* ── MAIN CONTENT ── */
 .admin-content {
   flex: 1;
   padding: 40px;
-  
-  /* Margin Logic */
-  margin-left: 320px;  /* MUST MATCH the width of .admin-sidebar exactly */
+  margin-left: 300px;
   min-height: 100vh;
 }
 
-/* --- Keep the rest of your table and card styles below --- */
+/* ── MOBILE TOPBAR ── (hidden on desktop) */
+.admin-topbar {
+  display: none;
+}
 
+/* ── OVERLAY ── (hidden on desktop) */
+.sidebar-overlay {
+  display: none;
+}
+
+/* =============================================
+   TABLE / CARD STYLES
+   ============================================= */
 .admin-page-title {
   font-size: 28px;
   margin-bottom: 20px;
@@ -111,4 +127,120 @@
   padding: 6px 12px;
   border-radius: 6px;
   cursor: pointer;
+}
+
+/* =============================================
+   MOBILE STYLES  (≤ 768px)
+   ============================================= */
+@media (max-width: 768px) {
+
+  /* Show topbar */
+  .admin-topbar {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 56px;
+    background: #0f172a;
+    padding: 0 16px;
+    z-index: 1100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+
+  .admin-topbar-title {
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+  }
+
+  /* Hamburger button */
+  .hamburger-btn {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    width: 36px;
+    height: 36px;
+  }
+
+  .ham-line {
+    display: block;
+    width: 24px;
+    height: 2.5px;
+    background: white;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+    transform-origin: center;
+  }
+
+  /* Animate to X when open */
+  .hamburger-btn .ham-line.open:nth-child(1) {
+    transform: translateY(7.5px) rotate(45deg);
+  }
+  .hamburger-btn .ham-line.open:nth-child(2) {
+    opacity: 0;
+    transform: scaleX(0);
+  }
+  .hamburger-btn .ham-line.open:nth-child(3) {
+    transform: translateY(-7.5px) rotate(-45deg);
+  }
+
+  /* Sidebar hidden off-screen by default */
+  .admin-sidebar {
+    width: 270px;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    top: 56px;           /* below topbar */
+    height: calc(100vh - 56px);
+    padding-top: 16px;
+    /* Hide the "Mariya Homes" h2 since topbar already shows it */
+  }
+
+  .admin-sidebar h2 {
+    display: none;
+  }
+
+  /* Slide in when open */
+  .admin-sidebar.sidebar-open {
+    transform: translateX(0);
+  }
+
+  /* Overlay behind sidebar */
+  .sidebar-overlay {
+    display: block;
+    position: fixed;
+    inset: 56px 0 0 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 999;
+  }
+
+  /* Main content: full width, push down below topbar */
+  .admin-content {
+    margin-left: 0;
+    padding: 20px 16px;
+    padding-top: 72px; /* 56px topbar + 16px gap */
+    width: 100%;
+  }
+}
+
+/* =============================================
+   EXTRA-SMALL  (≤ 480px)
+   ============================================= */
+@media (max-width: 480px) {
+  .admin-content {
+    padding: 16px 12px;
+    padding-top: 72px;
+  }
+
+  .admin-sidebar {
+    width: 260px;
+  }
 }
