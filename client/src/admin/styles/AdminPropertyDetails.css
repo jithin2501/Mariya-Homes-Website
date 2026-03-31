@@ -1247,3 +1247,45 @@
   align-items: center;
   padding: 20px 0;
 }
+/* =============================================
+   MOBILE FIXES  (≤ 768px)
+   ============================================= */
+@media (max-width: 768px) {
+
+  /* 1. "Saved Property Details" header:
+        title on its own line, buttons stacked below */
+  .preview-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 20px;
+  }
+
+  .preview-header h3 {
+    font-size: 18px;
+    white-space: nowrap;
+  }
+
+  .preview-actions {
+    width: 100%;
+    gap: 10px;
+  }
+
+  .preview-actions button {
+    flex: 1;
+    justify-content: center;
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+
+  /* 2. Amenity input + Add button:
+        stack vertically so "+ Add" sits below the input */
+  .amenity-input-group {
+    flex-direction: column;
+  }
+
+  .add-amenity-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

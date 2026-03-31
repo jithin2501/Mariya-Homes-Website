@@ -73,7 +73,7 @@ const AdminLayout = () => {
           </NavLink>
         )}
 
-        <div style={{ marginTop: 'auto' }}>
+        <div className="sidebar-logout-wrapper">
           <AnimatedLogoutButton onClick={handleLogout} />
         </div>
       </aside>

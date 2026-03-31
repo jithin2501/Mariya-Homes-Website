@@ -244,3 +244,18 @@
     width: 260px;
   }
 }
+/* =============================================
+   SIDEBAR LOGOUT WRAPPER
+   ============================================= */
+
+/* Desktop: push logout to the very bottom */
+.sidebar-logout-wrapper {
+  margin-top: auto;
+}
+
+/* Mobile: sit right below the last nav link, no auto-push */
+@media (max-width: 768px) {
+  .sidebar-logout-wrapper {
+    margin-top: 16px;
+  }
+}
