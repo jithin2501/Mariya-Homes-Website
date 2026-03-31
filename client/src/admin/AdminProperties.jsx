@@ -217,13 +217,7 @@ const AdminProperties = () => {
 
         <div className="form-actions">
           <button type="submit" className="add-btn" disabled={loading}>
-            {loading ? (
-              <div className="spinner"></div>
-            ) : isEditing ? (
-              "Update Property"
-            ) : (
-              "Add Property"
-            )}
+            {isEditing ? "Update Property" : "Add Property"}
           </button>
           {isEditing && (
             <button
