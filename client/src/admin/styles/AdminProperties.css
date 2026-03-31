@@ -69,7 +69,7 @@
     white-space: nowrap;
 }
 
-.file-input-group input[type="file"] {
+.file-input-group .file-input {
     padding: 0.5rem;
     border: 1px solid #d1d5db;
     border-radius: 6px;
@@ -80,7 +80,7 @@
     flex: 1;
 }
 
-.file-input-group input[type="file"]::file-selector-button {
+.file-input-group .file-input::file-selector-button {
     background: transparent;
     color: #000;
     border: 1px solid #d1d5db;
@@ -91,7 +91,7 @@
     margin-right: 10px;
 }
 
-.file-input-group input[type="file"]::file-selector-button:hover {
+.file-input-group .file-input::file-selector-button:hover {
     background: #f3f4f6;
 }
 
@@ -239,17 +239,43 @@
     cursor: pointer;
 }
 
-/* Tablet & Mobile Breaks */
-@media (max-width: 1024px) {
-    .props-list { grid-template-columns: repeat(2, 1fr); }
-    .prop-card-admin { height: 475px; }
+/* Image Preview Styling */
+.image-preview-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 10px;
+    background: #fff;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    flex: 1;
 }
 
-@media (max-width: 650px) {
-    .props-list { grid-template-columns: 1fr; }
-    .form-row { grid-template-columns: 1fr; }
-    .form-row-2 { grid-template-columns: 1fr; }
+.upload-preview-img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 2px solid #6366f1;
 }
+
+.remove-preview {
+    background: #fee2e2;
+    color: #dc2626;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.remove-preview:hover {
+    background: #dc2626;
+    color: white;
+}
+
 .form-actions {
     display: flex;
     gap: 10px;
@@ -269,45 +295,35 @@
     height: 50px;
     box-sizing: border-box;
 }
-/* Image Preview Styling */
-.image-preview-container {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    padding: 10px;
-    background: #fff;
-    border-radius: 8px;
-    border: 1px solid #ddd;
+
+/* Tablet & Mobile Breaks */
+@media (max-width: 1024px) {
+    .props-list { grid-template-columns: repeat(2, 1fr); }
+    .prop-card-admin { height: 475px; }
 }
 
-.image-preview-container p {
-    font-size: 0.85rem;
-    color: #666;
-    margin: 0;
-    white-space: nowrap;
+@media (max-width: 768px) {
+    .file-input-group {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .file-input-group label {
+        white-space: normal;
+    }
+    
+    .file-input-group .file-input {
+        width: 100%;
+    }
+    
+    .image-preview-container {
+        width: 100%;
+        justify-content: space-between;
+    }
 }
 
-.upload-preview-img {
-    width: 80px;
-    height: 80px;
-    object-fit: cover;
-    border-radius: 8px;
-    border: 2px solid #6366f1;
-}
-
-.remove-preview {
-    background: #fee2e2;
-    color: #dc2626;
-    border: none;
-    padding: 6px 14px;
-    border-radius: 4px;
-    font-size: 0.8rem;
-    cursor: pointer;
-    font-weight: 600;
-    white-space: nowrap;
-}
-
-.remove-preview:hover {
-    background: #dc2626;
-    color: white;
+@media (max-width: 650px) {
+    .props-list { grid-template-columns: 1fr; }
+    .form-row { grid-template-columns: 1fr; }
+    .form-row-2 { grid-template-columns: 1fr; }
 }

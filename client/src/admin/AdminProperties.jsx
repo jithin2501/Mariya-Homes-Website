@@ -57,6 +57,7 @@ const AdminProperties = () => {
       sqft: prop.features.sqft
     });
     setPreviewUrl(null);
+    setImageFile(null);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -97,7 +98,9 @@ const AdminProperties = () => {
         setImageFile(null);
         setPreviewUrl(null);
         fetchProperties();
-        e.target.reset();
+        // Reset the file input
+        const fileInput = document.getElementById('property-image-input');
+        if (fileInput) fileInput.value = '';
       }
     } catch (error) {
       alert("Error saving property");
@@ -194,20 +197,27 @@ const AdminProperties = () => {
 
         <div className="file-input-group">
           <label>Property Image {isEditing && "(Leave blank to keep current)"}:</label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleFileChange}
-            required={!isEditing}
-          />
-          {previewUrl && (
+          {!previewUrl ? (
+            <input
+              id="property-image-input"
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              required={!isEditing}
+              className="file-input"
+            />
+          ) : (
             <div className="image-preview-container">
-              <p>New Image Selected:</p>
               <img src={previewUrl} alt="Preview" className="upload-preview-img" />
               <button
                 type="button"
                 className="remove-preview"
-                onClick={() => { setPreviewUrl(null); setImageFile(null); }}
+                onClick={() => { 
+                  setPreviewUrl(null); 
+                  setImageFile(null);
+                  const fileInput = document.getElementById('property-image-input');
+                  if (fileInput) fileInput.value = '';
+                }}
               >
                 Remove
               </button>
@@ -235,6 +245,9 @@ const AdminProperties = () => {
                   sqft: ""
                 });
                 setPreviewUrl(null);
+                setImageFile(null);
+                const fileInput = document.getElementById('property-image-input');
+                if (fileInput) fileInput.value = '';
               }}
             >
               Cancel
