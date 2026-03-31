@@ -6,8 +6,24 @@ const PropertiesGrid = ({ filters }) => {
   const navigate = useNavigate();
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
-  
-  // Pagination State
+
+  // ── Format price to ₹ with lakh/crore labels ──
+  const formatPrice = (price) => {
+    if (!price && price !== 0) return '—';
+    const raw = String(price).toLowerCase().trim();
+
+    // Already has a text label (e.g. "57 lakh", "1.75Cr") — just prepend ₹
+    if (raw.includes('lakh') || raw.includes('crore') || raw.includes('cr')) {
+      return raw.startsWith('₹') ? raw : `₹${price}`;
+    }
+
+    // Pure number — convert to lakh / crore
+    const num = parseFloat(raw.replace(/[^0-9.]/g, ''));
+    if (isNaN(num)) return `₹${price}`;
+    if (num >= 10000000) return `₹${(num / 10000000).toFixed(2).replace(/\.?0+$/, '')} Cr`;
+    if (num >= 100000)   return `₹${(num / 100000).toFixed(2).replace(/\.?0+$/, '')} Lakh`;
+    return `₹${num.toLocaleString('en-IN')}`;
+  };
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
 
@@ -142,7 +158,12 @@ const PropertiesGrid = ({ filters }) => {
           <div className="no-properties">No properties found.</div>
         ) : (
           currentProperties.map((property) => (
-            <div key={property._id} className="property-listing-card">
+            <div
+              key={property._id}
+              className="property-listing-card"
+              onClick={() => handleViewMore(property)}
+              style={{ cursor: 'pointer' }}
+            >
               <div className="property-image-box">
                 <span className="property-badge">{property.category}</span>
                 <img src={property.image} alt={property.title} />
@@ -168,8 +189,11 @@ const PropertiesGrid = ({ filters }) => {
                   </div>
                 </div>
                 <div className="property-footer">
-                  <div className="property-price">{property.price}</div>
-                  <button className="view-more-link" onClick={() => handleViewMore(property)}>
+                  <div className="property-price">{formatPrice(property.price)}</div>
+                  <button
+                    className="view-more-link"
+                    onClick={(e) => { e.stopPropagation(); handleViewMore(property); }}
+                  >
                     View Details
                   </button>
                 </div>
