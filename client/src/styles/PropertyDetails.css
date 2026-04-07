@@ -373,7 +373,7 @@
     color: #0f172a;
     font-weight: 700;
     margin-bottom: 0;
-    margin-top: 25px;
+    margin-top: 20px;
     text-align: center;
 }
 
@@ -394,7 +394,7 @@
     position: relative;
     width: 100%;
     max-width: 700px;
-    height: 450px;
+    height: 320px;
     perspective: 1200px;
     display: flex;
     align-items: center;
@@ -497,7 +497,7 @@
     display: flex;
     justify-content: center;
     gap: 12px;
-    margin-top: -20px;
+    margin-top: 15px;
     padding-bottom: 10px;
 }
 
