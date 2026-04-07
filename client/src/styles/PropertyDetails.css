@@ -373,7 +373,7 @@
     color: #0f172a;
     font-weight: 700;
     margin-bottom: 0;
-    margin-top: 20px;
+    margin-top: 25px;
     text-align: center;
 }
 
@@ -497,7 +497,7 @@
     display: flex;
     justify-content: center;
     gap: 12px;
-    margin-top: -10px;
+    margin-top: -20px;
     padding-bottom: 10px;
 }
 
