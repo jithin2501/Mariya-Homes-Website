@@ -33,7 +33,7 @@ const About = () => {
               </div>
             </div>
 
-            <p className="stat-text">Real stories from families who found their perfect education with Maria Homes.</p>
+            <p className="stat-text">Real stories from families who found their perfect home with Maria Homes.</p>
           </div>
         </div>
 

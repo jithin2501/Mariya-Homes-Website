@@ -10,7 +10,7 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 30px;
-    align-items: flex-start;
+    align-items: stretch;
 }
 
 .contact-card {
@@ -19,6 +19,11 @@
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     height: 100%;
+}
+
+.contact-info-card {
+    display: flex;
+    flex-direction: column;
 }
 
 .contact-info-card h2,
@@ -73,7 +78,8 @@
 
 .map-wrapper {
     width: 100%;
-    height: 200px;
+    flex: 1;
+    min-height: 200px;
     border-radius: 8px;
     overflow: hidden;
     margin-top: 20px;

@@ -90,7 +90,7 @@ const Contact = () => {
                 <img src="/images/contact-logo/location-icon.png" alt="Location Icon" />
               </div>
               <div className="info-details">
-                <span>Maria homes, Kothamangalam, Kerala 686691</span>
+                <span>Maria homes Pallitazham, Kothamangalam, Kerala 686691, India</span>
               </div>
             </div>
 
@@ -108,7 +108,7 @@ const Contact = () => {
                 <img src="/images/contact-logo/email-icon.png" alt="Email Icon" />
               </div>
               <div className="info-details">
-                <span>info@mariyahomes.com</span>
+                <span>mariahomes95@gmail.com</span>
               </div>
             </div>
 

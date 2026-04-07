@@ -107,7 +107,6 @@ const Footer = () => {
           </h3>
           <div className="contact-item">
             <div className="contact-icon-wrapper">
-              {/* Add your location logo image URL here */}
               <img 
                 src="/images/logo/location-icon.png" 
                 alt="Location" 
@@ -116,16 +115,15 @@ const Footer = () => {
             </div>
             <div className="contact-text-item">
               <p className="contact-text-line1">
-                Maria homes, Kothamangalam
+                Maria homes Pallitazham, Kothamangalam
               </p>
               <p className="contact-text-line2">
-                Kerala 686691
+                Kerala 686691, India
               </p>
             </div>
           </div>
           <div className="contact-item">
             <div className="contact-icon-wrapper">
-              {/* Add your email logo image URL here */}
               <img 
                 src="/images/logo/email-icon.png" 
                 alt="Email" 
@@ -133,14 +131,13 @@ const Footer = () => {
               />
             </div>
             <div className="contact-text-item">
-              <a href="mailto:info@mariyahomes.com" className="contact-link">
-                info@mariyahomes.com
+              <a href="mailto:mariahomes95@gmail.com" className="contact-link">
+                mariahomes95@gmail.com
               </a>
             </div>
           </div>
           <div className="contact-item">
             <div className="contact-icon-wrapper">
-              {/* Add your phone logo image URL here */}
               <img 
                 src="/images/logo/phone-icon.png" 
                 alt="Phone" 
@@ -148,7 +145,7 @@ const Footer = () => {
               />
             </div>
             <div className="contact-text-item">
-              <a href="tel:+919544394939" className="contact-link">
+              <a href="tel:+917012791781" className="contact-link">
                 +91 7012791781
               </a>
             </div>
