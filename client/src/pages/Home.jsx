@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Hero from '../components/Hero';
 import About from '../components/About';
 import VideoSection from '../components/VideoSection';
@@ -6,6 +6,10 @@ import Services from '../components/Services';
 import Testimonials from '../components/Testimonials';
 
 const Home = () => {
+  useEffect(() => {
+    document.title = "Mariya Homes | Best Construction, Renovation & Real Estate Services in Kothamangalam, Ernakulam";
+  }, []);
+
   return (
     <>
       <Hero />

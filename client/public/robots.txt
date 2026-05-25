@@ -1,0 +1,12 @@
+# robots.txt for Mariya Homes
+# Crawlers can index all pages except administrative/api panels
+
+User-agent: *
+Allow: /
+
+# Disallow indexing of private or administrative sections
+Disallow: /admin/
+Disallow: /api/
+
+# Link to the main sitemap file (update domain when live if different)
+Sitemap: https://mariyahomes.com/sitemap.xml

@@ -46,6 +46,9 @@ const PropertyDetails = () => {
         if (!propRes.ok) throw new Error("Property not found");
         const propData = await propRes.json();
         setPropertyData(propData);
+        if (propData && propData.title) {
+          document.title = `${propData.title} | Premium Real Estate Kothamangalam | Mariya Homes`;
+        }
 
         const detailRes = await fetch(`/api/admin/property-details/${id}`);
 

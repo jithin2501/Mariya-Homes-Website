@@ -11,6 +11,8 @@ const Construction = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    document.title = "Best Construction Services in Kothamangalam, Ernakulam | Mariya Homes";
+
     const nodes = document.querySelectorAll('.node');
     nodes.forEach((node, index) => {
       setTimeout(() => {

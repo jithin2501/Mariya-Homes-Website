@@ -8,6 +8,7 @@ const Renovation = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    document.title = "Best Renovation Services in Kothamangalam, Ernakulam | Mariya Homes";
     // Fetch gallery images
     fetchGalleries();
   }, []);

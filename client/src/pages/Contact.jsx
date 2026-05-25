@@ -1,7 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../styles/Contact.css';
 
 const Contact = () => {
+  useEffect(() => {
+    document.title = "Contact Mariya Homes | Construction, Renovation & Real Estate in Kothamangalam";
+  }, []);
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',

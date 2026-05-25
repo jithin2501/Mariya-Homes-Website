@@ -1,8 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropertyFilter from '../components/PropertyFilter';
 import PropertiesGrid from '../components/PropertiesGrid';
 
 const Properties = () => {
+  useEffect(() => {
+    document.title = "Best Real Estate Services & Properties in Kothamangalam, Ernakulam | Mariya Homes";
+  }, []);
+
   const [filters, setFilters] = useState({
     location: 'All',
     priceMin: '',
